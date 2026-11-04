@@ -1,0 +1,101 @@
+{
+  "generated": "2026-11-04",
+  "sources": [
+    {
+      "id": "pantoner-coated",
+      "system": "C",
+      "url": "https://raw.githubusercontent.com/bconglet/Pantoner/gh-pages/json/pantone-coated.json",
+      "homepage": "https://github.com/bconglet/Pantoner",
+      "file": "pantone/pantone-coated.json",
+      "sha256": "cf82dbae3f466a29d06ff24e6816041249da8e52fbba4cc1e8f529a4d341b8d8",
+      "license": "MIT",
+      "retrieved": "2026-11-04",
+      "provenance": "community",
+      "expectedCount": 1341
+    },
+    {
+      "id": "pantoner-uncoated",
+      "system": "U",
+      "url": "https://raw.githubusercontent.com/bconglet/Pantoner/gh-pages/json/pantone-uncoated.json",
+      "homepage": "https://github.com/bconglet/Pantoner",
+      "file": "pantone/pantone-uncoated.json",
+      "sha256": "52e13188a5444309a7b400691e207374c34ce3d7220d44e44bae92d4a419c999",
+      "license": "MIT",
+      "retrieved": "2026-11-04",
+      "provenance": "community",
+      "expectedCount": 1341
+    },
+    {
+      "id": "pantone-tcx",
+      "system": "TCX",
+      "url": "https://raw.githubusercontent.com/pedroduke/pantone-tcx/main/src/pantoneColors.js",
+      "homepage": "https://github.com/pedroduke/pantone-tcx",
+      "file": "pantone/tcx.js",
+      "sha256": "827611c8afccd3cdef5b204259411559a9522cbcc47308887e14fdd83dfda8dd",
+      "license": "ISC",
+      "retrieved": "2026-11-04",
+      "provenance": "community",
+      "expectedCount": 2800
+    },
+    {
+      "id": "color-books-tpx",
+      "system": "TPX",
+      "url": "https://raw.githubusercontent.com/jacobbubu/color-books/master/color-books/PANTONE%C2%AE%20FHI%20Color%20Guide.json",
+      "homepage": "https://github.com/jacobbubu/color-books",
+      "file": "pantone/tpx.json",
+      "sha256": "3dbe863f5e9fcde95c4e2e227cc4237611443697bafa153ad2e9c9d9f4c8c743",
+      "license": "No license file",
+      "retrieved": "2026-11-04",
+      "provenance": "legacy",
+      "expectedCount": 2100
+    },
+    {
+      "id": "inkstitch-polyneon-40",
+      "system": "MP",
+      "url": "https://raw.githubusercontent.com/inkstitch/inkstitch/main/palettes/InkStitch%20Madeira%20Polyneon.gpl",
+      "homepage": "https://github.com/inkstitch/inkstitch/tree/main/palettes",
+      "file": "madeira/polyneon-40.gpl",
+      "sha256": "6006bc145ce4047ffac67dd0242bb953a99a9a99a4a521f2992f0a1daac32b6b",
+      "license": "GPL-3.0",
+      "retrieved": "2026-11-04",
+      "provenance": "manufacturer",
+      "expectedCount": 349
+    },
+    {
+      "id": "inkstitch-rayon-40",
+      "system": "MR",
+      "url": "https://raw.githubusercontent.com/inkstitch/inkstitch/main/palettes/InkStitch%20Madeira%20Rayon.gpl",
+      "homepage": "https://github.com/inkstitch/inkstitch/tree/main/palettes",
+      "file": "madeira/rayon-40.gpl",
+      "sha256": "816fbc114c0a20ee69f0b95373a29514596fca0d9995594e513d2c2a62805ae5",
+      "license": "GPL-3.0",
+      "retrieved": "2026-11-04",
+      "provenance": "manufacturer",
+      "expectedCount": 357
+    },
+    {
+      "id": "durak-polysoft",
+      "system": "DPS",
+      "url": "https://api.durakportal.com/api/DijitalKartela/Polysoft",
+      "homepage": "https://www.durakportal.com",
+      "file": "durak/polysoft.json",
+      "sha256": "42fdaeb906069432b93ef7e7f0e395b473828f78267ebe405e41400ca8ee4f16",
+      "license": "manufacturer permission (not public)",
+      "retrieved": "2026-11-04",
+      "provenance": "manufacturer",
+      "expectedCount": 420
+    },
+    {
+      "id": "durak-visco",
+      "system": "DVS",
+      "url": "https://api.durakportal.com/api/DijitalKartela/Visco",
+      "homepage": "https://www.durakportal.com",
+      "file": "durak/visco.json",
+      "sha256": "cc99c1c5b636a2963914c6cd9e48d5509ea39a7139a033dc5211d531967503e6",
+      "license": "manufacturer permission (not public)",
+      "retrieved": "2026-11-04",
+      "provenance": "manufacturer",
+      "expectedCount": 441
+    }
+  ]
+}

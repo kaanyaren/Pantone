@@ -1,6 +1,6 @@
 # PantonAK — Implementation Plan
 
-**Status:** ready for parallel execution  
+**Status:** implemented (v0.1.0)
 **Repo:** `/Users/kaanyaren/GitHub/Pantone` (empty, not yet a git repo)  
 **Host:** GitHub Pages  
 **Stack:** Vite + vanilla TypeScript + one runtime colour library  
@@ -61,7 +61,7 @@ Type a Pantone code, a Madeira or Durak thread number, a hex value, RGB, or CMYK
 ### 2.1 Inputs
 
 - Pantone: `186 C`, `186 U`, `19-4052 TCX`, `19-4052 TPX`, or a bare code.
-- Madeira: `Madeira 1147`, `Polyneon 1878`, `Rayon 1001`.
+- Madeira: `Rayon 1147`, `Polyneon 1610`, `Rayon 1001`.
 - Durak: `Polysoft 00118`, `Visco 00144`, `Durak Polysoft 00118`.
 - Hex: `#C8102E`, `C8102E`.
 - RGB: `rgb(200, 16, 46)` or `200, 16, 46`.
@@ -447,7 +447,7 @@ All channels normalized 0–1 internally, displayed 0–100 for CMYK.
 
 - `#FFFFFF` → Lab(100, 0, 0).
 - `#000000` → Lab(0, 0, 0).
-- `#FF0000` → Lab ≈ (53.24, 80.09, 67.20).
+- `#FF0000` → Lab D50 ≈ (54.2905, 80.8049, 69.8910).
 - RGB → Lab → RGB round trip within 1/255.
 - CMYK round trip within 1/255 for in-gamut colours.
 - Black → `0/0/0/100`.
@@ -558,7 +558,7 @@ Nav N9, Footer Ft4, slop-test gates, responsive rules.
   --color-ink-2: oklch(30% 0.010 255);
   --color-muted: oklch(46% 0.008 255);
   --color-rule: oklch(88% 0.005 255);
-  --color-rule-2: oklch(78% 0.006 255);
+  --color-rule-2: oklch(65% 0.008 255);
 
   /* One signal ink: ultramarine, used sparingly */
   --color-accent: oklch(45% 0.19 264);
@@ -823,7 +823,7 @@ The UI agent must use these assets. It must not hand-draw a second logo or set t
 
 - H1, lede, tool, three example chips.
 - No results table until a query exists.
-- Examples: `186 C`, `19-4052 TCX`, `#C8102E`, `Madeira 1147`, `Polysoft 00118`.
+- Examples: `186 C`, `19-4052 TCX`, `#C8102E`, `Rayon 1147`, `Polyneon 1610`, `Polysoft 00118`.
 - Clicking a chip fills the input and submits.
 
 ### 10.2 Results state
@@ -841,7 +841,7 @@ The UI agent must use these assets. It must not hand-draw a second logo or set t
 ### 10.3 Empty and error states
 
 - Empty query: no error; show examples.
-- Unknown code: "No code `XYZ` in the loaded libraries. Try `186 C`, `19-4052 TCX`, or `Madeira 1147`."
+- Unknown code: "No code `XYZ` in the loaded libraries. Try `186 C`, `19-4052 TCX`, or `Rayon 1147`."
 - Ambiguous 4-digit code: "Add `Madeira` or `Rayon` to disambiguate `1001`."
 - Invalid hex: "Hex must be 3 or 6 characters after `#`."
 - Invalid CMYK: "CMYK channels must be 0–100."
@@ -891,8 +891,8 @@ Deliverables:
 Interface contract to freeze:
 
 ```ts
-matchColor(dataset, hex, options): Match[]
-searchColors(dataset, query, limit): ColorRow[]
+matchColor(rows: ColorRow[], hex, options): Match[]
+searchColors(rows: ColorRow[], query, limit): ColorRow[]
 parseQuery(raw: string): Query | null
 deltaE2000(a: Lab, b: Lab): number
 ```
@@ -960,7 +960,7 @@ Tasks:
 2. Implement `searchColors` per §8.2.
 3. Implement system/code normalization helpers.
 4. Write table-driven tests for all input forms and ambiguity rules.
-5. Add a small fixture-based search test for `classic blue`, `186c`, `19-4052`, `madeira 1147`, `polysoft 00118`.
+5. Add a small fixture-based search test for `classic blue`, `186c`, `19-4052`, `rayon 1147`, `polyneon 1610`, `polysoft 00118`.
 
 Acceptance:
 
@@ -1178,7 +1178,7 @@ npm run preview
 ## 14. Definition of done
 
 1. `public/data/colors.json` contains all eight systems with the agreed counts.
-2. `186 C`, `19-4052 TCX`, `#C8102E`, `Madeira 1147`, and `Polysoft 00118` all return correct results.
+2. `186 C`, `19-4052 TCX`, `#C8102E`, `Rayon 1147`, `Polyneon 1610`, and `Polysoft 00118` all return correct results.
 3. Every result shows system, code, name, hex, RGB, CMYK, ΔE00, and provenance.
 4. C/U and TCX/TPX are never presented as conversions of each other.
 5. CMYK is labelled unprofiled; thread values are labelled approximate.

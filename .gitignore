@@ -7,3 +7,6 @@ dist/
 !.env.example
 data/permissions/
 QA_REPORT.md
+qa-*.png
+qa-*.yml
+.playwright-mcp/

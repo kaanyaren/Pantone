@@ -1,0 +1,19 @@
+[
+  {
+    "date": "2026-11-04",
+    "macrostructure": "Workbench",
+    "theme": "Grid",
+    "enrichment": "none",
+    "brief": "PantonAK — Pantone, Madeira and Durak colour converter",
+    "nav": "N9",
+    "footer": "Ft4",
+    "critique": {
+      "P": 5,
+      "H": 4,
+      "E": 5,
+      "S": 4,
+      "R": 5,
+      "V": 5
+    }
+  }
+]

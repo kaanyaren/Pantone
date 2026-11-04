@@ -1,0 +1,62 @@
+/* PantonAK design tokens — the only file allowed to declare raw colour and font values. */
+
+:root {
+  /* Paper and ink — cool near-white, never #fff or #000 */
+  --color-paper: oklch(99% 0.003 255);
+  --color-paper-2: oklch(97.2% 0.003 255);
+  --color-paper-3: oklch(94.5% 0.003 255);
+  --color-ink: oklch(16% 0.010 255);
+  --color-ink-2: oklch(30% 0.010 255);
+  --color-muted: oklch(46% 0.008 255);
+  --color-rule: oklch(88% 0.005 255);
+  --color-rule-2: oklch(65% 0.008 255);
+
+  /* One signal ink: ultramarine, used sparingly */
+  --color-accent: oklch(45% 0.19 264);
+  --color-accent-ink: var(--color-paper);
+  --color-focus: var(--color-accent);
+
+  /* Functional state colours — always paired with text/icon */
+  --color-error: oklch(55% 0.20 25);
+  --color-error-ink: var(--color-paper);
+
+  /* Type — Archivo display/body + JetBrains Mono for data only */
+  --font-display: "Archivo", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Archivo", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --display-weight: 800;
+  --tracking-display: -0.045em;
+
+  /* 4 pt spacing scale */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+
+  /* Type scale — 1.25 ratio */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.5625rem;
+  --text-2xl: 1.953rem;
+  --text-3xl: 2.441rem;
+  --text-display: clamp(3.25rem, 10.5vw, 8.5rem);
+
+  /* Structure */
+  --radius: 0;
+  --rule: 1px;
+  --shell: 80rem;
+  --gutter: clamp(1rem, 4vw, 4rem);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-fast: 160ms;
+  --dur-base: 200ms;
+}
