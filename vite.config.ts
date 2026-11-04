@@ -2,7 +2,8 @@ import { execSync } from "node:child_process";
 import { defineConfig } from "vite";
 
 function buildHash(): string {
-  if (process.env.GITHUB_SHA) return process.env.GITHUB_SHA.slice(0, 7);
+  const sha = process.env.BUILD_HASH || process.env.GITHUB_SHA;
+  if (sha) return sha.slice(0, 7);
   try {
     return execSync("git rev-parse --short HEAD", { stdio: ["ignore", "pipe", "ignore"] })
       .toString()

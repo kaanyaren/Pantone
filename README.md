@@ -6,7 +6,7 @@
 
 Colour converter for Pantone C/U/TCX/TPX, hex, RGB, CMYK, Madeira Polyneon/Rayon, and Durak Polysoft/Visco.
 
-**Status:** implemented. 9,149 rows across 8 systems, 52 tests passing, static GitHub Pages build. See [`IMPLEMENTATION_PLAN.md`](IMPLEMENTATION_PLAN.md).
+**Status:** implemented. 9,149 rows across 8 systems, 52 tests passing, static GitHub Pages build. Live at https://kaanyaren.github.io/Pantone/. See [`IMPLEMENTATION_PLAN.md`](IMPLEMENTATION_PLAN.md).
 
 ## Design
 
