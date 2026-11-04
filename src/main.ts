@@ -42,6 +42,12 @@ const footData = byId<HTMLParagraphElement>("foot-data");
 const footBuild = byId<HTMLParagraphElement>("foot-build");
 
 const SYSTEM_IDS = new Set<SystemId>(["C", "U", "TCX", "TPX", "MP", "MR", "DPS", "DVS"]);
+const SAME_CODE_FAMILY: Partial<Record<SystemId, readonly SystemId[]>> = {
+  C: ["C", "U"],
+  U: ["C", "U"],
+  TCX: ["TCX", "TPX"],
+  TPX: ["TCX", "TPX"],
+};
 
 let dataset: Dataset | null = null;
 let entries: Entry[] = [];
@@ -76,6 +82,7 @@ function clearError(): void {
 }
 
 function fail(message: string): void {
+  commitUrl(null);
   clearResults();
   queryError.textContent = message;
   queryError.hidden = false;
@@ -158,10 +165,13 @@ async function loadData(): Promise<void> {
     footData.textContent = `${data.systems.length} systems · ${rows.length} rows · ${data.generated}`;
     footBuild.textContent = `PantonAK · ${__BUILD_HASH__}`;
     setBusy(false);
+    clearError();
 
     if (pending) {
       input.value = pending;
       handleSubmit(pending);
+    } else if (resultsSection.querySelector(".data-error")) {
+      clearResults();
     }
   } catch {
     dataset = null;
@@ -243,7 +253,8 @@ function applyColour(hex: string, inputLabel: string, exactRow: ColorRow | null)
     if (!best) continue;
 
     let sameCode: Match | null = null;
-    if (exactRow) {
+    const exactGroup = exactRow ? SAME_CODE_FAMILY[exactRow.system] : undefined;
+    if (exactRow && exactGroup?.includes(meta.id)) {
       const sibling = entries.find(
         (entry) =>
           entry.row.system === meta.id &&
@@ -332,6 +343,7 @@ function handleSubmit(raw: string, exactRow: ColorRow | null = null): void {
 
   const trimmed = raw.trim();
   if (!trimmed) {
+    commitUrl(null);
     clearResults();
     input.focus();
     return;
@@ -406,7 +418,7 @@ function handleSubmit(raw: string, exactRow: ColorRow | null = null): void {
           return;
         }
       }
-      if (/^\d{4}$/.test(query.code)) {
+      if (!madeiraOnly && query.system === null && /^\d{4}$/.test(query.code)) {
         fail(`Add "Madeira" or "Rayon" to disambiguate "${query.code}".`);
         return;
       }
@@ -430,7 +442,11 @@ function handleSubmit(raw: string, exactRow: ColorRow | null = null): void {
         clearError();
         handleSubmit(labelForRow(row), row);
       });
-      resultStatus.textContent = `${shown.length} name matches. Choose one to convert.`;
+      resultStatus.textContent =
+        shown.length < results.length
+          ? `Showing ${shown.length} of ${results.length} name matches. Choose one to convert.`
+          : `${results.length} name matches. Choose one to convert.`;
+      commitUrl(trimmed);
       input.focus();
       return;
     }

@@ -1,5 +1,5 @@
 import type { ColorRow, Match, SystemMeta } from "./types.ts";
-import { hexToRgb, pickSwatchText, rgbToCmyk } from "./color.ts";
+import { hexToRgb, rgbToCmyk } from "./color.ts";
 
 /* Hallmark · pre-emit critique: P5 H4 E5 S4 R5 V5 */
 
@@ -91,8 +91,6 @@ function renderHero(view: ResultsView): HTMLElement {
 
   const figure = el("div", "input-figure");
   const bigSwatch = swatch(view.inputHex, "swatch swatch-large");
-  bigSwatch.dataset.tone = pickSwatchText(view.inputHex);
-  bigSwatch.textContent = view.inputHex.toUpperCase();
   figure.append(bigSwatch);
 
   const inputMeta = el("div", "input-meta");
@@ -276,7 +274,11 @@ export function renderResults(root: HTMLElement, view: ResultsView): void {
 
   const thead = el("thead");
   const headRow = el("tr");
-  for (const column of COLUMNS) headRow.append(el("th", undefined, column));
+  for (const column of COLUMNS) {
+    const th = el("th", undefined, column);
+    th.scope = "col";
+    headRow.append(th);
+  }
   thead.append(headRow);
   table.append(thead);
 
