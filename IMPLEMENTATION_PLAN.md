@@ -4,9 +4,11 @@
 **Repo:** `/Users/kaanyaren/GitHub/Pantone` (empty, not yet a git repo)  
 **Host:** GitHub Pages  
 **Stack:** Vite + vanilla TypeScript + one runtime colour library  
-**Design system:** Hallmark — genre `editorial`, theme `Grid`, macrostructure `Workbench`, nav `N9`, footer `Ft4`
+**Design system:** Hallmark — genre `modern-minimal`, theme `Utility (custom)`, macrostructure `Component Playground`, nav `N9`, footer `Ft4`
 
 > Product name is **PantonAK**. Use the typographic wordmark and mark in §9.12 everywhere: nav, favicon, Apple touch icon, web manifest, social card, README, and footer. Pantone is referenced only nominatively in body copy and data labels.
+>
+> **v0.2 redesign (2026-11-04):** the original editorial Grid/Workbench shell was too heavy for a utility. The live UI is now a compact function-first tool: 32px page title, no grid rails, no blue plate, no marketing hero, search panel first, dense result table, inline 5-nearest disclosure, and reference details at the bottom. Where §9 below conflicts with this note, the compact Utility shell wins.
 
 ---
 

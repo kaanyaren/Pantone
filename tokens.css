@@ -1,31 +1,33 @@
 /* PantonAK design tokens — the only file allowed to declare raw colour and font values. */
 
 :root {
-  /* Paper and ink — cool near-white, never #fff or #000 */
+  /* Cool paper and ink. No pure #fff or #000. */
   --color-paper: oklch(99% 0.003 255);
   --color-paper-2: oklch(97.2% 0.003 255);
   --color-paper-3: oklch(94.5% 0.003 255);
-  --color-ink: oklch(16% 0.010 255);
+  --color-ink: oklch(17% 0.010 255);
   --color-ink-2: oklch(30% 0.010 255);
-  --color-muted: oklch(46% 0.008 255);
+  --color-muted: oklch(45% 0.008 255);
   --color-rule: oklch(88% 0.005 255);
   --color-rule-2: oklch(65% 0.008 255);
 
-  /* One signal ink: ultramarine, used sparingly */
-  --color-accent: oklch(45% 0.19 264);
+  /* One signal ink. Ultramarine, used for action and focus only. */
+  --color-accent: oklch(48% 0.19 264);
+  --color-accent-hover: oklch(43% 0.19 264);
   --color-accent-ink: var(--color-paper);
   --color-focus: var(--color-accent);
 
-  /* Functional state colours — always paired with text/icon */
-  --color-error: oklch(55% 0.20 25);
+  /* Functional states — always paired with text or an icon. */
+  --color-error: oklch(52% 0.20 25);
   --color-error-ink: var(--color-paper);
+  --color-success: oklch(45% 0.10 155);
 
-  /* Type — Archivo display/body + JetBrains Mono for data only */
+  /* Type. Archivo for UI; JetBrains Mono for codes and values. */
   --font-display: "Archivo", ui-sans-serif, system-ui, sans-serif;
   --font-body: "Archivo", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-  --display-weight: 800;
-  --tracking-display: -0.045em;
+  --display-weight: 700;
+  --tracking-display: -0.025em;
 
   /* 4 pt spacing scale */
   --space-1: 0.25rem;
@@ -38,25 +40,23 @@
   --space-10: 2.5rem;
   --space-12: 3rem;
   --space-16: 4rem;
-  --space-20: 5rem;
-  --space-24: 6rem;
 
-  /* Type scale — 1.25 ratio */
-  --text-xs: 0.75rem;
-  --text-sm: 0.875rem;
-  --text-base: 1rem;
+  /* Compact type scale */
+  --text-xs: 0.6875rem;
+  --text-sm: 0.75rem;
+  --text-base: 0.875rem;
+  --text-md: 1rem;
   --text-lg: 1.25rem;
-  --text-xl: 1.5625rem;
-  --text-2xl: 1.953rem;
-  --text-3xl: 2.441rem;
-  --text-display: clamp(3.25rem, 10.5vw, 8.5rem);
+  --text-xl: 1.5rem;
+  --text-display: clamp(1.5rem, 2.2vw, 2rem);
 
   /* Structure */
-  --radius: 0;
+  --radius-control: 6px;
+  --radius-panel: 8px;
   --rule: 1px;
-  --shell: 80rem;
-  --gutter: clamp(1rem, 4vw, 4rem);
+  --shell: 73rem;
+  --gutter: clamp(1rem, 3vw, 1.75rem);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --dur-fast: 160ms;
-  --dur-base: 200ms;
+  --dur-fast: 140ms;
+  --dur-base: 180ms;
 }

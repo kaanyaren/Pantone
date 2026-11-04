@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>PantonAK — one colour. eight systems.</title>
+    <title>PantonAK — colour converter</title>
     <meta
       name="description"
       content="Convert Pantone, Madeira and Durak colour codes, hex, RGB and CMYK with CIEDE2000 nearest matches."
@@ -14,21 +14,21 @@
     <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
     <link rel="manifest" href="./site.webmanifest" />
     <meta name="theme-color" content="#0A0E12" />
-    <meta property="og:title" content="PantonAK — one colour. eight systems." />
-    <meta property="og:description" content="Convert Pantone, Madeira and Durak colour codes, hex, RGB and CMYK." />
+    <meta property="og:title" content="PantonAK — colour converter" />
+    <meta property="og:description" content="Pantone, Madeira and Durak colour conversion with CIEDE2000 nearest matches." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://kaanyaren.github.io/Pantone/" />
     <link rel="canonical" href="https://kaanyaren.github.io/Pantone/" />
     <meta property="og:image" content="https://kaanyaren.github.io/Pantone/og-image.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="PantonAK — one colour. eight systems." />
+    <meta property="og:image:alt" content="PantonAK — colour converter." />
     <meta property="og:site_name" content="PantonAK" />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/src/styles.css" />
@@ -36,35 +36,35 @@
   <body>
     <a class="skip-link" href="#query-input">Skip to the converter</a>
 
-    <div class="grid-rails" aria-hidden="true">
-      <span></span><span></span><span></span><span></span><span></span><span></span>
-      <span></span><span></span><span></span><span></span><span></span><span></span>
-    </div>
-
-    <header class="site-head shell">
-      <a class="brand" href="./" aria-label="PantonAK home">
-        <img src="./brand/logo.svg" alt="PantonAK" width="118" height="40" />
-      </a>
-      <a class="nav-link" href="https://github.com/kaanyaren/Pantone" target="_blank" rel="noopener">
-        GitHub<span class="visually-hidden"> (opens in a new tab)</span>
-      </a>
+    <header class="site-header">
+      <div class="shell header-row">
+        <a class="brand" href="./" aria-label="PantonAK home">
+          <img src="./brand/logo.svg" alt="PantonAK" width="107" height="36" />
+        </a>
+        <a class="nav-link" href="https://github.com/kaanyaren/Pantone" target="_blank" rel="noopener">
+          GitHub<span class="visually-hidden"> (opens in a new tab)</span>
+        </a>
+      </div>
     </header>
 
-    <main id="main" class="shell">
-      <section class="hero" aria-labelledby="page-title">
-        <h1 id="page-title">one colour. <br />eight systems.</h1>
-        <p class="lede">
-          Pantone C, U, TCX and TPX, Madeira Polyneon and Rayon, Durak Polysoft and Visco. Enter any
-          code or colour value; every library returns its nearest match by CIEDE2000.
-        </p>
+    <main id="main" class="shell page">
+      <section class="intro" aria-labelledby="page-title">
+        <div>
+          <h1 id="page-title">Colour converter</h1>
+          <p class="lede">
+            Pantone C, U, TCX and TPX; Madeira Polyneon and Rayon; Durak Polysoft and Visco.
+            Enter a code or colour, get the nearest match in every library.
+          </p>
+        </div>
+        <p class="intro-meta mono">8 libraries · CIEDE2000 · no signup</p>
       </section>
 
-      <section class="tool" aria-labelledby="tool-title">
-        <h2 id="tool-title" class="tool-title">convert</h2>
+      <section class="converter" aria-labelledby="converter-title">
+        <h2 id="converter-title" class="visually-hidden">Convert a colour</h2>
         <form id="convert-form" class="convert" novalidate>
           <div class="field">
-            <label class="label" for="query-input">Colour, code, or value</label>
-            <div class="field-row">
+            <label class="field-label" for="query-input">Code or colour</label>
+            <div class="search-row">
               <input
                 id="query-input"
                 name="q"
@@ -80,105 +80,77 @@
               />
               <button id="match-button" class="button button-primary" type="submit">
                 <span class="button-label">Match</span>
-                <span class="button-busy" aria-hidden="true">Loading</span>
+                <span class="button-busy" aria-hidden="true">Matching…</span>
               </button>
             </div>
+            <div class="examples" aria-labelledby="examples-label">
+              <span class="field-label" id="examples-label">Try</span>
+              <ul class="chips">
+                <li><button class="chip" type="button" data-q="186 C">186 C</button></li>
+                <li><button class="chip" type="button" data-q="19-4052 TCX">19-4052 TCX</button></li>
+                <li><button class="chip" type="button" data-q="#C8102E">#C8102E</button></li>
+                <li><button class="chip" type="button" data-q="Rayon 1147">Rayon 1147</button></li>
+                <li><button class="chip" type="button" data-q="Polyneon 1610">Polyneon 1610</button></li>
+                <li><button class="chip" type="button" data-q="Polysoft 00118">Polysoft 00118</button></li>
+              </ul>
+            </div>
             <p class="help" id="query-help">
-              Hex, <span class="mono">rgb()</span>, <span class="mono">cmyk()</span>, Pantone code,
-              <span class="mono">Rayon 1147</span> or <span class="mono">Polysoft 00118</span>.
-              Press <kbd>/</kbd> to focus.
+              Accepts hex, <span class="mono">rgb()</span>, <span class="mono">cmyk()</span>,
+              Pantone numbers, and Madeira or Durak codes. Press <kbd>/</kbd> to focus.
             </p>
             <p class="error" id="query-error" role="alert" hidden></p>
-          </div>
-          <div class="examples">
-            <span class="label" id="examples-label">Examples</span>
-            <ul class="chips" aria-labelledby="examples-label">
-              <li><button class="chip" type="button" data-q="186 C">186 C</button></li>
-              <li><button class="chip" type="button" data-q="19-4052 TCX">19-4052 TCX</button></li>
-              <li><button class="chip" type="button" data-q="#C8102E">#C8102E</button></li>
-              <li><button class="chip" type="button" data-q="Rayon 1147">Rayon 1147</button></li>
-              <li><button class="chip" type="button" data-q="Polyneon 1610">Polyneon 1610</button></li>
-              <li><button class="chip" type="button" data-q="Polysoft 00118">Polysoft 00118</button></li>
-            </ul>
           </div>
         </form>
       </section>
 
       <section id="results" class="results" aria-labelledby="results-title" hidden>
         <div class="results-head">
-          <h2 id="results-title">results</h2>
+          <div>
+            <h2 id="results-title">Results</h2>
+            <p id="result-status" class="status" role="status" aria-live="polite"></p>
+          </div>
           <div class="results-tools">
             <button id="copy-all" class="button button-quiet" type="button" disabled>Copy all</button>
             <button id="copy-link" class="button button-quiet" type="button">Copy link</button>
           </div>
         </div>
-        <p id="result-status" class="status" role="status" aria-live="polite"></p>
         <div id="result-body"></div>
       </section>
 
-      <section class="plate" aria-labelledby="plate-title">
-        <div class="plate-figure" aria-hidden="true">
-          <span class="plate-delta">ΔE</span><span class="plate-zero">00</span>
-        </div>
-        <div class="plate-copy">
-          <h2 id="plate-title">what ΔE00 means</h2>
-          <p>
-            ΔE00 is the CIEDE2000 colour difference between two Lab values. It weights lightness,
-            chroma and hue the way the eye does. Zero is identity; above five reads as a different
-            colour. It is guidance, not a pass mark.
-          </p>
-          <dl class="bands">
-            <div><dt class="mono">0</dt><dd>same value</dd></div>
-            <div><dt class="mono">≤ 1</dt><dd>near identical</dd></div>
-            <div><dt class="mono">&gt; 1–2</dt><dd>close</dd></div>
-            <div><dt class="mono">&gt; 2–3.5</dt><dd>noticeable</dd></div>
-            <div><dt class="mono">&gt; 3.5–5</dt><dd>loose</dd></div>
-            <div><dt class="mono">&gt; 5</dt><dd>no close match</dd></div>
-          </dl>
-        </div>
-      </section>
-
-      <section class="libraries" aria-labelledby="libraries-title">
-        <div class="section-head">
-          <h2 id="libraries-title">libraries</h2>
-          <p>
-            Eight systems, each with its own provenance and licence. Counts are read from the loaded
-            dataset.
-          </p>
-        </div>
-        <div id="libraries-body"></div>
+      <section class="reference" aria-label="Reference">
+        <details class="reference-block">
+          <summary>How matching works</summary>
+          <div class="reference-body">
+            <p>
+              Values are sRGB references matched in Lab D50 with CIEDE2000 (kL = kC = kH = 1).
+              ΔE00 is a distance, not a pass mark. CMYK is the naive unprofiled formula, not an
+              ink build.
+            </p>
+            <dl class="bands">
+              <div><dt class="mono">0</dt><dd>same value</dd></div>
+              <div><dt class="mono">≤ 1</dt><dd>near identical</dd></div>
+              <div><dt class="mono">&gt; 1–2</dt><dd>close</dd></div>
+              <div><dt class="mono">&gt; 2–3.5</dt><dd>noticeable</dd></div>
+              <div><dt class="mono">&gt; 3.5–5</dt><dd>loose</dd></div>
+              <div><dt class="mono">&gt; 5</dt><dd>no close match</dd></div>
+            </dl>
+          </div>
+        </details>
+        <details class="reference-block">
+          <summary>Libraries and sources</summary>
+          <div id="libraries-body" class="reference-body"></div>
+        </details>
       </section>
     </main>
 
-    <footer class="site-foot shell" aria-labelledby="footer-title">
-      <h2 id="footer-title" class="visually-hidden">Colophon</h2>
-      <div class="foot-grid">
-        <div class="foot-brand">
-          <img src="./brand/logo.svg" alt="PantonAK" width="88" height="30" />
-          <p class="foot-note">
-            Approximate colour reference. Screen colour is not ink, paper, or thread. Not affiliated
-            with Pantone LLC, Madeira, or Durak.
-          </p>
-        </div>
-        <div class="foot-block">
-          <h3>Sources</h3>
-          <p>
-            Pantone C/U: Pantoner (MIT). TCX: pedroduke/pantone-tcx (ISC). TPX: color-books (legacy,
-            unlicensed). Madeira: Ink/Stitch palettes (GPL-3.0). Durak: digital shade chart.
-          </p>
-        </div>
-        <div class="foot-block">
-          <h3>Method</h3>
-          <p>
-            sRGB rows, Lab D50, CIEDE2000 with kL = kC = kH = 1. CMYK uses the naive unprofiled
-            formula and is not an ink build.
-          </p>
-        </div>
-        <div class="foot-block foot-meta">
-          <h3>Dataset</h3>
-          <p class="mono" id="foot-data">loading…</p>
-          <p class="mono" id="foot-build">PantonAK</p>
-        </div>
+    <footer class="site-footer">
+      <div class="shell footer-row">
+        <img src="./brand/logo.svg" alt="PantonAK" width="71" height="24" />
+        <p class="foot-note">
+          Approximate colour reference. Screen colour is not ink, paper, or thread. Not affiliated
+          with Pantone LLC, Madeira, or Durak.
+        </p>
+        <p class="foot-meta mono"><span id="foot-data">loading…</span> · <span id="foot-build">PantonAK</span></p>
       </div>
     </footer>
 

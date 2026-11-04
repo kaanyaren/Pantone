@@ -10,7 +10,8 @@ Colour converter for Pantone C/U/TCX/TPX, hex, RGB, CMYK, Madeira Polyneon/Rayon
 
 ## Design
 
-- Hallmark genre `editorial`, theme `Grid`, macrostructure `Workbench`.
+- Hallmark genre `modern-minimal`, theme `Utility (custom)`, macrostructure `Component Playground`.
+- Compact function-first shell: search panel, dense result table, reference details, no marketing hero.
 - Archivo for display and body; JetBrains Mono for codes, hex, and numeric data.
 - Typographic wordmark in `public/brand/logo.svg`; mark in `public/brand/mark.svg`.
 - Favicon, Apple touch icon, web manifest, and social card live in `public/`.

@@ -1,19 +1,28 @@
 [
   {
     "date": "2026-11-04",
-    "macrostructure": "Workbench",
-    "theme": "Grid",
+    "macrostructure": "Component Playground",
+    "theme": "Utility (custom)",
     "enrichment": "none",
-    "brief": "PantonAK — Pantone, Madeira and Durak colour converter",
+    "brief": "PantonAK — function-first redesign",
     "nav": "N9",
     "footer": "Ft4",
     "critique": {
       "P": 5,
-      "H": 4,
+      "H": 5,
       "E": 5,
       "S": 4,
       "R": 5,
-      "V": 5
+      "V": 4
     }
+  },
+  {
+    "date": "2026-11-04",
+    "macrostructure": "Workbench",
+    "theme": "Grid",
+    "enrichment": "none",
+    "brief": "PantonAK — initial editorial build",
+    "nav": "N9",
+    "footer": "Ft4"
   }
 ]

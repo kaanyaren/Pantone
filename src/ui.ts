@@ -1,8 +1,6 @@
 import type { ColorRow, Match, SystemMeta } from "./types.ts";
 import { hexToRgb, rgbToCmyk } from "./color.ts";
 
-/* Hallmark · pre-emit critique: P5 H4 E5 S4 R5 V5 */
-
 export interface SystemResult {
   meta: SystemMeta;
   matches: Match[];
@@ -21,8 +19,6 @@ export interface ResultsView {
 
 type Tone = "neutral" | "warn" | "none";
 
-/* ---------- small DOM helpers ---------- */
-
 function el<K extends keyof HTMLElementTagNameMap>(
   tag: K,
   className?: string,
@@ -34,10 +30,6 @@ function el<K extends keyof HTMLElementTagNameMap>(
   return node;
 }
 
-function label(text: string): HTMLParagraphElement {
-  return el("p", "label", text);
-}
-
 function swatch(hex: string, className = "swatch"): HTMLSpanElement {
   const node = el("span", className);
   node.style.setProperty("--swatch", hex);
@@ -47,8 +39,7 @@ function swatch(hex: string, className = "swatch"): HTMLSpanElement {
 
 function rgbText(hex: string): string {
   const rgb = hexToRgb(hex);
-  if (!rgb) return "—";
-  return `${rgb.r} ${rgb.g} ${rgb.b}`;
+  return rgb ? `${rgb.r} ${rgb.g} ${rgb.b}` : "—";
 }
 
 function cmykText(hex: string): string {
@@ -72,7 +63,6 @@ function formatDelta(deltaE: number): string {
 }
 
 function rowCopyLine(meta: SystemMeta, match: Match): string {
-  const d = deltaBand(match.deltaE);
   return [
     meta.label,
     match.row.code,
@@ -80,100 +70,82 @@ function rowCopyLine(meta: SystemMeta, match: Match): string {
     match.row.hex,
     `RGB ${rgbText(match.row.hex)}`,
     `CMYK ${cmykText(match.row.hex)}`,
-    `ΔE00 ${formatDelta(match.deltaE)} (${d.text})`,
+    `ΔE00 ${formatDelta(match.deltaE)} (${deltaBand(match.deltaE).text})`,
   ].join(" · ");
 }
 
-/* ---------- result hero ---------- */
+/* ---------- summary ---------- */
 
-function renderHero(view: ResultsView): HTMLElement {
-  const hero = el("div", "result-hero");
+function renderSummary(view: ResultsView): HTMLElement {
+  const summary = el("div", "result-summary");
 
-  const figure = el("div", "input-figure");
-  const bigSwatch = swatch(view.inputHex, "swatch swatch-large");
-  figure.append(bigSwatch);
+  const input = el("div", "summary-input");
+  input.append(swatch(view.inputHex, "swatch summary-swatch"));
+  const inputText = el("div", "summary-text");
+  inputText.append(el("span", "field-label", "Input"));
+  inputText.append(el("span", "summary-hex mono", view.inputHex.toUpperCase()));
+  inputText.append(el("span", "summary-name", view.inputLabel));
+  input.append(inputText);
 
-  const inputMeta = el("div", "input-meta");
-  inputMeta.append(label("Input"));
-  inputMeta.append(el("p", "input-hex mono", view.inputHex.toUpperCase()));
-  inputMeta.append(el("p", "input-name", view.inputLabel));
-
-  const closest = el("div", "closest");
-  closest.append(label("Closest overall"));
+  const closest = el("div", "summary-closest");
+  closest.append(el("span", "field-label", "Closest overall"));
   if (view.closest) {
     const { meta, match } = view.closest;
-    const line = el("p", "closest-line");
-    line.append(swatch(match.row.hex, "swatch swatch-inline"));
-    line.append(el("span", "closest-code mono", match.row.code));
-    line.append(el("span", "closest-system", meta.label));
+    const line = el("span", "summary-match");
+    line.append(swatch(match.row.hex, "swatch swatch-xs"));
+    line.append(el("span", "mono", match.row.code));
+    line.append(el("span", "summary-system", meta.label));
     closest.append(line);
-    closest.append(el("p", "closest-name", match.row.name));
-    const band = deltaBand(match.deltaE);
-    const de = el(
-      "p",
-      `closest-de mono${band.tone === "none" ? " is-warning" : ""}`,
-      `ΔE00 ${formatDelta(match.deltaE)} · ${band.text}`,
+    closest.append(
+      el(
+        "span",
+        `summary-de mono${match.deltaE > 5 ? " is-warning" : ""}`,
+        `ΔE00 ${formatDelta(match.deltaE)} · ${deltaBand(match.deltaE).text}`,
+      ),
     );
-    closest.append(de);
-    if (match.row.hex !== match.mappedHex) {
-      closest.append(
-        el("p", "closest-mapped", `sRGB mapped from ${match.row.hex} to ${match.mappedHex}`),
-      );
-    }
   } else {
-    closest.append(el("p", "closest-name", "No colour data for this query."));
+    closest.append(el("span", "summary-name", "No colour data."));
   }
 
-  hero.append(figure, inputMeta, closest);
-  return hero;
+  summary.append(input, closest);
+  return summary;
 }
 
 /* ---------- result table ---------- */
 
-const COLUMNS = [
-  "System",
-  "Code",
-  "Name",
-  "Swatch",
-  "Hex",
-  "RGB",
-  "CMYK",
-  "ΔE00",
-  "Copy",
-] as const;
+const COLUMNS = ["System", "Code", "Match", "Hex", "ΔE00", "Copy"] as const;
 
-function renderNearest(meta: SystemMeta, matches: Match[]): HTMLDetailsElement {
+function renderNearest(matches: Match[]): HTMLDetailsElement {
   const details = el("details", "nearest");
   const summary = el("summary", "nearest-summary");
-  summary.append(el("span", undefined, "Nearest in this system"));
-  summary.append(el("span", "nearest-count mono", `${matches.length} nearest`));
+  summary.append(el("span", undefined, "5 nearest"));
   details.append(summary);
 
   const list = el("ol", "nearest-list");
   for (const match of matches) {
     const item = el("li", "nearest-item");
     item.append(swatch(match.row.hex, "swatch swatch-xs"));
-    const code = el("span", "nearest-code mono", match.row.code);
-    const name = el("span", "nearest-name", match.row.name);
-    const hex = el("span", "nearest-hex mono", match.row.hex);
-    const de = el("span", "nearest-de mono", `ΔE ${formatDelta(match.deltaE)}`);
-    item.append(code, name, hex, de);
+    const text = el("span", "nearest-text");
+    const top = el("span", "nearest-top");
+    top.append(el("span", "nearest-code mono", match.row.code));
+    top.append(el("span", "nearest-name", match.row.name));
+    text.append(top);
+    const bottom = el("span", "nearest-bottom mono");
+    bottom.append(el("span", undefined, match.row.hex));
+    bottom.append(el("span", undefined, `ΔE ${formatDelta(match.deltaE)}`));
+    text.append(bottom);
+    item.append(text);
     list.append(item);
   }
   details.append(list);
   return details;
 }
 
-function renderRow(system: SystemResult): {
-  row: HTMLTableRowElement;
-  detail: HTMLTableRowElement | null;
-} {
+function renderRow(system: SystemResult): HTMLTableRowElement {
   const tr = el("tr", "result-row");
-  if (system.noClose) tr.classList.add("is-none");
-
   const best = system.matches[0] ?? null;
   const primary = system.sameCode ?? (system.noClose ? null : best);
-  const band = primary ? deltaBand(primary.deltaE) : { text: "no close match", tone: "none" as Tone };
+  if (!primary) tr.classList.add("is-none");
 
   const tdSystem = el("td", "cell-system");
   tdSystem.dataset.label = "System";
@@ -185,46 +157,46 @@ function renderRow(system: SystemResult): {
   tdCode.dataset.label = "Code";
   tdCode.append(el("span", "mono", primary ? primary.row.code : "—"));
 
-  const tdName = el("td", "cell-name");
-  tdName.dataset.label = "Name";
-  tdName.append(
-    el(
-      "span",
-      "row-title",
-      primary ? primary.row.name : "No close match in this system",
-    ),
-  );
-  if (system.sameCode && !system.sameCodeIsInput) {
-    tdName.append(el("span", "row-note", "same code · different substrate"));
+  const tdMatch = el("td", "cell-match");
+  tdMatch.dataset.label = "Match";
+  if (primary) {
+    const title = el("span", "row-title");
+    title.append(swatch(primary.row.hex, "swatch swatch-row"));
+    title.append(el("span", undefined, primary.row.name));
+    tdMatch.append(title);
+    if (system.sameCode && !system.sameCodeIsInput) {
+      tdMatch.append(el("span", "row-note", "same code · different substrate"));
+    }
+    tdMatch.append(
+      el(
+        "span",
+        "row-values mono",
+        `RGB ${rgbText(primary.row.hex)} · CMYK ${cmykText(primary.row.hex)}`,
+      ),
+    );
+  } else {
+    tdMatch.append(el("span", "row-title", "No close match in this system"));
+    if (best) {
+      tdMatch.append(
+        el(
+          "span",
+          "row-values mono",
+          `Nearest ${best.row.code} · ΔE ${formatDelta(best.deltaE)}`,
+        ),
+      );
+    }
   }
-
-  const tdSwatch = el("td", "cell-swatch");
-  tdSwatch.dataset.label = "Swatch";
-  if (primary) tdSwatch.append(swatch(primary.row.hex, "swatch swatch-cell"));
-  else tdSwatch.append(el("span", "cell-empty", "—"));
+  if (system.matches.length > 1) tdMatch.append(renderNearest(system.matches));
 
   const tdHex = el("td", "cell-hex");
   tdHex.dataset.label = "Hex";
-  if (primary) {
-    tdHex.append(el("span", "mono", primary.row.hex));
-    if (primary.row.hex !== primary.mappedHex) {
-      tdHex.append(el("span", "mapped mono", `→ ${primary.mappedHex}`));
-    }
-  } else tdHex.append(el("span", "cell-empty", "—"));
-
-  const tdRgb = el("td", "cell-rgb");
-  tdRgb.dataset.label = "RGB";
-  tdRgb.append(el("span", "mono", primary ? rgbText(primary.row.hex) : "—"));
-
-  const tdCmyk = el("td", "cell-cmyk");
-  tdCmyk.dataset.label = "CMYK";
-  tdCmyk.append(el("span", "mono", primary ? cmykText(primary.row.hex) : "—"));
+  tdHex.append(el("span", "mono", primary ? primary.row.hex : "—"));
 
   const tdDe = el("td", "cell-de");
   tdDe.dataset.label = "ΔE00";
-  const deValue = el("span", "de-value mono", primary ? formatDelta(primary.deltaE) : "—");
-  tdDe.append(deValue);
-  if (primary) tdDe.append(el("span", "de-band", band.text));
+  const band = primary ? deltaBand(primary.deltaE) : { text: "no close match", tone: "none" as Tone };
+  tdDe.append(el("span", "de-value mono", primary ? formatDelta(primary.deltaE) : "—"));
+  tdDe.append(el("span", `de-band${band.tone === "none" ? " is-warning" : ""}`, band.text));
 
   const tdCopy = el("td", "cell-copy");
   tdCopy.dataset.label = "Copy";
@@ -233,7 +205,7 @@ function renderRow(system: SystemResult): {
   copy.disabled = !primary;
   copy.setAttribute(
     "aria-label",
-    primary ? `Copy ${primary.row.code} from ${system.meta.label}` : `No value to copy`,
+    primary ? `Copy ${primary.row.code} from ${system.meta.label}` : "No value to copy",
   );
   if (primary) {
     copy.dataset.copy = rowCopyLine(system.meta, primary);
@@ -241,36 +213,18 @@ function renderRow(system: SystemResult): {
   }
   tdCopy.append(copy);
 
-  tr.append(tdCode, tdName, tdSwatch, tdHex, tdRgb, tdCmyk, tdDe, tdCopy);
-
-  const detail = el("tr", "detail-row");
-  const td = el("td", "detail-cell");
-  td.colSpan = COLUMNS.length;
-  if (system.matches.length > 1) {
-    td.append(renderNearest(system.meta, system.matches));
-    detail.append(td);
-    return { row: tr, detail };
-  }
-  return { row: tr, detail: null };
+  tr.append(tdCode, tdMatch, tdHex, tdDe, tdCopy);
+  return tr;
 }
 
 export function renderResults(root: HTMLElement, view: ResultsView): void {
   const fragment = document.createDocumentFragment();
-  fragment.append(renderHero(view));
+  fragment.append(renderSummary(view));
 
-  const tableWrap = el("div", "table-wrap");
   const table = el("table", "result-table");
-
-  const caption = el("caption", "visually-hidden", "Nearest colour in each system with codes and values.");
-  table.append(caption);
-
-  const colgroup = el("colgroup");
-  for (const width of ["15%", "9%", "18%", "8%", "11%", "11%", "11%", "8%", "9%"]) {
-    const col = el("col");
-    col.style.width = width;
-    colgroup.append(col);
-  }
-  table.append(colgroup);
+  table.append(
+    el("caption", "visually-hidden", "Nearest colour in each system with codes and values."),
+  );
 
   const thead = el("thead");
   const headRow = el("tr");
@@ -283,19 +237,13 @@ export function renderResults(root: HTMLElement, view: ResultsView): void {
   table.append(thead);
 
   const tbody = el("tbody");
-  for (const system of view.systems) {
-    const { row, detail } = renderRow(system);
-    tbody.append(row);
-    if (detail) tbody.append(detail);
-  }
+  for (const system of view.systems) tbody.append(renderRow(system));
   table.append(tbody);
-  tableWrap.append(table);
-  fragment.append(tableWrap);
-
+  fragment.append(table);
   root.replaceChildren(fragment);
 }
 
-/* ---------- candidates for name search ---------- */
+/* ---------- name search ---------- */
 
 export function renderCandidates(
   root: HTMLElement,
@@ -303,14 +251,14 @@ export function renderCandidates(
   onPick: (row: ColorRow) => void,
 ): void {
   const wrap = el("div", "candidates");
-  wrap.append(label("Name matches — choose one"));
+  wrap.append(el("p", "field-label", "Name matches — choose one"));
 
   const list = el("ul", "candidate-list");
   for (const row of rows) {
     const item = el("li");
     const button = el("button", "candidate");
     button.type = "button";
-    button.append(swatch(row.hex, "swatch swatch-xs"));
+    button.append(swatch(row.hex, "swatch swatch-row"));
     button.append(el("span", "candidate-system mono", row.system));
     button.append(el("span", "candidate-code mono", row.code));
     button.append(el("span", "candidate-name", row.name));
@@ -319,23 +267,20 @@ export function renderCandidates(
     item.append(button);
     list.append(item);
   }
-
   wrap.append(list);
   root.replaceChildren(wrap);
 }
 
 /* ---------- loading, error, libraries ---------- */
 
-export function renderLoading(root: HTMLElement, rows = 6): void {
+export function renderLoading(root: HTMLElement, rows = 5): void {
   const wrap = el("div", "skeleton-wrap");
   wrap.setAttribute("aria-hidden", "true");
   for (let index = 0; index < rows; index += 1) {
     const row = el("div", "skeleton-row");
-    for (const width of ["14%", "10%", "26%", "6%", "12%", "12%", "10%"]) {
-      const block = el("span", "skeleton");
-      block.style.width = width;
-      row.append(block);
-    }
+    row.append(el("span", "skeleton skeleton-wide"));
+    row.append(el("span", "skeleton"));
+    row.append(el("span", "skeleton skeleton-short"));
     wrap.append(row);
   }
   root.replaceChildren(wrap);
@@ -344,7 +289,7 @@ export function renderLoading(root: HTMLElement, rows = 6): void {
 export function renderDataError(root: HTMLElement, onRetry: () => void): void {
   const panel = el("div", "data-error");
   panel.append(el("p", "error-title", "Colour data failed to load."));
-  panel.append(el("p", "error-detail", "The dataset file did not arrive. Reload the page or retry."));
+  panel.append(el("p", "error-detail", "The dataset did not arrive. Reload the page or retry."));
   const retry = el("button", "button button-quiet", "Retry");
   retry.type = "button";
   retry.addEventListener("click", onRetry);
@@ -359,27 +304,15 @@ export function formatCount(value: number): string {
 }
 
 export function renderLibraries(root: HTMLElement, systems: SystemMeta[]): void {
-  const list = el("ol", "library-index");
+  const list = el("ul", "library-list");
   for (const system of systems) {
     const item = el("li", "library-row");
-
-    const name = el("div", "library-name");
+    const name = el("span", "library-name");
     name.append(el("span", "library-title", system.label));
     name.append(el("span", "library-id mono", system.id));
-
-    const provenance = el("div", "library-provenance");
-    provenance.append(el("span", "library-family", system.family));
-    provenance.append(el("span", "library-origin", system.provenance));
-
-    const source = el("div", "library-source");
-    source.append(el("span", "library-source-name", system.source));
-    source.append(el("span", "library-license mono", system.license));
-
-    const count = el("div", "library-count");
-    count.append(el("span", "mono", formatCount(system.count)));
-    count.append(el("span", "library-count-label", "colours"));
-
-    item.append(name, provenance, source, count);
+    const source = el("span", "library-source", system.source);
+    const count = el("span", "library-count mono", formatCount(system.count));
+    item.append(name, source, count);
     list.append(item);
   }
   root.replaceChildren(list);
@@ -395,7 +328,6 @@ export function resultsToTsv(view: ResultsView): string {
       lines.push([system.meta.label, "", "", "", "", "", "", "no close match"].join("\t"));
       continue;
     }
-    const band = deltaBand(primary.deltaE);
     lines.push(
       [
         system.meta.label,
@@ -405,7 +337,7 @@ export function resultsToTsv(view: ResultsView): string {
         rgbText(primary.row.hex),
         cmykText(primary.row.hex),
         formatDelta(primary.deltaE),
-        band.text,
+        deltaBand(primary.deltaE).text,
       ].join("\t"),
     );
   }

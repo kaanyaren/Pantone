@@ -38,8 +38,8 @@ const copyAllButton = byId<HTMLButtonElement>("copy-all");
 const copyLinkButton = byId<HTMLButtonElement>("copy-link");
 const copyStatus = byId<HTMLParagraphElement>("copy-status");
 const librariesBody = byId<HTMLDivElement>("libraries-body");
-const footData = byId<HTMLParagraphElement>("foot-data");
-const footBuild = byId<HTMLParagraphElement>("foot-build");
+const footData = byId<HTMLElement>("foot-data");
+const footBuild = byId<HTMLElement>("foot-build");
 
 const SYSTEM_IDS = new Set<SystemId>(["C", "U", "TCX", "TPX", "MP", "MR", "DPS", "DVS"]);
 const SAME_CODE_FAMILY: Partial<Record<SystemId, readonly SystemId[]>> = {
