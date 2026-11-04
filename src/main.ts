@@ -428,7 +428,7 @@ function handleSubmit(raw: string, exactRow: ColorRow | null = null): void {
       return;
     }
     case "text": {
-      const results: ColorRow[] = searchColors(colorRows, query.text);
+      const results: ColorRow[] = searchColors(colorRows, query.text, 10_000);
       if (results.length === 0) {
         fail(
           `No code or name matched "${query.text}". Try "186 C", "19-4052 TCX", or "Rayon 1147".`,
