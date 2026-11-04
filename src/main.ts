@@ -1,4 +1,4 @@
-import type { ColorRow, Dataset, Lab, Match, Query, SystemId } from "./types.ts";
+import type { ColorRow, Dataset, Lab, Match, Query, SystemId, SystemMeta } from "./types.ts";
 import { cmykToRgb, deltaE2000, hexToRgb, rgbToHex, rgbToLab } from "./color.ts";
 import { parseQuery } from "./query.ts";
 import { searchColors } from "./search.ts";
@@ -6,10 +6,14 @@ import {
   deltaBand,
   renderCandidates,
   renderDataError,
+  renderEmptyState,
+  renderInspector,
   renderLibraries,
   renderLoading,
   renderResults,
   resultsToTsv,
+  type ActiveComparison,
+  type LibraryFilter,
   type ResultsView,
   type SystemResult,
 } from "./ui.ts";
@@ -21,6 +25,8 @@ interface Entry {
 
 type LoadState = "loading" | "ready" | "error";
 
+const DEFAULT_SAMPLE = "186 C";
+
 function byId<T extends HTMLElement>(id: string): T {
   const node = document.getElementById(id);
   if (!node) throw new Error(`Missing #${id}`);
@@ -29,9 +35,15 @@ function byId<T extends HTMLElement>(id: string): T {
 
 const form = byId<HTMLFormElement>("convert-form");
 const input = byId<HTMLInputElement>("query-input");
+const colorPicker = byId<HTMLInputElement>("color-picker");
+const pickerSwatch = byId<HTMLElement>("picker-swatch");
+const clearButton = byId<HTMLButtonElement>("clear-button");
 const matchButton = byId<HTMLButtonElement>("match-button");
+const queryHelp = byId<HTMLParagraphElement>("query-help");
 const queryError = byId<HTMLParagraphElement>("query-error");
 const resultsSection = byId<HTMLElement>("results");
+const inspectorBody = byId<HTMLDivElement>("inspector-body");
+const loupeMode = byId<HTMLElement>("loupe-mode");
 const resultBody = byId<HTMLDivElement>("result-body");
 const resultStatus = byId<HTMLParagraphElement>("result-status");
 const copyAllButton = byId<HTMLButtonElement>("copy-all");
@@ -54,6 +66,8 @@ let entries: Entry[] = [];
 let colorRows: ColorRow[] = [];
 let loadState: LoadState = "loading";
 let currentView: ResultsView | null = null;
+let activeComparison: ActiveComparison | null = null;
+let activeFilter: LibraryFilter = "all";
 
 /* ---------- URL state ---------- */
 
@@ -72,38 +86,50 @@ function commitUrl(value: string | null): void {
   history.replaceState(null, "", url);
 }
 
+function syncPickerHex(hex: string): void {
+  const upper = hex.toUpperCase();
+  pickerSwatch.style.setProperty("--swatch", upper);
+  if (/^#[0-9A-F]{6}$/.test(upper)) {
+    colorPicker.value = upper.toLowerCase();
+  }
+}
+
 /* ---------- errors and state ---------- */
 
 function clearError(): void {
   queryError.textContent = "";
   queryError.hidden = true;
+  queryHelp.hidden = false;
   input.removeAttribute("aria-invalid");
   input.setAttribute("aria-describedby", "query-help");
 }
 
+function showEmptyWorkbench(): void {
+  currentView = null;
+  activeComparison = null;
+  copyAllButton.disabled = true;
+  resultStatus.textContent = "Ready — pick a starter specimen or enter a query above.";
+  renderEmptyState(resultBody, inspectorBody, loupeMode, (q) => {
+    input.value = q;
+    handleSubmit(q, null, true);
+  });
+}
+
 function fail(message: string): void {
   commitUrl(null);
-  clearResults();
+  showEmptyWorkbench();
+  queryHelp.hidden = true;
   queryError.textContent = message;
   queryError.hidden = false;
   input.setAttribute("aria-invalid", "true");
-  input.setAttribute("aria-describedby", "query-help query-error");
+  input.setAttribute("aria-describedby", "query-error");
   input.focus();
-}
-
-function clearResults(): void {
-  currentView = null;
-  resultBody.replaceChildren();
-  resultStatus.textContent = "";
-  resultsSection.hidden = true;
-  copyAllButton.disabled = true;
 }
 
 function setBusy(busy: boolean): void {
   matchButton.disabled = busy || loadState === "error";
   matchButton.dataset.loading = busy ? "true" : "false";
   matchButton.setAttribute("aria-busy", busy ? "true" : "false");
-  matchButton.setAttribute("aria-label", busy ? "Loading colour data" : "Match");
 }
 
 /* ---------- dataset ---------- */
@@ -125,12 +151,10 @@ async function loadData(): Promise<void> {
   setBusy(true);
 
   const pending = queryFromUrl();
-  if (pending) {
-    resultsSection.hidden = false;
-    resultStatus.textContent = "Loading colour data…";
-    renderLoading(resultBody);
-  }
-  renderLoading(librariesBody, 8);
+  resultStatus.textContent = "Loading colour libraries…";
+  renderLoading(resultBody, 6);
+  renderLoading(inspectorBody, 3);
+  renderLoading(librariesBody, 6);
 
   try {
     const response = await fetch("./data/colors.json", { cache: "no-cache" });
@@ -145,15 +169,19 @@ async function loadData(): Promise<void> {
       const code = tuple[1];
       const name = tuple[2];
       const hex = tuple[3];
-      if (!isSystemId(system) || typeof code !== "string" || typeof name !== "string" || typeof hex !== "string") {
+      if (
+        !isSystemId(system) ||
+        typeof code !== "string" ||
+        typeof name !== "string" ||
+        typeof hex !== "string"
+      ) {
         continue;
       }
-      if (!hexToRgb(hex)) continue;
-      const rgb = hexToRgb(hex);
-      if (!rgb) continue;
+      const parsed = hexToRgb(hex);
+      if (!parsed) continue;
       const row: ColorRow = { system, code, name, hex };
       rows.push(row);
-      indexed.push({ row, lab: rgbToLab(rgb) });
+      indexed.push({ row, lab: rgbToLab(parsed) });
     }
 
     dataset = data;
@@ -169,9 +197,10 @@ async function loadData(): Promise<void> {
 
     if (pending) {
       input.value = pending;
-      handleSubmit(pending);
-    } else if (resultsSection.querySelector(".data-error")) {
-      clearResults();
+      handleSubmit(pending, null, true);
+    } else {
+      input.value = DEFAULT_SAMPLE;
+      handleSubmit(DEFAULT_SAMPLE, null, false);
     }
   } catch {
     dataset = null;
@@ -179,10 +208,10 @@ async function loadData(): Promise<void> {
     colorRows = [];
     loadState = "error";
     setBusy(false);
-    resultsSection.hidden = false;
-    resultStatus.textContent = "Colour data failed to load.";
+    resultStatus.textContent = "Colour dataset failed to load.";
     copyAllButton.disabled = true;
     renderDataError(resultBody, () => void loadData());
+    renderDataError(inspectorBody, () => void loadData());
     renderDataError(librariesBody, () => void loadData());
   }
 }
@@ -197,9 +226,9 @@ function labelForRow(row: ColorRow): string {
     case "TPX":
       return `${row.code} ${row.system}`;
     case "MP":
-      return `Madeira Polyneon ${row.code}`;
+      return `Polyneon ${row.code}`;
     case "MR":
-      return `Madeira Rayon ${row.code}`;
+      return `Rayon ${row.code}`;
     case "DPS":
       return `Polysoft ${row.code}`;
     case "DVS":
@@ -215,7 +244,52 @@ function canonCode(code: string): string {
   return value;
 }
 
-/* ---------- matching ---------- */
+/* ---------- matching & rendering ---------- */
+
+function handleInspect(meta: SystemMeta, match: Match, pinned: boolean): void {
+  if (!currentView) return;
+  if (activeComparison?.pinned && !pinned) return;
+  activeComparison = { meta, match, pinned };
+  renderInspector(inspectorBody, loupeMode, currentView, activeComparison, selectSystemInLoupe);
+}
+
+function selectSystemInLoupe(systemId: SystemId): void {
+  if (!currentView) return;
+  const sys = currentView.systems.find((item) => item.meta.id === systemId);
+  if (!sys) return;
+  const target = sys.sameCode ?? sys.matches[0];
+  if (!target) return;
+  const toggleOff =
+    activeComparison?.pinned && activeComparison.meta.id === systemId;
+  activeComparison = toggleOff
+    ? currentView.closest
+      ? { ...currentView.closest, pinned: false }
+      : null
+    : { meta: sys.meta, match: target, pinned: true };
+  refreshWorkspaceView();
+  const pinEl = inspectorBody.querySelector<HTMLButtonElement>(
+    `.tolerance-pin[data-system-id="${systemId}"]`,
+  );
+  pinEl?.focus({ preventScroll: true });
+  const rowEl = resultBody.querySelector<HTMLElement>(`tr[data-system-id="${systemId}"]`);
+  rowEl?.scrollIntoView({ block: "nearest" });
+}
+
+function refreshWorkspaceView(): void {
+  if (!currentView) return;
+  renderInspector(inspectorBody, loupeMode, currentView, activeComparison, selectSystemInLoupe);
+  renderResults(
+    resultBody,
+    currentView,
+    activeFilter,
+    activeComparison?.meta.id ?? null,
+    handleInspect,
+    (row) => {
+      clearError();
+      handleSubmit(labelForRow(row), row, true);
+    },
+  );
+}
 
 function applyColour(hex: string, inputLabel: string, exactRow: ColorRow | null): void {
   const rgb = hexToRgb(hex);
@@ -226,6 +300,7 @@ function applyColour(hex: string, inputLabel: string, exactRow: ColorRow | null)
   if (!dataset) return;
 
   const normalised = rgbToHex(rgb);
+  syncPickerHex(normalised);
   const inputLab = rgbToLab(rgb);
   const systems: SystemResult[] = [];
 
@@ -282,21 +357,32 @@ function applyColour(hex: string, inputLabel: string, exactRow: ColorRow | null)
   }
 
   let closest: ResultsView["closest"] = null;
+  let closestCross: ResultsView["closest"] = null;
   for (const system of systems) {
     const best = system.matches[0];
     if (!best) continue;
-    if (!closest || best.deltaE < closest.match.deltaE) closest = { meta: system.meta, match: best };
+    if (!closest || best.deltaE < closest.match.deltaE) {
+      closest = { meta: system.meta, match: best };
+    }
+    if (
+      exactRow &&
+      system.meta.id !== exactRow.system &&
+      (!closestCross || best.deltaE < closestCross.match.deltaE)
+    ) {
+      closestCross = { meta: system.meta, match: best };
+    }
   }
 
-  const view: ResultsView = {
+  currentView = {
     inputHex: normalised,
     inputLabel,
     systems,
     closest,
   };
+  const initialLoupe = closestCross ?? closest;
+  activeComparison = initialLoupe ? { ...initialLoupe, pinned: false } : null;
 
-  currentView = view;
-  renderResults(resultBody, view);
+  refreshWorkspaceView();
   resultsSection.hidden = false;
   copyAllButton.disabled = false;
 
@@ -325,11 +411,14 @@ function findExactRow(
   return candidates[0]?.row ?? null;
 }
 
-function handleSubmit(raw: string, exactRow: ColorRow | null = null): void {
+function handleSubmit(
+  raw: string,
+  exactRow: ColorRow | null = null,
+  syncUrl = true,
+): void {
   clearError();
   if (loadState === "loading") return;
   if (loadState === "error") {
-    resultsSection.hidden = false;
     renderDataError(resultBody, () => void loadData());
     return;
   }
@@ -337,14 +426,14 @@ function handleSubmit(raw: string, exactRow: ColorRow | null = null): void {
     const label = labelForRow(exactRow);
     input.value = label;
     applyColour(exactRow.hex, label, exactRow);
-    commitUrl(label);
+    if (syncUrl) commitUrl(label);
     return;
   }
 
   const trimmed = raw.trim();
   if (!trimmed) {
     commitUrl(null);
-    clearResults();
+    showEmptyWorkbench();
     input.focus();
     return;
   }
@@ -371,29 +460,29 @@ function handleSubmit(raw: string, exactRow: ColorRow | null = null): void {
         return;
       }
       applyColour(rgbToHex(rgb), trimmed, null);
-      commitUrl(trimmed);
+      if (syncUrl) commitUrl(trimmed);
       return;
     }
     case "rgb": {
       const { r, g, b } = query.rgb;
-      const valid = [r, g, b].every((value) => Number.isFinite(value) && value >= 0 && value <= 255);
+      const valid = [r, g, b].every((v) => Number.isFinite(v) && v >= 0 && v <= 255);
       if (!valid) {
         fail("RGB channels must be 0–255.");
         return;
       }
       applyColour(rgbToHex(query.rgb), trimmed, null);
-      commitUrl(trimmed);
+      if (syncUrl) commitUrl(trimmed);
       return;
     }
     case "cmyk": {
       const { c, m, y, k } = query.cmyk;
-      const valid = [c, m, y, k].every((value) => Number.isFinite(value) && value >= 0 && value <= 100);
+      const valid = [c, m, y, k].every((v) => Number.isFinite(v) && v >= 0 && v <= 100);
       if (!valid) {
         fail("CMYK channels must be 0–100.");
         return;
       }
       applyColour(rgbToHex(cmykToRgb(query.cmyk)), trimmed, null);
-      commitUrl(trimmed);
+      if (syncUrl) commitUrl(trimmed);
       return;
     }
     case "code": {
@@ -402,7 +491,7 @@ function handleSubmit(raw: string, exactRow: ColorRow | null = null): void {
       const exact = findExactRow(query, allowed);
       if (exact) {
         applyColour(exact.hex, trimmed, exact);
-        commitUrl(trimmed);
+        if (syncUrl) commitUrl(trimmed);
         return;
       }
       const elsewhere = entries.filter(
@@ -414,7 +503,7 @@ function handleSubmit(raw: string, exactRow: ColorRow | null = null): void {
         const first = elsewhere[0];
         if (first) {
           applyColour(first.row.hex, trimmed, first.row);
-          commitUrl(trimmed);
+          if (syncUrl) commitUrl(trimmed);
           return;
         }
       }
@@ -436,17 +525,18 @@ function handleSubmit(raw: string, exactRow: ColorRow | null = null): void {
         return;
       }
       const shown = results.slice(0, 10);
-      clearResults();
-      resultsSection.hidden = false;
-      renderCandidates(resultBody, shown, (row) => {
+      currentView = null;
+      activeComparison = null;
+      copyAllButton.disabled = true;
+      renderCandidates(resultBody, inspectorBody, loupeMode, query.text, shown, (row) => {
         clearError();
-        handleSubmit(labelForRow(row), row);
+        handleSubmit(labelForRow(row), row, true);
       });
       resultStatus.textContent =
         shown.length < results.length
           ? `Showing ${shown.length} of ${results.length} name matches. Choose one to convert.`
           : `${results.length} name matches. Choose one to convert.`;
-      commitUrl(trimmed);
+      if (syncUrl) commitUrl(trimmed);
       input.focus();
       return;
     }
@@ -461,7 +551,7 @@ function fallbackCopy(text: string): boolean {
   const area = document.createElement("textarea");
   area.value = text;
   area.readOnly = true;
-  area.className = "copy-fallback";
+  area.className = "visually-hidden";
   document.body.append(area);
   area.select();
   let ok = false;
@@ -482,21 +572,32 @@ function announce(message: string): void {
 }
 
 function flash(button: HTMLButtonElement): void {
-  const original = button.dataset.originalLabel ?? button.textContent ?? "";
-  button.dataset.originalLabel = original;
-  button.textContent = "Copied";
-  button.dataset.state = "success";
+  const isCoord = button.classList.contains("coord-cell");
+  if (isCoord) {
+    button.dataset.state = "success";
+  } else {
+    const original = button.dataset.originalLabel ?? button.textContent ?? "";
+    button.dataset.originalLabel = original;
+    button.textContent = "Copied";
+    button.dataset.state = "success";
+  }
   const previous = copyTimers.get(button);
   if (previous) window.clearTimeout(previous);
   const timer = window.setTimeout(() => {
-    button.textContent = button.dataset.originalLabel ?? original;
+    if (!isCoord && button.dataset.originalLabel) {
+      button.textContent = button.dataset.originalLabel;
+    }
     delete button.dataset.state;
     copyTimers.delete(button);
-  }, 1600);
+  }, 1500);
   copyTimers.set(button, timer);
 }
 
-async function copyText(text: string, button: HTMLButtonElement | null, label: string): Promise<void> {
+async function copyText(
+  text: string,
+  button: HTMLButtonElement | null,
+  label: string,
+): Promise<void> {
   let ok = false;
   try {
     await navigator.clipboard.writeText(text);
@@ -516,11 +617,25 @@ async function copyText(text: string, button: HTMLButtonElement | null, label: s
 
 form.addEventListener("submit", (event) => {
   event.preventDefault();
-  handleSubmit(input.value);
+  handleSubmit(input.value, null, true);
 });
 
 input.addEventListener("input", () => {
   if (!queryError.hidden && input.value.trim()) clearError();
+});
+
+colorPicker.addEventListener("input", () => {
+  const hex = colorPicker.value.toUpperCase();
+  input.value = hex;
+  handleSubmit(hex, null, true);
+});
+
+clearButton.addEventListener("click", () => {
+  input.value = "";
+  clearError();
+  commitUrl(null);
+  showEmptyWorkbench();
+  input.focus();
 });
 
 document.addEventListener("click", (event) => {
@@ -532,8 +647,21 @@ document.addEventListener("click", (event) => {
     const value = chip.dataset.q;
     if (value) {
       input.value = value;
-      handleSubmit(value);
+      handleSubmit(value, null, true);
     }
+    return;
+  }
+
+  const filterPill = target.closest<HTMLButtonElement>(".filter-pill");
+  if (filterPill) {
+    const nextFilter = (filterPill.dataset.filter ?? "all") as LibraryFilter;
+    activeFilter = nextFilter;
+    for (const pill of document.querySelectorAll<HTMLButtonElement>(".filter-pill")) {
+      const active = pill.dataset.filter === nextFilter;
+      pill.classList.toggle("is-active", active);
+      pill.setAttribute("aria-pressed", active ? "true" : "false");
+    }
+    refreshWorkspaceView();
     return;
   }
 
@@ -563,11 +691,11 @@ document.addEventListener("keydown", (event) => {
       details.open = false;
       return;
     }
-    if (input.value || !resultsSection.hidden || !queryError.hidden) {
+    if (input.value || currentView || !queryError.hidden) {
       input.value = "";
       clearError();
-      clearResults();
       commitUrl(null);
+      showEmptyWorkbench();
       input.focus();
     }
     return;
@@ -582,6 +710,7 @@ document.addEventListener("keydown", (event) => {
 
 /* ---------- boot ---------- */
 
+syncPickerHex("#C8102E");
 setBusy(true);
 requestAnimationFrame(() => {
   void loadData();

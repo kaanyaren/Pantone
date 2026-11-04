@@ -1,12 +1,12 @@
 {
   "name": "PantonAK",
   "short_name": "PantonAK",
-  "description": "Colour converter for Pantone, Madeira and Durak.",
+  "description": "Colour and embroidery thread converter for Pantone, Madeira and Durak.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#FAFCFE",
-  "theme_color": "#0A0E12",
+  "background_color": "#FAF7F1",
+  "theme_color": "#10141B",
   "icons": [
     {
       "src": "./icon-192.png",

@@ -1,35 +1,57 @@
 /* PantonAK design tokens — the only file allowed to declare raw colour and font values. */
 
 :root {
-  /* Cool paper and ink. No pure #fff or #000. */
-  --color-paper: oklch(99% 0.003 255);
-  --color-paper-2: oklch(97.2% 0.003 255);
-  --color-paper-3: oklch(94.5% 0.003 255);
-  --color-ink: oklch(17% 0.010 255);
-  --color-ink-2: oklch(30% 0.010 255);
-  --color-muted: oklch(45% 0.008 255);
-  --color-rule: oklch(88% 0.005 255);
-  --color-rule-2: oklch(65% 0.008 255);
+  /* Warm D50 daylight viewing-booth paper & slate-carbon ink (zero pure #fff or #000) */
+  --color-paper: oklch(97.6% 0.008 80);
+  --color-paper-2: oklch(94.8% 0.010 80);
+  --color-paper-3: oklch(91.5% 0.012 80);
+  --color-ink: oklch(17% 0.012 260);
+  --color-ink-2: oklch(29% 0.012 260);
+  --color-muted: oklch(43% 0.010 260);
+  --color-rule: oklch(86% 0.008 80);
+  --color-rule-2: oklch(60% 0.010 260);
 
-  /* One signal ink. Ultramarine, used for action and focus only. */
-  --color-accent: oklch(48% 0.19 264);
-  --color-accent-hover: oklch(43% 0.19 264);
-  --color-accent-ink: var(--color-paper);
-  --color-focus: var(--color-accent);
+  /* Committed dark slate-carbon command deck */
+  --color-deck: oklch(19% 0.015 260);
+  --color-deck-2: oklch(24% 0.015 260);
+  --color-deck-3: oklch(29% 0.015 260);
+  --color-deck-ink: oklch(96% 0.006 80);
+  --color-deck-muted: oklch(76% 0.008 80);
+  --color-deck-rule: oklch(52% 0.012 260);
 
-  /* Functional states — always paired with text or an icon. */
-  --color-error: oklch(52% 0.20 25);
-  --color-error-ink: var(--color-paper);
-  --color-success: oklch(45% 0.10 155);
+  /* Rubric vermilion signal accent (strictly <= 5% viewport area) */
+  --color-accent: oklch(48% 0.19 30);
+  --color-accent-hover: oklch(43% 0.19 30);
+  --color-accent-ink: oklch(98.5% 0.005 80);
+  --color-focus: oklch(52% 0.19 30);
+  --color-deck-focus: oklch(74% 0.16 55);
+  --color-selection: oklch(88% 0.06 45);
 
-  /* Type. Archivo for UI; JetBrains Mono for codes and values. */
+  /* Semantic ΔE00 tolerance & state tokens (all >= 4.5:1 against paper) */
+  --color-exact: oklch(40% 0.11 160);
+  --color-exact-bg: oklch(93% 0.03 160);
+  --color-close: oklch(41% 0.10 235);
+  --color-close-bg: oklch(93% 0.025 235);
+  --color-warn: oklch(43% 0.12 65);
+  --color-warn-bg: oklch(93% 0.035 75);
+  --color-error: oklch(47% 0.19 28);
+  --color-error-bg: oklch(93% 0.03 28);
+  --color-error-ink: oklch(98.5% 0.005 80);
+  --color-deck-error: oklch(78% 0.15 28);
+  --color-success: oklch(40% 0.11 160);
+
+  /* Neutral fallback for dynamic swatch surfaces */
+  --color-swatch-fallback: oklch(91.5% 0.012 80);
+  --color-shadow: oklch(17% 0.012 260 / 0.08);
+
+  /* Typography — Archivo UI + JetBrains Mono for codes/coordinates (2 families total) */
   --font-display: "Archivo", ui-sans-serif, system-ui, sans-serif;
   --font-body: "Archivo", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   --display-weight: 700;
-  --tracking-display: -0.025em;
+  --tracking-display: -0.02em;
 
-  /* 4 pt spacing scale */
+  /* 4 pt spacing scale (multiples of 4 px) */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -41,22 +63,25 @@
   --space-12: 3rem;
   --space-16: 4rem;
 
-  /* Compact type scale */
-  --text-xs: 0.6875rem;
-  --text-sm: 0.75rem;
+  /* Fixed rem type scale for Operate UI (ratio ~1.15, no fluid clamp headings) */
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
   --text-base: 0.875rem;
   --text-md: 1rem;
-  --text-lg: 1.25rem;
-  --text-xl: 1.5rem;
-  --text-display: clamp(1.5rem, 2.2vw, 2rem);
+  --text-lg: 1.125rem;
+  --text-xl: 1.3125rem;
+  --text-display: 1.5rem;
 
-  /* Structure */
+  /* Structure & motion */
+  --radius-sm: 4px;
   --radius-control: 6px;
   --radius-panel: 8px;
   --rule: 1px;
-  --shell: 73rem;
-  --gutter: clamp(1rem, 3vw, 1.75rem);
+  --shell: 84rem;
+  --gutter: var(--space-5);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --dur-fast: 140ms;
-  --dur-base: 180ms;
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 150ms;
+  --dur-base: 200ms;
 }

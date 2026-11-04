@@ -10,3 +10,4 @@ QA_REPORT.md
 qa-*.png
 qa-*.yml
 .playwright-mcp/
+.impeccable/review/
