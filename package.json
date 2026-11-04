@@ -1,0 +1,25 @@
+{
+  "name": "pantonak",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Colour converter for Pantone, Madeira and Durak.",
+  "scripts": {
+    "data": "node scripts/build-data.ts",
+    "dev": "vite",
+    "build": "npm run data && tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "node --test \"test/**/*.test.ts\""
+  },
+  "engines": {
+    "node": ">=22.18"
+  },
+  "dependencies": {
+    "culori": "^4.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5"
+  }
+}

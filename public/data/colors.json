@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "generated": "2026-11-04",
+  "systems": [
+    { "id": "C", "label": "Pantone Solid Coated", "short": "C", "family": "pantone", "provenance": "community", "source": "Pantoner", "license": "MIT", "count": 1 },
+    { "id": "U", "label": "Pantone Solid Uncoated", "short": "U", "family": "pantone", "provenance": "community", "source": "Pantoner", "license": "MIT", "count": 1 },
+    { "id": "TCX", "label": "Pantone TCX", "short": "TCX", "family": "pantone", "provenance": "community", "source": "pedroduke/pantone-tcx", "license": "ISC", "count": 1 },
+    { "id": "TPX", "label": "Pantone TPX (legacy)", "short": "TPX", "family": "pantone", "provenance": "legacy", "source": "color-books", "license": "unlicensed", "count": 1 },
+    { "id": "MP", "label": "Madeira Polyneon 40", "short": "Polyneon", "family": "madeira", "provenance": "manufacturer", "source": "Ink/Stitch", "license": "GPL-3.0", "count": 1 },
+    { "id": "MR", "label": "Madeira Rayon 40", "short": "Rayon", "family": "madeira", "provenance": "manufacturer", "source": "Ink/Stitch", "license": "GPL-3.0", "count": 1 },
+    { "id": "DPS", "label": "Durak Polysoft", "short": "Polysoft", "family": "durak", "provenance": "manufacturer", "source": "Durak digital chart", "license": "permission", "count": 1 },
+    { "id": "DVS", "label": "Durak Visco", "short": "Visco", "family": "durak", "provenance": "manufacturer", "source": "Durak digital chart", "license": "permission", "count": 1 }
+  ],
+  "rows": [
+    ["C", "186", "186 C", "#C8102E"],
+    ["U", "186", "186 U", "#D2515E"],
+    ["TCX", "19-1664", "True Red", "#BF1932"],
+    ["TPX", "19-1664", "True Red", "#B01B2E"],
+    ["MP", "1147", "Madeira Polyneon 1147", "#C8102E"],
+    ["MR", "1001", "Madeira Rayon 1001", "#F5F5F5"],
+    ["DPS", "00118", "Polysoft 00118", "#5B5951"],
+    ["DVS", "00118", "Visco 00118", "#A9ACA9"]
+  ]
+}
