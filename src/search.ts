@@ -68,7 +68,7 @@ function extractCode(input: string): string | null {
   let stripped = true;
   while (stripped) {
     stripped = false;
-    for (const prefix of ["madeira", "durak", "polyneon", "rayon", "polysoft", "visco"]) {
+    for (const prefix of ["madeira", "durak", "polyneon", "rayon", "classic", "polysoft", "visco"]) {
       if (value.startsWith(`${prefix} `)) {
         value = value.slice(prefix.length + 1).trim();
         stripped = true;

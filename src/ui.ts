@@ -336,7 +336,13 @@ function renderRow(
   headTitle.append(el("span", "head-lib", system.meta.label));
   if (primary) {
     headTitle.append(el("span", "head-sep", "-"));
-    headTitle.append(el("span", "head-val mono", primary.row.name));
+    headTitle.append(
+      el(
+        "span",
+        "head-val mono",
+        system.meta.family === "madeira" ? primary.row.code : primary.row.name,
+      ),
+    );
   }
   tdHead.append(headTitle);
   if (primary) {
@@ -468,7 +474,7 @@ export function renderCandidates(
 const STARTER_SWATCHES: Array<{ q: string; label: string; sub: string; hex: string }> = [
   { q: "186 C", label: "186 C", sub: "Pantone C", hex: "#C8102E" },
   { q: "19-4052 TCX", label: "19-4052 TCX", sub: "Classic Blue · Pamuk", hex: "#0F4C81" },
-  { q: "Rayon 1147", label: "Rayon 1147", sub: "Madeira Rayon 40", hex: "#B60F2F" },
+  { q: "Classic 1147", label: "Classic 1147", sub: "Madeira Classic 40", hex: "#B60F2F" },
   { q: "Polyneon 1610", label: "Polyneon 1610", sub: "Madeira Polyneon 40", hex: "#B7C3C5" },
   { q: "Polysoft 00118", label: "Polysoft 00118", sub: "Durak Polysoft", hex: "#5B5951" },
   { q: "Visco 00118", label: "Visco 00118", sub: "Durak Visco", hex: "#A9ACA9" },

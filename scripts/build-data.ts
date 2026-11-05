@@ -119,8 +119,8 @@ const SYSTEM_META: Omit<SystemMeta, "count">[] = [
   },
   {
     id: "MR",
-    label: "Madeira Rayon 40",
-    short: "Rayon",
+    label: "Madeira Classic 40",
+    short: "Classic",
     family: "madeira",
     provenance: "manufacturer",
     source: "Ink/Stitch",

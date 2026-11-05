@@ -241,7 +241,7 @@ function labelForRow(row: ColorRow): string {
     case "MP":
       return `Polyneon ${row.code}`;
     case "MR":
-      return `Rayon ${row.code}`;
+      return `Classic ${row.code}`;
     case "DPS":
       return `Polysoft ${row.code}`;
     case "DVS":
@@ -513,7 +513,7 @@ function handleSubmit(
         );
         if (threadHit) {
           fail(
-            `"${query.code}" hem baskı hem iplikte var. Pantone için "1225 C", iplik için "Madeira 1225" veya "Rayon 1225" yazın.`,
+            `"${query.code}" hem baskı hem iplikte var. Pantone için "1225 C", iplik için "Madeira 1225" veya "Classic 1225" yazın.`,
           );
           return;
         }
@@ -537,11 +537,11 @@ function handleSubmit(
         }
       }
       if (!madeiraOnly && query.system === null && /^\d{4}$/.test(query.code)) {
-        fail(`"${query.code}" kodunu ayırt etmek için "Madeira" veya "Rayon" ekleyin.`);
+        fail(`"${query.code}" kodunu ayırt etmek için "Madeira" veya "Classic" ekleyin.`);
         return;
       }
       fail(
-        `Yüklenen kütüphanelerde "${trimmed}" kodu yok. "186 C", "19-4052 TCX" veya "Rayon 1147" deneyin.`,
+        `Yüklenen kütüphanelerde "${trimmed}" kodu yok. "186 C", "19-4052 TCX" veya "Classic 1147" deneyin.`,
       );
       return;
     }
@@ -549,7 +549,7 @@ function handleSubmit(
       const results: ColorRow[] = searchColors(colorRows, query.text, 10_000);
       if (results.length === 0) {
         fail(
-          `"${query.text}" ile eşleşen kod veya ad yok. "186 C", "19-4052 TCX" veya "Rayon 1147" deneyin.`,
+          `"${query.text}" ile eşleşen kod veya ad yok. "186 C", "19-4052 TCX" veya "Classic 1147" deneyin.`,
         );
         return;
       }

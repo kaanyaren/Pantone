@@ -110,6 +110,16 @@ const cases: ParserCase[] = [
     input: "MADEIRA RAYON 1001",
     expected: { kind: "code", system: "MR", code: "1001" },
   },
+  {
+    label: "madeira classic",
+    input: "classic 1147",
+    expected: { kind: "code", system: "MR", code: "1147" },
+  },
+  {
+    label: "madeira classic with brand",
+    input: "MADEIRA CLASSIC 1147",
+    expected: { kind: "code", system: "MR", code: "1147" },
+  },
 
   {
     label: "durak polysoft",

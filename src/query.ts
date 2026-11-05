@@ -4,7 +4,7 @@ const HEX_RE = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i;
 const PANTONE_SUFFIX_RE = /^(\d{2,4}(?:-\d{2,4})?)\s*(C|U|TCX|TPX)$/i;
 const BARE_TEXTILE_RE = /^(\d{2,4})-(\d{2,4})$/;
 const BARE_PRINT_RE = /^(\d{3,4})$/;
-const MADEIRA_RE = /^(?:MADEIRA\s*)?(POLYNEON|RAYON)\s*(\d{3,5})$/i;
+const MADEIRA_RE = /^(?:MADEIRA\s*)?(POLYNEON|RAYON|CLASSIC)\s*(\d{3,5})$/i;
 const MADEIRA_DEFAULT_RE = /^MADEIRA\s*(\d{3,5})$/i;
 const DURAK_RE = /^(?:DURAK\s*)?(POLYSOFT|VISCO)\s*(\d{4,6})$/i;
 
@@ -135,13 +135,13 @@ export function parseQuery(raw: string): Query | null {
     const product = (madeira[1] ?? "").toUpperCase();
     return {
       kind: "code",
-      system: product === "RAYON" ? "MR" : "MP",
+      system: product === "POLYNEON" ? "MP" : "MR",
       code: madeira[2] ?? "",
     };
   }
   const madeiraDefault = input.match(MADEIRA_DEFAULT_RE);
   if (madeiraDefault) {
-    // No product given: resolve across Polyneon and Rayon in main.ts.
+    // No product given: resolve across Polyneon and Classic in main.ts.
     return { kind: "code", system: null, code: madeiraDefault[1] ?? "" };
   }
 
