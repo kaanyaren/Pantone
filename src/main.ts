@@ -4,6 +4,7 @@ import { parseQuery } from "./query.ts";
 import { searchColors } from "./search.ts";
 import {
   deltaBand,
+  formatCount,
   renderCandidates,
   renderDataError,
   renderEmptyState,
@@ -108,7 +109,7 @@ function showEmptyWorkbench(): void {
   currentView = null;
   activeComparison = null;
   copyAllButton.disabled = true;
-  resultStatus.textContent = "Ready — pick a starter specimen or enter a query above.";
+  resultStatus.textContent = "Hazır — bir başlangıç numunesi seçin veya yukarıya bir sorgu girin.";
   renderEmptyState(resultBody, inspectorBody, loupeMode, (q) => {
     input.value = q;
     handleSubmit(q, null, true);
@@ -151,7 +152,7 @@ async function loadData(): Promise<void> {
   setBusy(true);
 
   const pending = queryFromUrl();
-  resultStatus.textContent = "Loading colour libraries…";
+  resultStatus.textContent = "Renk kütüphaneleri yükleniyor…";
   renderLoading(resultBody, 6);
   renderLoading(inspectorBody, 3);
   renderLoading(librariesBody, 6);
@@ -190,7 +191,7 @@ async function loadData(): Promise<void> {
     loadState = "ready";
 
     renderLibraries(librariesBody, data.systems);
-    footData.textContent = `${data.systems.length} systems · ${rows.length} rows · ${data.generated}`;
+    footData.textContent = `${data.systems.length} sistem · ${formatCount(rows.length)} satır · ${data.generated}`;
     footBuild.textContent = `PantonAK · ${__BUILD_HASH__}`;
     setBusy(false);
     clearError();
@@ -208,7 +209,7 @@ async function loadData(): Promise<void> {
     colorRows = [];
     loadState = "error";
     setBusy(false);
-    resultStatus.textContent = "Colour dataset failed to load.";
+    resultStatus.textContent = "Renk veri kümesi yüklenemedi.";
     copyAllButton.disabled = true;
     renderDataError(resultBody, () => void loadData());
     renderDataError(inspectorBody, () => void loadData());
@@ -294,7 +295,7 @@ function refreshWorkspaceView(): void {
 function applyColour(hex: string, inputLabel: string, exactRow: ColorRow | null): void {
   const rgb = hexToRgb(hex);
   if (!rgb) {
-    fail("Hex must be 3 or 6 characters after #.");
+    fail("# sonrasında hex 3 veya 6 karakter olmalı.");
     return;
   }
   if (!dataset) return;
@@ -390,10 +391,10 @@ function applyColour(hex: string, inputLabel: string, exactRow: ColorRow | null)
     const band = deltaBand(closest.match.deltaE);
     resultStatus.textContent =
       closest.match.deltaE > 5
-        ? `No close match overall. Nearest is ${closest.match.row.code} in ${closest.meta.label}, ΔE00 ${closest.match.deltaE.toFixed(2)}.`
-        : `${systems.length} systems matched. Closest is ${closest.match.row.code} in ${closest.meta.label}, ΔE00 ${closest.match.deltaE.toFixed(2)} (${band.text}).`;
+        ? `Genel olarak yakın eşleşme yok. En yakın aday: ${closest.meta.label} kütüphanesinde ${closest.match.row.code}, ΔE00 ${closest.match.deltaE.toFixed(2)}.`
+        : `${systems.length} sistem eşleşti. En yakın eşleşme: ${closest.meta.label} kütüphanesinde ${closest.match.row.code}, ΔE00 ${closest.match.deltaE.toFixed(2)} (${band.text}).`;
   } else {
-    resultStatus.textContent = "No systems in the loaded dataset.";
+    resultStatus.textContent = "Yüklenen veri kümesinde sistem yok.";
   }
 }
 
@@ -441,13 +442,13 @@ function handleSubmit(
   const query = parseQuery(trimmed);
   if (!query) {
     if (trimmed.startsWith("#")) {
-      fail("Hex must be 3 or 6 characters after #.");
+      fail("# sonrasında hex 3 veya 6 karakter olmalı.");
     } else if (/^rgb\s*\(/i.test(trimmed)) {
-      fail("RGB channels must be 0–255.");
+      fail("RGB kanalları 0–255 arasında olmalı.");
     } else if (/^cmyk\s*\(/i.test(trimmed)) {
-      fail("CMYK channels must be 0–100.");
+      fail("CMYK kanalları 0–100 arasında olmalı.");
     } else {
-      fail("Enter a hex value, rgb(), cmyk(), Pantone code, or thread code.");
+      fail("Bir hex değeri, rgb(), cmyk(), Pantone kodu veya iplik kodu girin.");
     }
     return;
   }
@@ -456,7 +457,7 @@ function handleSubmit(
     case "hex": {
       const rgb = hexToRgb(query.hex);
       if (!rgb) {
-        fail("Hex must be 3 or 6 characters after #.");
+        fail("# sonrasında hex 3 veya 6 karakter olmalı.");
         return;
       }
       applyColour(rgbToHex(rgb), trimmed, null);
@@ -467,7 +468,7 @@ function handleSubmit(
       const { r, g, b } = query.rgb;
       const valid = [r, g, b].every((v) => Number.isFinite(v) && v >= 0 && v <= 255);
       if (!valid) {
-        fail("RGB channels must be 0–255.");
+        fail("RGB kanalları 0–255 arasında olmalı.");
         return;
       }
       applyColour(rgbToHex(query.rgb), trimmed, null);
@@ -478,7 +479,7 @@ function handleSubmit(
       const { c, m, y, k } = query.cmyk;
       const valid = [c, m, y, k].every((v) => Number.isFinite(v) && v >= 0 && v <= 100);
       if (!valid) {
-        fail("CMYK channels must be 0–100.");
+        fail("CMYK kanalları 0–100 arasında olmalı.");
         return;
       }
       applyColour(rgbToHex(cmykToRgb(query.cmyk)), trimmed, null);
@@ -508,11 +509,11 @@ function handleSubmit(
         }
       }
       if (!madeiraOnly && query.system === null && /^\d{4}$/.test(query.code)) {
-        fail(`Add "Madeira" or "Rayon" to disambiguate "${query.code}".`);
+        fail(`"${query.code}" kodunu ayırt etmek için "Madeira" veya "Rayon" ekleyin.`);
         return;
       }
       fail(
-        `No code "${trimmed}" in the loaded libraries. Try "186 C", "19-4052 TCX", or "Rayon 1147".`,
+        `Yüklenen kütüphanelerde "${trimmed}" kodu yok. "186 C", "19-4052 TCX" veya "Rayon 1147" deneyin.`,
       );
       return;
     }
@@ -520,7 +521,7 @@ function handleSubmit(
       const results: ColorRow[] = searchColors(colorRows, query.text, 10_000);
       if (results.length === 0) {
         fail(
-          `No code or name matched "${query.text}". Try "186 C", "19-4052 TCX", or "Rayon 1147".`,
+          `"${query.text}" ile eşleşen kod veya ad yok. "186 C", "19-4052 TCX" veya "Rayon 1147" deneyin.`,
         );
         return;
       }
@@ -534,8 +535,8 @@ function handleSubmit(
       });
       resultStatus.textContent =
         shown.length < results.length
-          ? `Showing ${shown.length} of ${results.length} name matches. Choose one to convert.`
-          : `${results.length} name matches. Choose one to convert.`;
+          ? `${results.length} ad eşleşmesinden ${shown.length} tanesi gösteriliyor. Dönüştürmek için birini seçin.`
+          : `${results.length} ad eşleşmesi. Dönüştürmek için birini seçin.`;
       if (syncUrl) commitUrl(trimmed);
       input.focus();
       return;
@@ -578,7 +579,7 @@ function flash(button: HTMLButtonElement): void {
   } else {
     const original = button.dataset.originalLabel ?? button.textContent ?? "";
     button.dataset.originalLabel = original;
-    button.textContent = "Copied";
+    button.textContent = "Kopyalandı";
     button.dataset.state = "success";
   }
   const previous = copyTimers.get(button);
@@ -606,10 +607,10 @@ async function copyText(
     ok = fallbackCopy(text);
   }
   if (ok) {
-    announce(`Copied ${label} to the clipboard.`);
+    announce(`${label} panoya kopyalandı.`);
     if (button) flash(button);
   } else {
-    announce("Copy failed. Select the value and copy it manually.");
+    announce("Kopyalama başarısız. Değeri seçip elle kopyalayın.");
   }
 }
 
@@ -669,18 +670,18 @@ document.addEventListener("click", (event) => {
   if (copyButton) {
     const value = copyButton.dataset.copy;
     if (value) {
-      void copyText(value, copyButton, copyButton.dataset.copyLabel ?? "values");
+      void copyText(value, copyButton, copyButton.dataset.copyLabel ?? "değerler");
     }
   }
 });
 
 copyAllButton.addEventListener("click", () => {
   if (!currentView) return;
-  void copyText(resultsToTsv(currentView), copyAllButton, "all systems");
+  void copyText(resultsToTsv(currentView), copyAllButton, "tüm sistemler");
 });
 
 copyLinkButton.addEventListener("click", () => {
-  void copyText(window.location.href, copyLinkButton, "link");
+  void copyText(window.location.href, copyLinkButton, "bağlantı");
 });
 
 document.addEventListener("keydown", (event) => {

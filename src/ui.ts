@@ -77,13 +77,24 @@ function labText(hex: string): string {
   return `${lab.l.toFixed(1)} ${lab.a.toFixed(1)} ${lab.b.toFixed(1)}`;
 }
 
+const PROVENANCE_LABELS: Record<SystemMeta["provenance"], string> = {
+  community: "topluluk",
+  manufacturer: "üretici",
+  legacy: "eski",
+};
+
+const LICENSE_LABELS: Record<string, string> = {
+  "No license file": "Lisans dosyası yok",
+  "manufacturer permission (not public)": "üretici izni (kamuya açık değil)",
+};
+
 export function deltaBand(deltaE: number): { text: string; tone: Tone } {
-  if (deltaE === 0) return { text: "same value", tone: "exact" };
-  if (deltaE <= 1) return { text: "near identical", tone: "exact" };
-  if (deltaE <= 2) return { text: "close", tone: "close" };
-  if (deltaE <= 3.5) return { text: "noticeable", tone: "warn" };
-  if (deltaE <= 5) return { text: "loose", tone: "warn" };
-  return { text: "no close match", tone: "none" };
+  if (deltaE === 0) return { text: "aynı değer", tone: "exact" };
+  if (deltaE <= 1) return { text: "neredeyse aynı", tone: "exact" };
+  if (deltaE <= 2) return { text: "yakın", tone: "close" };
+  if (deltaE <= 3.5) return { text: "fark edilir", tone: "warn" };
+  if (deltaE <= 5) return { text: "zayıf", tone: "warn" };
+  return { text: "yakın eşleşme yok", tone: "none" };
 }
 
 function formatDelta(deltaE: number): string {
@@ -131,9 +142,9 @@ export function renderInspector(
 
   badgeNode.textContent = target
     ? active?.pinned
-      ? `Pinned · ${target.meta.short}`
-      : `Comparing · ${target.meta.short}`
-    : "Input only";
+      ? `Sabit · ${target.meta.short}`
+      : `Karşılaştırma · ${target.meta.short}`
+    : "Yalnızca giriş";
 
   const loupe = el("div", "loupe-card");
   const split = el("div", "loupe-split");
@@ -141,7 +152,7 @@ export function renderInspector(
   const leftHalf = el("div", "loupe-half loupe-left");
   leftHalf.style.setProperty("--swatch", view.inputHex);
   const leftCap = el("div", "loupe-caption");
-  leftCap.append(el("span", "loupe-tag", "Input"));
+  leftCap.append(el("span", "loupe-tag", "Giriş"));
   leftCap.append(el("strong", "loupe-code mono", view.inputLabel));
   leftCap.append(el("span", "loupe-hex mono", view.inputHex.toUpperCase()));
   leftHalf.append(leftCap);
@@ -187,7 +198,7 @@ export function renderInspector(
   const items: Array<{ label: string; value: string; copy: string }> = [
     { label: "HEX", value: hexVal, copy: hexVal },
     { label: "sRGB", value: rgbVal, copy: `rgb(${rgbVal.replace(/\s+/g, ", ")})` },
-    { label: "CMYK (unprofiled)", value: cmykVal, copy: `cmyk(${cmykVal.replace(/\s+/g, ", ")})` },
+    { label: "CMYK (profilsiz)", value: cmykVal, copy: `cmyk(${cmykVal.replace(/\s+/g, ", ")})` },
     { label: "CIELAB D50", value: labVal, copy: `lab(${labVal})` },
   ];
 
@@ -196,7 +207,7 @@ export function renderInspector(
     btn.type = "button";
     btn.dataset.copy = item.copy;
     btn.dataset.copyLabel = item.label;
-    btn.setAttribute("aria-label", `Copy ${item.label} ${item.value}`);
+    btn.setAttribute("aria-label", `${item.label} ${item.value} değerini kopyala`);
     btn.append(
       el("span", "coord-label", item.label),
       el("span", "coord-value mono", item.value),
@@ -209,7 +220,7 @@ export function renderInspector(
   const ruler = el("div", "tolerance-card");
   const rulerHead = el("div", "tolerance-head");
   rulerHead.append(
-    el("span", "tolerance-title", "ΔE00 spread across libraries"),
+    el("span", "tolerance-title", "Kütüphaneler arası ΔE00 dağılımı"),
     el("span", "tolerance-hint mono", "0 → 5+"),
   );
   ruler.append(rulerHead);
@@ -236,7 +247,7 @@ export function renderInspector(
     pin.style.setProperty("--de-pct", `${pct.toFixed(1)}%`);
     pin.setAttribute(
       "aria-label",
-      `Inspect ${sys.meta.label}: ${primary.row.code}, ΔE00 ${formatDelta(primary.deltaE)}`,
+      `İncele ${sys.meta.label}: ${primary.row.code}, ΔE00 ${formatDelta(primary.deltaE)}`,
     );
     const pinTop = el("span", "pin-top");
     pinTop.append(
@@ -259,7 +270,46 @@ export function renderInspector(
 
 /* ---------- right pane: 8-library matrix ---------- */
 
-const COLUMNS = ["Library", "Code", "Specimen & recipe", "Hex", "ΔE00", "Copy"] as const;
+const COLUMNS = ["Kütüphane", "Kod", "Numune ve formül", "Hex", "ΔE00", "Kopyala"] as const;
+
+function renderThreadSummary(
+  view: ResultsView,
+  onPickRow: (row: ColorRow) => void,
+): HTMLElement | null {
+  const picks = view.systems
+    .filter((system) => system.meta.family !== "pantone")
+    .map((system) => ({ meta: system.meta, match: system.matches[0] }))
+    .filter((pick): pick is { meta: SystemMeta; match: Match } => Boolean(pick.match))
+    .sort((a, b) => a.match.deltaE - b.match.deltaE);
+  if (picks.length === 0) return null;
+
+  const section = el("section", "thread-summary");
+  section.setAttribute("aria-label", "En iyi iplik önerileri");
+  const heading = el("p", "thread-heading", "En iyi iplik önerileri");
+  heading.append(el("span", "thread-note", "Yalnızca iplik kütüphaneleri · ΔE00 sırasına göre"));
+  section.append(heading);
+
+  const grid = el("div", "thread-grid");
+  for (const pick of picks) {
+    const band = deltaBand(pick.match.deltaE);
+    const card = el("button", "starter-card thread-card");
+    card.type = "button";
+    card.setAttribute(
+      "aria-label",
+      `Dönüştür ${pick.meta.label} ${pick.match.row.code} (${pick.match.row.name}), ΔE00 ${formatDelta(pick.match.deltaE)}`,
+    );
+    card.append(
+      swatch(pick.match.row.hex, "swatch starter-swatch"),
+      el("span", "starter-code mono", pick.match.row.code),
+      el("span", "starter-sub", pick.match.row.name),
+      el("span", "thread-meta mono", `${pick.meta.short} · ΔE00 ${formatDelta(pick.match.deltaE)} (${band.text})`),
+    );
+    card.addEventListener("click", () => onPickRow(pick.match.row));
+    grid.append(card);
+  }
+  section.append(grid);
+  return section;
+}
 
 function renderNearest(
   meta: SystemMeta,
@@ -269,7 +319,7 @@ function renderNearest(
 ): HTMLDetailsElement {
   const details = el("details", "nearest");
   const summary = el("summary", "nearest-summary");
-  summary.append(el("span", undefined, "Top 5 in this library"));
+  summary.append(el("span", undefined, "Bu kütüphanede ilk 5"));
   details.append(summary);
 
   const list = el("ol", "nearest-list");
@@ -279,7 +329,7 @@ function renderNearest(
     pick.type = "button";
     pick.setAttribute(
       "aria-label",
-      `Convert ${meta.short} ${match.row.code} (${match.row.name}), ΔE00 ${formatDelta(match.deltaE)}`,
+      `Dönüştür ${meta.short} ${match.row.code} (${match.row.name}), ΔE00 ${formatDelta(match.deltaE)}`,
     );
     pick.append(
       swatch(match.row.hex, "swatch swatch-xs"),
@@ -318,29 +368,29 @@ function renderRow(
   }
 
   const tdSystem = el("td", "cell-system");
-  tdSystem.dataset.label = "Library";
+  tdSystem.dataset.label = "Kütüphane";
   tdSystem.append(el("span", "system-label", system.meta.label));
   const sysMetaLine = el("span", "system-subline");
   sysMetaLine.append(
     el("span", "system-short mono", system.meta.short),
-    el("span", "system-prov", system.meta.provenance),
+    el("span", "system-prov", PROVENANCE_LABELS[system.meta.provenance]),
   );
   tdSystem.append(sysMetaLine);
   tr.append(tdSystem);
 
   const tdCode = el("td", "cell-code");
-  tdCode.dataset.label = "Code";
+  tdCode.dataset.label = "Kod";
   tdCode.append(el("span", "code-badge mono", primary ? primary.row.code : "—"));
 
   const tdMatch = el("td", "cell-match");
-  tdMatch.dataset.label = "Specimen";
+  tdMatch.dataset.label = "Numune";
   if (primary) {
     const title = el("div", "row-title");
     title.append(dualSwatch(inputHex, primary.row.hex));
     title.append(el("span", "row-name-text", primary.row.name));
     tdMatch.append(title);
     if (system.sameCode && !system.sameCodeIsInput) {
-      tdMatch.append(el("span", "row-note", "same code · different substrate"));
+      tdMatch.append(el("span", "row-note", "aynı kod · farklı zemin"));
     }
     tdMatch.append(
       el(
@@ -350,13 +400,13 @@ function renderRow(
       ),
     );
   } else {
-    tdMatch.append(el("span", "row-title", "No close match in this library (ΔE00 > 5)"));
+    tdMatch.append(el("span", "row-title", "Bu kütüphanede yakın eşleşme yok (ΔE00 > 5)"));
     if (best) {
       tdMatch.append(
         el(
           "span",
           "row-values mono",
-          `Nearest candidate: ${best.row.code} (${best.row.hex}) · ΔE00 ${formatDelta(best.deltaE)}`,
+          `En yakın aday: ${best.row.code} (${best.row.hex}) · ΔE00 ${formatDelta(best.deltaE)}`,
         ),
       );
     }
@@ -373,24 +423,24 @@ function renderRow(
   tdDe.dataset.label = "ΔE00";
   const band = primary
     ? deltaBand(primary.deltaE)
-    : { text: "no close match", tone: "none" as Tone };
+    : { text: "yakın eşleşme yok", tone: "none" as Tone };
   tdDe.append(el("span", "de-value mono", primary ? formatDelta(primary.deltaE) : "—"));
   tdDe.append(el("span", `tone-pill tone-${band.tone}`, band.text));
 
   const tdCopy = el("td", "cell-copy");
-  tdCopy.dataset.label = "Copy";
-  const copy = el("button", "copy-button", "Copy row");
+  tdCopy.dataset.label = "Kopyala";
+  const copy = el("button", "copy-button", "Satırı kopyala");
   copy.type = "button";
   copy.disabled = !primary;
   copy.setAttribute(
     "aria-label",
     primary
-      ? `Copy full specification row for ${primary.row.code} in ${system.meta.label}`
-      : "No value to copy",
+      ? `${system.meta.label} içindeki ${primary.row.code} için tam özellik satırını kopyala`
+      : "Kopyalanacak değer yok",
   );
   if (primary) {
     copy.dataset.copy = rowCopyLine(system.meta, primary);
-    copy.dataset.copyLabel = `${primary.row.code} row (${system.meta.label})`;
+    copy.dataset.copyLabel = `${primary.row.code} satırı (${system.meta.label})`;
   }
   tdCopy.append(copy);
 
@@ -409,9 +459,12 @@ export function renderResults(
   const fragment = document.createDocumentFragment();
   const visibleSystems = view.systems.filter((sys) => matchesFilter(sys.meta.id, filter));
 
+  const threadSummary = renderThreadSummary(view, onPickRow);
+  if (threadSummary) fragment.append(threadSummary);
+
   const table = el("table", "result-table");
   table.append(
-    el("caption", "visually-hidden", "Nearest colour in each library with codes and values."),
+    el("caption", "visually-hidden", "Her kütüphanedeki en yakın renk; kodlar ve değerlerle."),
   );
 
   const thead = el("thead");
@@ -451,19 +504,19 @@ export function renderCandidates(
   rows: ColorRow[],
   onPick: (row: ColorRow) => void,
 ): void {
-  badgeNode.textContent = "Name search";
+  badgeNode.textContent = "Ad araması";
   const inspectNote = el("div", "empty-inspector");
   inspectNote.append(
     el(
       "p",
       "empty-text",
-      `Showing name matches for "${queryText}". Select any swatch on the right to open its 8-library comparison and split loupe.`,
+      `"${queryText}" için ad eşleşmeleri gösteriliyor. 8 kütüphaneli karşılaştırmayı ve bölünmüş büyüteci açmak için sağdaki renk örneklerinden birini seçin.`,
     ),
   );
   inspectorRoot.replaceChildren(inspectNote);
 
   const wrap = el("div", "candidates");
-  wrap.append(el("p", "candidates-heading", "Matching colour names — select one to convert"));
+  wrap.append(el("p", "candidates-heading", "Eşleşen renk adları — dönüştürmek için birini seçin"));
 
   const list = el("ul", "candidate-list");
   for (const row of rows) {
@@ -487,7 +540,7 @@ export function renderCandidates(
 
 const STARTER_SWATCHES: Array<{ q: string; label: string; sub: string; hex: string }> = [
   { q: "186 C", label: "186 C", sub: "Pantone Solid Coated", hex: "#C8102E" },
-  { q: "19-4052 TCX", label: "19-4052 TCX", sub: "Classic Blue · Cotton", hex: "#0F4C81" },
+  { q: "19-4052 TCX", label: "19-4052 TCX", sub: "Classic Blue · Pamuk", hex: "#0F4C81" },
   { q: "Rayon 1147", label: "Rayon 1147", sub: "Madeira Rayon 40", hex: "#B60F2F" },
   { q: "Polyneon 1610", label: "Polyneon 1610", sub: "Madeira Polyneon 40", hex: "#B7C3C5" },
   { q: "Polysoft 00118", label: "Polysoft 00118", sub: "Durak Polysoft", hex: "#5B5951" },
@@ -500,25 +553,25 @@ export function renderEmptyState(
   badgeNode: HTMLElement,
   onPickQuery: (q: string) => void,
 ): void {
-  badgeNode.textContent = "Standby";
+  badgeNode.textContent = "Beklemede";
 
   const inspectEmpty = el("div", "empty-inspector");
   inspectEmpty.append(
     el(
       "p",
       "empty-text",
-      "Select a starter swatch or enter any Pantone, Madeira, Durak, hex, RGB, or CMYK value above to open the split comparator.",
+      "Bölünmüş karşılaştırıcıyı açmak için bir başlangıç rengi seçin veya yukarıya herhangi bir Pantone, Madeira, Durak, hex, RGB ya da CMYK değeri girin.",
     ),
   );
   inspectorRoot.replaceChildren(inspectEmpty);
 
   const wrap = el("div", "empty-workbench");
   wrap.append(
-    el("p", "empty-heading", "Quick-start reference specimens"),
+    el("p", "empty-heading", "Hızlı başlangıç numuneleri"),
     el(
       "p",
       "empty-sub",
-      "Pick a specimen below to compare across all eight print, textile, and embroidery thread libraries.",
+      "Sekiz baskı, tekstil ve nakış ipliği kütüphanesinin tamamında karşılaştırmak için aşağıdan bir numune seçin.",
     ),
   );
 
@@ -556,16 +609,16 @@ export function renderLoading(root: HTMLElement, rows = 5): void {
 
 export function renderDataError(root: HTMLElement, onRetry: () => void): void {
   const panel = el("div", "data-error");
-  panel.append(el("p", "error-title", "Colour dataset failed to load."));
-  panel.append(el("p", "error-detail", "The JSON bundle did not arrive. Reload or retry."));
-  const retry = el("button", "button button-quiet", "Retry");
+  panel.append(el("p", "error-title", "Renk veri kümesi yüklenemedi."));
+  panel.append(el("p", "error-detail", "JSON paketi gelmedi. Sayfayı yenileyin veya tekrar deneyin."));
+  const retry = el("button", "button button-quiet", "Yeniden dene");
   retry.type = "button";
   retry.addEventListener("click", onRetry);
   panel.append(retry);
   root.replaceChildren(panel);
 }
 
-const numberFormat = new Intl.NumberFormat("en-US");
+const numberFormat = new Intl.NumberFormat("tr-TR");
 
 export function formatCount(value: number): string {
   return numberFormat.format(value);
@@ -578,8 +631,12 @@ export function renderLibraries(root: HTMLElement, systems: SystemMeta[]): void 
     const name = el("span", "library-name");
     name.append(el("span", "library-title", system.label));
     name.append(el("span", "library-id mono", system.id));
-    const source = el("span", "library-source", `${system.source} · ${system.license}`);
-    const count = el("span", "library-count mono", `${formatCount(system.count)} colours`);
+    const source = el(
+      "span",
+      "library-source",
+      `${system.source} · ${LICENSE_LABELS[system.license] ?? system.license}`,
+    );
+    const count = el("span", "library-count mono", `${formatCount(system.count)} renk`);
     item.append(name, source, count);
     list.append(item);
   }
@@ -589,11 +646,11 @@ export function renderLibraries(root: HTMLElement, systems: SystemMeta[]): void 
 /* ---------- export ---------- */
 
 export function resultsToTsv(view: ResultsView): string {
-  const lines = ["System\tCode\tName\tHex\tRGB\tCMYK\tDeltaE00\tBand"];
+  const lines = ["Sistem\tKod\tAd\tHex\tRGB\tCMYK\tDeltaE00\tAralık"];
   for (const system of view.systems) {
     const primary = system.sameCode ?? (system.noClose ? null : system.matches[0]);
     if (!primary) {
-      lines.push([system.meta.label, "", "", "", "", "", "", "no close match"].join("\t"));
+      lines.push([system.meta.label, "", "", "", "", "", "", "yakın eşleşme yok"].join("\t"));
       continue;
     }
     lines.push(

@@ -1,7 +1,7 @@
 {
   "name": "PantonAK",
   "short_name": "PantonAK",
-  "description": "Colour and embroidery thread converter for Pantone, Madeira and Durak.",
+  "description": "Pantone, Madeira ve Durak için renk ve nakış ipliği dönüştürücüsü.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

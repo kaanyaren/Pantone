@@ -1,12 +1,12 @@
 <!doctype html>
-<html lang="en">
+<html lang="tr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>PantonAK — Colour &amp; Thread Workbench</title>
+    <title>PantonAK — Renk ve İplik Tezgâhı</title>
     <meta
       name="description"
-      content="Convert Pantone C, U, TCX and TPX, Madeira Polyneon and Rayon, Durak Polysoft and Visco, hex, RGB and CMYK with CIEDE2000 nearest matches."
+      content="Pantone C, U, TCX ve TPX, Madeira Polyneon ve Rayon, Durak Polysoft ve Visco, hex, RGB ve CMYK değerlerini CIEDE2000 en yakın eşleşmelerle dönüştürün."
     />
     <meta name="color-scheme" content="light" />
     <link rel="icon" href="./favicon.ico" sizes="any" />
@@ -14,18 +14,19 @@
     <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
     <link rel="manifest" href="./site.webmanifest" />
     <meta name="theme-color" content="#10141B" />
-    <meta property="og:title" content="PantonAK — Colour &amp; Thread Workbench" />
+    <meta property="og:title" content="PantonAK — Renk ve İplik Tezgâhı" />
     <meta
       property="og:description"
-      content="Pantone, Madeira and Durak colour cross-reference with CIEDE2000 (D50) nearest matches."
+      content="Pantone, Madeira ve Durak renk çapraz referansı; CIEDE2000 (D50) en yakın eşleşmelerle."
     />
     <meta property="og:type" content="website" />
+    <meta property="og:locale" content="tr_TR" />
     <meta property="og:url" content="https://kaanyaren.github.io/Pantone/" />
     <link rel="canonical" href="https://kaanyaren.github.io/Pantone/" />
     <meta property="og:image" content="https://kaanyaren.github.io/Pantone/og-image.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="PantonAK — Colour &amp; Thread Workbench." />
+    <meta property="og:image:alt" content="PantonAK — Renk ve İplik Tezgâhı." />
     <meta property="og:site_name" content="PantonAK" />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -37,41 +38,41 @@
     <link rel="stylesheet" href="/src/styles.css" />
   </head>
   <body>
-    <a class="skip-link" href="#query-input">Skip to converter</a>
+    <a class="skip-link" href="#query-input">Dönüştürücüye geç</a>
 
     <header class="command-deck">
       <div class="shell deck-inner">
         <div class="deck-top">
           <div class="brand-group">
-            <a class="brand" href="./" aria-label="PantonAK home">
+            <a class="brand" href="./" aria-label="PantonAK ana sayfa">
               <img src="./brand/logo-deck.svg" alt="PantonAK" width="107" height="36" />
             </a>
-            <h1 id="page-title" class="deck-title">Colour &amp; Thread Workbench</h1>
+            <h1 id="page-title" class="deck-title">Renk ve İplik Tezgâhı</h1>
           </div>
-          <nav class="deck-nav" aria-label="Project links">
+          <nav class="deck-nav" aria-label="Proje bağlantıları">
             <a
               class="nav-link"
               href="https://github.com/kaanyaren/Pantone"
               target="_blank"
               rel="noopener"
             >
-              GitHub<span class="visually-hidden"> (opens in a new tab)</span>
+              GitHub<span class="visually-hidden"> (yeni sekmede açılır)</span>
             </a>
           </nav>
         </div>
 
         <form id="convert-form" class="command-form" novalidate>
           <label class="field-label" for="query-input">
-            Enter Pantone code, Madeira / Durak thread number, hex, RGB, CMYK, or colour name
+            Pantone kodu, Madeira / Durak iplik numarası, hex, RGB, CMYK veya renk adı girin
           </label>
           <div class="search-row">
-            <label class="color-well" for="color-picker" title="Pick a colour visually">
+            <label class="color-well" for="color-picker" title="Görsel olarak renk seç">
               <input
                 id="color-picker"
                 class="color-picker-input"
                 type="color"
                 value="#C8102E"
-                aria-label="Pick a colour visually"
+                aria-label="Görsel olarak renk seç"
               />
               <span id="picker-swatch" class="picker-swatch" aria-hidden="true"></span>
             </label>
@@ -92,16 +93,16 @@
               <span class="input-shortcut mono" aria-hidden="true">/</span>
             </div>
             <button id="clear-button" class="button button-deck-Secondary" type="button">
-              Clear
+              Temizle
             </button>
             <button id="match-button" class="button button-primary" type="submit">
-              <span class="button-label">Match</span>
-              <span class="button-busy" aria-hidden="true">Matching…</span>
+              <span class="button-label">Eşleştir</span>
+              <span class="button-busy" aria-hidden="true">Eşleştiriliyor…</span>
             </button>
           </div>
 
           <div class="deck-subbar">
-            <div class="examples" aria-label="Sample queries">
+            <div class="examples" aria-label="Örnek sorgular">
               <ul class="chips">
                 <li><button class="chip" type="button" data-q="186 C">186 C</button></li>
                 <li><button class="chip" type="button" data-q="19-4052 TCX">19-4052 TCX</button></li>
@@ -113,8 +114,8 @@
             </div>
             <div class="feedback-slot">
               <p class="help" id="query-help">
-                D50 CIELAB · CIEDE2000 ranking across 8 libraries. Press <kbd>/</kbd> to focus,
-                <kbd>Esc</kbd> to clear.
+                D50 CIELAB · 8 kütüphanede CIEDE2000 sıralaması. Odaklanmak için <kbd>/</kbd>,
+                temizlemek için <kbd>Esc</kbd>.
               </p>
               <p class="error" id="query-error" role="alert" hidden></p>
             </div>
@@ -127,8 +128,8 @@
       <section id="results" class="studio-grid" aria-labelledby="results-title">
         <aside id="inspector-rail" class="inspector-rail" aria-labelledby="inspector-title">
           <div class="pane-head">
-            <h2 id="inspector-title">Specimen loupe</h2>
-            <span id="loupe-mode" class="loupe-badge mono">Closest match</span>
+            <h2 id="inspector-title">Numune büyüteci</h2>
+            <span id="loupe-mode" class="loupe-badge mono">En yakın eşleşme</span>
           </div>
           <div id="inspector-body"></div>
         </aside>
@@ -136,19 +137,19 @@
         <div class="results-pane">
           <div class="results-head">
             <div class="results-title-group">
-              <h2 id="results-title">Cross-reference matrix</h2>
+              <h2 id="results-title">Çapraz referans matrisi</h2>
               <p id="result-status" class="status" role="status" aria-live="polite"></p>
             </div>
             <div class="results-tools">
-              <div class="filter-bar" role="group" aria-label="Filter libraries by family">
+              <div class="filter-bar" role="group" aria-label="Kütüphaneleri aileye göre filtrele">
                 <button class="filter-pill is-active" type="button" data-filter="all" aria-pressed="true">
-                  All (8)
+                  Tümü (8)
                 </button>
                 <button class="filter-pill" type="button" data-filter="print" aria-pressed="false">
-                  Print C/U
+                  Baskı C/U
                 </button>
                 <button class="filter-pill" type="button" data-filter="textile" aria-pressed="false">
-                  Textile TCX/TPX
+                  Tekstil TCX/TPX
                 </button>
                 <button class="filter-pill" type="button" data-filter="madeira" aria-pressed="false">
                   Madeira
@@ -159,10 +160,10 @@
               </div>
               <div class="export-tools">
                 <button id="copy-all" class="button button-quiet" type="button" disabled>
-                  Copy TSV
+                  TSV kopyala
                 </button>
                 <button id="copy-link" class="button button-quiet" type="button">
-                  Share URL
+                  URL paylaş
                 </button>
               </div>
             </div>
@@ -171,30 +172,30 @@
         </div>
       </section>
 
-      <section class="reference-strip" aria-label="Technical notes and library provenance">
+      <section class="reference-strip" aria-label="Teknik notlar ve kütüphane kaynakları">
         <details class="reference-block">
-          <summary>CIEDE2000 (D50) tolerance scale &amp; colour-space caveats</summary>
+          <summary>CIEDE2000 (D50) tolerans ölçeği ve renk uzayı uyarıları</summary>
           <div class="reference-body">
             <p>
-              Every row is converted from sRGB into CIELAB D50 and ranked with CIEDE2000
-              (<span class="mono">kL = kC = kH = 1</span>). Same-code counterparts (<span class="mono">C ↔ U</span>,
-              <span class="mono">TCX ↔ TPX</span>) represent the same ink or dye number on different
-              substrates, never interchangeable colours. CMYK values use the unprofiled device
-              formula and are not Pantone Color Bridge ink builds. Thread RGBs are digital shade-card
-              approximations; verify physical cones before production.
+              Her satır sRGB'den CIELAB D50'ye dönüştürülür ve CIEDE2000 ile sıralanır
+              (<span class="mono">kL = kC = kH = 1</span>). Aynı kodlu karşılıklar (<span class="mono">C ↔ U</span>,
+              <span class="mono">TCX ↔ TPX</span>) farklı zeminlerde aynı mürekkep veya boya numarasını
+              temsil eder; renkler asla birbirinin yerine kullanılamaz. CMYK değerleri profilsiz aygıt
+              formülünü kullanır ve Pantone Color Bridge mürekkep karışımları değildir. İplik RGB'leri
+              dijital renk kartı yaklaşımlarıdır; üretimden önce fiziksel konileri doğrulayın.
             </p>
             <dl class="bands">
-              <div><dt class="mono">0</dt><dd>same value</dd></div>
-              <div><dt class="mono">≤ 1</dt><dd>near identical</dd></div>
-              <div><dt class="mono">&gt; 1–2</dt><dd>close</dd></div>
-              <div><dt class="mono">&gt; 2–3.5</dt><dd>noticeable</dd></div>
-              <div><dt class="mono">&gt; 3.5–5</dt><dd>loose</dd></div>
-              <div><dt class="mono">&gt; 5</dt><dd>no close match</dd></div>
+              <div><dt class="mono">0</dt><dd>aynı değer</dd></div>
+              <div><dt class="mono">≤ 1</dt><dd>neredeyse aynı</dd></div>
+              <div><dt class="mono">&gt; 1–2</dt><dd>yakın</dd></div>
+              <div><dt class="mono">&gt; 2–3.5</dt><dd>fark edilir</dd></div>
+              <div><dt class="mono">&gt; 3.5–5</dt><dd>zayıf</dd></div>
+              <div><dt class="mono">&gt; 5</dt><dd>yakın eşleşme yok</dd></div>
             </dl>
           </div>
         </details>
         <details class="reference-block">
-          <summary>Loaded libraries, counts &amp; source provenance</summary>
+          <summary>Yüklenen kütüphaneler, adetler ve kaynak bilgisi</summary>
           <div id="libraries-body" class="reference-body"></div>
         </details>
       </section>
@@ -204,11 +205,11 @@
       <div class="shell footer-row">
         <img src="./brand/logo.svg" alt="PantonAK" width="78" height="26" />
         <p class="foot-note">
-          Approximate digital reference · Verify physical shade cards before production · Not
-          affiliated with Pantone LLC, Madeira, or Durak.
+          Yaklaşık dijital referans · Üretimden önce fiziksel renk kartlarını doğrulayın · Pantone
+          LLC, Madeira veya Durak ile bağlantılı değildir.
         </p>
         <p class="foot-meta mono">
-          <span id="foot-data">loading…</span> · <span id="foot-build">PantonAK</span>
+          <span id="foot-data">yükleniyor…</span> · <span id="foot-build">PantonAK</span>
         </p>
       </div>
     </footer>
