@@ -302,44 +302,6 @@ export function renderInspector(
 
 /* ---------- right pane: 8-library matrix ---------- */
 
-function renderThreadSummary(
-  view: ResultsView,
-  onPickRow: (row: ColorRow) => void,
-  lang: Lang = "tr",
-): HTMLElement | null {
-  const t = DICTIONARY[lang];
-  const picks = view.systems
-    .filter((system) => system.meta.family !== "pantone")
-    .map((system) => ({ meta: system.meta, match: system.matches[0] }))
-    .filter((pick): pick is { meta: SystemMeta; match: Match } => Boolean(pick.match))
-    .sort((a, b) => a.match.deltaE - b.match.deltaE);
-  if (picks.length === 0) return null;
-
-  const section = el("section", "thread-summary");
-  section.setAttribute("aria-label", t.threadSummaryLabel);
-  section.append(el("span", "thread-heading", t.threadHeading));
-
-  const row = el("div", "thread-row");
-  for (const pick of picks) {
-    const chip = el("button", "thread-pick");
-    chip.type = "button";
-    chip.setAttribute(
-      "aria-label",
-      `${t.convert} ${pick.meta.label} ${pick.match.row.code} (${pick.match.row.name}), ΔE00 ${formatDelta(pick.match.deltaE)}`,
-    );
-    chip.append(
-      swatch(pick.match.row.hex, "swatch thread-swatch"),
-      el("span", "thread-name", pick.meta.short),
-      el("span", "thread-code mono", pick.match.row.code),
-      el("span", "thread-de mono", `ΔE ${formatDelta(pick.match.deltaE)}`),
-    );
-    chip.addEventListener("click", () => onPickRow(pick.match.row));
-    row.append(chip);
-  }
-  section.append(row);
-  return section;
-}
-
 function renderNearest(
   meta: SystemMeta,
   matches: Match[],
@@ -510,9 +472,6 @@ export function renderResults(
   const fragment = document.createDocumentFragment();
   const visibleSystems = view.systems.filter((sys) => matchesFilter(sys.meta.id, filter));
 
-  const threadSummary = renderThreadSummary(view, onPickRow, lang);
-  if (threadSummary) fragment.append(threadSummary);
-
   const table = el("table", "result-table");
   table.append(
     el("caption", "visually-hidden", t.matrixCaption),
@@ -528,20 +487,47 @@ export function renderResults(
   thead.append(headRow);
   table.append(thead);
 
-  const tbody = el("tbody");
-  for (const system of visibleSystems) {
-    tbody.append(
-      renderRow(
-        view.inputHex,
-        system,
-        selectedSystemId === system.meta.id,
-        onInspect,
-        onPickRow,
-        lang,
-      ),
-    );
-  }
-  table.append(tbody);
+  const renderGroup = (
+    systems: SystemResult[],
+    label: string,
+    className: string,
+  ): HTMLTableSectionElement | null => {
+    if (systems.length === 0) return null;
+    const tbody = el("tbody", `matrix-group ${className}`);
+    const groupHead = el("tr", "matrix-group-head");
+    const groupTitle = el("th", "matrix-group-title", `${label} (${systems.length})`);
+    groupTitle.scope = "rowgroup";
+    groupTitle.colSpan = 2;
+    groupHead.append(groupTitle);
+    tbody.append(groupHead);
+    for (const system of systems) {
+      tbody.append(
+        renderRow(
+          view.inputHex,
+          system,
+          selectedSystemId === system.meta.id,
+          onInspect,
+          onPickRow,
+          lang,
+        ),
+      );
+    }
+    return tbody;
+  };
+
+  const threadGroup = renderGroup(
+    visibleSystems.filter((system) => system.meta.family !== "pantone"),
+    t.groupThreads,
+    "is-threads",
+  );
+  const pantoneGroup = renderGroup(
+    visibleSystems.filter((system) => system.meta.family === "pantone"),
+    t.groupPantone,
+    "is-pantone",
+  );
+  if (threadGroup) table.append(threadGroup);
+  if (pantoneGroup) table.append(pantoneGroup);
+
   fragment.append(table);
   root.replaceChildren(fragment);
 }

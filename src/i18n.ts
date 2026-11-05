@@ -51,8 +51,8 @@ export interface Translations {
   closestCandidate: (code: string, hex: string, delta: string) => string;
   nearestFirst5: string;
   inspectCandidateAria: (system: string, code: string, name: string, delta: string) => string;
-  threadSummaryLabel: string;
-  threadHeading: string;
+  groupThreads: string;
+  groupPantone: string;
   matrixCaption: string;
   columns: readonly [string, string];
   cmykUnprofiled: string;
@@ -134,8 +134,8 @@ export const DICTIONARY: Record<Lang, Translations> = {
     nearestFirst5: "Bu kütüphanede ilk 5",
     inspectCandidateAria: (system, code, name, delta) =>
       `Dönüştür ${system} ${code} (${name}), ΔE00 ${delta}`,
-    threadSummaryLabel: "En iyi iplik önerileri",
-    threadHeading: "İplik önerileri",
+    groupThreads: "İplikler",
+    groupPantone: "Pantone",
     matrixCaption: "Her kütüphanedeki en yakın renk; kodlar ve değerlerle.",
     columns: ["Renk", "ΔE00"] as const,
     cmykUnprofiled: "CMYK (profilsiz)",
@@ -223,8 +223,8 @@ export const DICTIONARY: Record<Lang, Translations> = {
     nearestFirst5: "Top 5 in this library",
     inspectCandidateAria: (system, code, name, delta) =>
       `Convert ${system} ${code} (${name}), ΔE00 ${delta}`,
-    threadSummaryLabel: "Best thread matches",
-    threadHeading: "Thread recommendations",
+    groupThreads: "Threads",
+    groupPantone: "Pantone",
     matrixCaption: "Nearest color in each library with codes and values.",
     columns: ["Color", "ΔE00"] as const,
     cmykUnprofiled: "CMYK (unprofiled)",
