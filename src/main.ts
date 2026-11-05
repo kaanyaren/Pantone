@@ -5,6 +5,7 @@ import { searchColors } from "./search.ts";
 import { DICTIONARY, getStoredLang, setStoredLang, type Lang } from "./i18n.ts";
 import {
   formatCount,
+  primaryOf,
   renderCandidates,
   renderDataError,
   renderEmptyState,
@@ -562,7 +563,7 @@ function updateStatus(): void {
   );
   let closest: { meta: SystemMeta; match: Match } | null = null;
   for (const system of visible) {
-    const best = system.matches[0];
+    const best = primaryOf(system);
     if (!best) continue;
     if (!closest || best.deltaE < closest.match.deltaE) {
       closest = { meta: system.meta, match: best };
@@ -1125,6 +1126,21 @@ copyLinkButton.addEventListener("click", () => {
 });
 
 /* ---------- boot ---------- */
+
+function openToleranceNote(): void {
+  const note = document.getElementById("tolerance-note") as HTMLDetailsElement | null;
+  if (note) note.open = true;
+}
+
+document.addEventListener("click", (event) => {
+  const anchor = (event.target as Element | null)?.closest?.('a[href="#tolerance-note"]');
+  if (anchor) openToleranceNote();
+});
+
+window.addEventListener("hashchange", () => {
+  if (window.location.hash === "#tolerance-note") openToleranceNote();
+});
+if (window.location.hash === "#tolerance-note") openToleranceNote();
 
 applyLanguage(currentLang);
 syncPickerHex("#C8102E");

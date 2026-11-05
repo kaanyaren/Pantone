@@ -15,6 +15,11 @@ export interface SystemResult {
   noClose: boolean;
 }
 
+/** Displayed card primary: same-code sibling wins, noClose yields null. */
+export function primaryOf(sys: SystemResult): Match | null {
+  return sys.sameCode ?? (sys.noClose ? null : (sys.matches[0] ?? null));
+}
+
 export interface ActiveComparison {
   meta: SystemMeta;
   match: Match;
@@ -313,8 +318,9 @@ export function renderInspector(
     pin.dataset.systemId = sys.meta.id;
     pin.setAttribute(
       "aria-label",
-      `${sys.meta.label}: ${primary.row.code}, ΔE00 ${formatDelta(primary.deltaE)}`,
+      `${sys.meta.label}: ${primary.row.code}, ΔE00 ${formatDelta(primary.deltaE)} · ${band.text}`,
     );
+    pin.title = band.text;
     if (target?.meta.id === sys.meta.id) pin.setAttribute("aria-current", "true");
     pin.append(
       el("span", "chip-lib mono", sys.meta.short),
@@ -386,7 +392,7 @@ function renderRow(
   const tr = el("tr", `result-row${isSelected ? " is-inspected" : ""}${rank === 1 ? " is-lead" : ""}${rank <= 3 ? " is-top" : ""}`);
   tr.dataset.systemId = system.meta.id;
   const best = system.matches[0] ?? null;
-  const primary = system.sameCode ?? (system.noClose ? null : best);
+  const primary = primaryOf(system);
   if (!primary) tr.classList.add("is-none");
 
   const tdHead = el("td", "cell-head");
@@ -406,13 +412,10 @@ function renderRow(
     headMain.append(el("span", "head-name", secondary));
   }
   if (primary) {
-    headMain.append(
-      el(
-        "span",
-        "row-recipe mono",
-        `RGB ${rgbText(primary.row.hex)} · CMYK ${cmykText(primary.row.hex)}`,
-      ),
-    );
+    const recipeText = `RGB ${rgbText(primary.row.hex)} · CMYK ${cmykText(primary.row.hex)}`;
+    const recipe = el("span", "row-recipe mono", recipeText);
+    recipe.title = recipeText;
+    headMain.append(recipe);
     if (system.sameCode && !system.sameCodeIsInput) {
       headMain.append(el("span", "row-note", t.sameCodeDifferentSubstrate));
     }
@@ -451,7 +454,7 @@ function renderRow(
     const copyLabel = formatRowLabel(primary.row, system.meta.label);
     const copy = el("button", "card-copy", t.copyCardButton);
     copy.type = "button";
-    copy.dataset.copy = copyLabel;
+    copy.dataset.copy = `${copyLabel} · ${primary.row.hex.toUpperCase()}`;
     copy.dataset.copyLabel = copyLabel;
     copy.setAttribute("aria-label", t.copyCardAria(copyLabel));
     copy.title = t.copyCardTitle;
@@ -493,7 +496,7 @@ export function renderResults(
   const t = DICTIONARY[lang];
   const fragment = document.createDocumentFragment();
   const primaryDelta = (sys: SystemResult): number =>
-    sys.sameCode?.deltaE ?? sys.matches[0]?.deltaE ?? Number.POSITIVE_INFINITY;
+    primaryOf(sys)?.deltaE ?? Number.POSITIVE_INFINITY;
   const globalOrder = view.systems
     .slice()
     .sort((a, b) => primaryDelta(a) - primaryDelta(b));
@@ -710,7 +713,7 @@ export function resultsToTsv(view: ResultsView, lang: Lang = "tr"): string {
       : "Sistem\tKod\tAd\tHex\tRGB\tCMYK\tDeltaE00\tAralık";
   const lines = [header];
   for (const system of view.systems) {
-    const primary = system.sameCode ?? (system.noClose ? null : system.matches[0]);
+    const primary = primaryOf(system);
     if (!primary) {
       lines.push([system.meta.label, "", "", "", "", "", "", t.deltaBands.noClose].join("\t"));
       continue;
