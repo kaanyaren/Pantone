@@ -33,6 +33,9 @@ export interface Translations {
   convertAria: (label: string, code: string) => string;
   copyCodeAria: (code: string) => string;
   copyCodeTitle: string;
+  copyCardButton: string;
+  copyCardAria: (label: string) => string;
+  copyCardTitle: string;
   copiedAnnouncement: (code: string) => string;
   coordCopyAria: (label: string, value: string) => string;
   deltaBands: {
@@ -112,6 +115,9 @@ export const DICTIONARY: Record<Lang, Translations> = {
     convertAria: (label, code) => `Dönüştür: ${label} ${code}`,
     copyCodeAria: (code) => `Kodu kopyala: ${code}`,
     copyCodeTitle: "Kodu kopyala",
+    copyCardButton: "Kopyala",
+    copyCardAria: (label) => `Kopyala: ${label}`,
+    copyCardTitle: "Adı ve kodu kopyala",
     copiedAnnouncement: (code) => `${code} kopyalandı`,
     coordCopyAria: (label, value) => `${label} ${value} değerini kopyala`,
     deltaBands: {
@@ -198,6 +204,9 @@ export const DICTIONARY: Record<Lang, Translations> = {
     convertAria: (label, code) => `Convert: ${label} ${code}`,
     copyCodeAria: (code) => `Copy code: ${code}`,
     copyCodeTitle: "Copy code",
+    copyCardButton: "Copy",
+    copyCardAria: (label) => `Copy: ${label}`,
+    copyCardTitle: "Copy name and code",
     copiedAnnouncement: (code) => `${code} copied`,
     coordCopyAria: (label, value) => `Copy ${label} ${value}`,
     deltaBands: {

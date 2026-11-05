@@ -590,12 +590,14 @@ function applyColour(hex: string, inputLabel: string, exactRow: ColorRow | null)
     });
   }
 
-  const familyRank: Record<SystemMeta["family"], number> = {
-    madeira: 0,
-    durak: 1,
-    pantone: 2,
-  };
-  systems.sort((a, b) => familyRank[a.meta.family] - familyRank[b.meta.family]);
+  // Rank every library by the distance of the row that will be shown on its card.
+  const systemDelta = (system: SystemResult): number =>
+    system.sameCode?.deltaE ?? system.matches[0]?.deltaE ?? Number.POSITIVE_INFINITY;
+  systems.sort(
+    (a, b) =>
+      systemDelta(a) - systemDelta(b) ||
+      a.meta.id.localeCompare(b.meta.id, "en"),
+  );
 
   let closest: ResultsView["closest"] = null;
   let closestCross: ResultsView["closest"] = null;
@@ -871,8 +873,9 @@ function flashElement(el: HTMLElement, duration = 1200): void {
 }
 
 function flashButton(button: HTMLButtonElement): void {
-  const isCoord = button.classList.contains("coord-cell");
-  if (isCoord) {
+  const isStateOnly =
+    button.classList.contains("coord-cell") || button.classList.contains("card-copy");
+  if (isStateOnly) {
     flashElement(button, 1500);
   } else {
     const original = button.dataset.originalLabel ?? button.textContent ?? "";

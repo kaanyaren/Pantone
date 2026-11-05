@@ -1264,12 +1264,55 @@ h2 {
 
 .head-name {
   display: block;
+  flex: 1 1 auto;
+  min-width: 0;
   overflow: hidden;
-  margin-top: 2px;
   color: var(--color-muted);
   font-size: var(--text-sm);
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.card-copy {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  height: 26px;
+  padding: 0 8px;
+  border: var(--rule) solid var(--color-rule);
+  border-radius: var(--radius-sm);
+  background: var(--color-paper);
+  color: var(--color-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  white-space: nowrap;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+
+.card-copy:hover {
+  border-color: var(--color-rule-2);
+  background: var(--color-paper-3);
+  color: var(--color-ink);
+}
+
+.card-copy:active {
+  transform: translateY(1px);
+}
+
+.card-copy:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 1px;
+}
+
+.card-copy[data-state="success"] {
+  border-color: var(--color-success);
+  background: var(--color-exact-bg);
+  color: var(--color-success);
 }
 
 .row-title {
@@ -1286,8 +1329,8 @@ h2 {
   display: inline-grid;
   flex: none;
   grid-template-columns: repeat(2, 1fr);
-  width: 28px;
-  height: 20px;
+  width: 36px;
+  height: 36px;
   overflow: hidden;
   border: var(--rule) solid var(--color-rule-2);
   border-radius: var(--radius-sm);
@@ -1396,8 +1439,8 @@ h2 {
 
 /* nearest disclosure */
 
-.cell-head .nearest {
-  margin-top: var(--space-1);
+.card-foot .nearest {
+  margin-top: 0;
 }
 
 .nearest-summary {
@@ -1853,6 +1896,10 @@ h2 {
     padding-top: var(--space-2);
   }
 
+  .result-table tbody:has(.nearest[open]) {
+    align-items: start;
+  }
+
   .result-row {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
@@ -2078,7 +2125,35 @@ h2 {
 }
 
 .result-table td.cell-head {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding-right: 0;
+}
+
+.card-head-main {
+  min-width: 0;
+  min-height: 3rem;
   padding-right: 7.5rem;
+}
+
+.card-foot {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: var(--space-2);
+  margin-top: auto;
+  padding-top: var(--space-2);
+  border-top: var(--rule) solid var(--color-rule);
+}
+
+.card-actions {
+  display: flex;
+  grid-column: 2;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: var(--space-2);
 }
 
 .result-table td.cell-de {
@@ -2161,7 +2236,16 @@ h2 {
   }
 
   .result-table td.cell-head {
+    padding-right: 0;
+  }
+
+  .card-head-main {
     padding-right: 6.75rem;
+  }
+
+  .dual-swatch {
+    width: 32px;
+    height: 32px;
   }
 
   .head-code {
@@ -2186,6 +2270,10 @@ h2 {
   }
 
   .result-table td.cell-head {
+    padding-right: 0;
+  }
+
+  .card-head-main {
     padding-right: 0;
   }
 
@@ -2227,6 +2315,10 @@ h2 {
     min-height: 44px;
   }
 
+  .card-copy {
+    min-height: 44px;
+  }
+
   .result-row {
     min-height: 6.75rem;
   }
@@ -2260,7 +2352,8 @@ h2 {
   .tolerance-chip,
   .input-clear,
   .suggestion,
-  .card-convert {
+  .card-convert,
+  .card-copy {
     border: 1px solid CanvasText;
   }
 

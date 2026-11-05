@@ -139,6 +139,19 @@ export function formatRowCode(row: ColorRow): string {
   }
 }
 
+/** Paste-ready spec label, e.g. "Pantone 186 C" or "Madeira Polyneon 40 1637". */
+export function formatRowLabel(row: ColorRow, systemLabel: string): string {
+  switch (row.system) {
+    case "C":
+    case "U":
+    case "TCX":
+    case "TPX":
+      return `Pantone ${row.code} ${row.system}`;
+    default:
+      return `${systemLabel.trim()} ${row.code}`;
+  }
+}
+
 export function matchesFilter(id: SystemId, filter: LibraryFilter): boolean {
   switch (filter) {
     case "all":
@@ -409,20 +422,22 @@ function renderRow(
     headCode.title = t.copyCodeTitle;
   }
   headTitle.append(headCode);
-  tdHead.append(headTitle);
+
+  const headMain = el("div", "card-head-main");
+  headMain.append(headTitle);
 
   const secondary = primary ? secondaryName(primary.row, system.meta.short) : "";
   if (secondary) {
-    tdHead.append(el("span", "head-name", secondary));
+    headMain.append(el("span", "head-name", secondary));
   }
   if (primary) {
     if (system.sameCode && !system.sameCodeIsInput) {
-      tdHead.append(el("span", "row-note", t.sameCodeDifferentSubstrate));
+      headMain.append(el("span", "row-note", t.sameCodeDifferentSubstrate));
     }
   } else {
-    tdHead.append(el("span", "row-title", t.noCloseMatchHeading));
+    headMain.append(el("span", "row-title", t.noCloseMatchHeading));
     if (best) {
-      tdHead.append(
+      headMain.append(
         el(
           "span",
           "row-values mono",
@@ -431,8 +446,38 @@ function renderRow(
       );
     }
   }
+  tdHead.append(headMain);
+
+  const foot = el("div", "card-foot");
   if (system.matches.length > 1) {
-    tdHead.append(renderNearest(system.meta, system.matches, onInspect, onPickRow, lang));
+    foot.append(renderNearest(system.meta, system.matches, onInspect, onPickRow, lang));
+  }
+
+  const actions = el("div", "card-actions");
+  if (primary) {
+    const copyLabel = formatRowLabel(primary.row, system.meta.label);
+    const copy = el("button", "card-copy", t.copyCardButton);
+    copy.type = "button";
+    copy.dataset.copy = copyLabel;
+    copy.dataset.copyLabel = copyLabel;
+    copy.setAttribute("aria-label", t.copyCardAria(copyLabel));
+    copy.title = t.copyCardTitle;
+    actions.append(copy);
+
+    const convert = el("button", "card-convert", t.convert);
+    convert.type = "button";
+    convert.setAttribute("aria-label", t.convertAria(system.meta.label, primary.row.code));
+    convert.addEventListener("click", (event) => {
+      event.stopPropagation();
+      onPickRow(primary.row);
+    });
+    actions.append(convert);
+  }
+  if (actions.childElementCount > 0) {
+    foot.append(actions);
+  }
+  if (foot.childElementCount > 0) {
+    tdHead.append(foot);
   }
 
   const tdDe = el("td", "cell-de");
@@ -447,16 +492,6 @@ function renderRow(
     el("span", `tone-pill tone-${band.tone}`, band.text),
   );
   tdDe.append(deLine);
-  if (primary) {
-    const convert = el("button", "card-convert", t.convert);
-    convert.type = "button";
-    convert.setAttribute("aria-label", t.convertAria(system.meta.label, primary.row.code));
-    convert.addEventListener("click", (event) => {
-      event.stopPropagation();
-      onPickRow(primary.row);
-    });
-    tdDe.append(convert);
-  }
 
   tr.append(tdHead, tdDe);
   return tr;

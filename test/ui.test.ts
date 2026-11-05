@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { deltaBand, formatRowCode, secondaryName } from "../src/ui.ts";
+import { deltaBand, formatRowCode, formatRowLabel, secondaryName } from "../src/ui.ts";
 import { DICTIONARY } from "../src/i18n.ts";
 import type { ColorRow } from "../src/types.ts";
 
@@ -34,6 +34,31 @@ test("formatRowCode prefixes thread systems and appends pantone suffixes", () =>
   assert.equal(formatRowCode(row("1147", "Classic 1147", "MR")), "Classic 1147");
   assert.equal(formatRowCode(row("00118", "Polysoft 00118", "DPS")), "Polysoft 00118");
   assert.equal(formatRowCode(row("00118", "Visco 00118", "DVS")), "Visco 00118");
+});
+
+test("formatRowLabel builds paste-ready spec labels", () => {
+  assert.equal(formatRowLabel(row("186", "186 C", "C"), "Pantone C"), "Pantone 186 C");
+  assert.equal(formatRowLabel(row("186", "186 U", "U"), "Pantone U"), "Pantone 186 U");
+  assert.equal(
+    formatRowLabel(row("19-4052", "Classic Blue", "TCX"), "Pantone TCX"),
+    "Pantone 19-4052 TCX",
+  );
+  assert.equal(
+    formatRowLabel(row("1610", "Celestial Blue", "MP"), "Madeira Polyneon 40"),
+    "Madeira Polyneon 40 1610",
+  );
+  assert.equal(
+    formatRowLabel(row("1147", "Foxy Red", "MR"), "Madeira Classic 40"),
+    "Madeira Classic 40 1147",
+  );
+  assert.equal(
+    formatRowLabel(row("00118", "Polysoft 00118", "DPS"), "Durak Polysoft"),
+    "Durak Polysoft 00118",
+  );
+  assert.equal(
+    formatRowLabel(row("00118", "Visco 00118", "DVS"), "Durak Visco"),
+    "Durak Visco 00118",
+  );
 });
 
 test("deltaBand supports TR and EN localized band labels", () => {
