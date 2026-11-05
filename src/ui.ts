@@ -261,7 +261,7 @@ export function renderInspector(
       ),
     );
     if (onTogglePin) {
-      const pinButton = el("button", `seam-pin${target.pinned ? " is-on" : ""}`, target.pinned ? t.unpin : t.pin);
+      const pinButton = el("button", `seam-pin${target.pinned ? " is-on" : ""}`, target.pinned ? `✓ ${t.unpin}` : t.pin);
       pinButton.type = "button";
       pinButton.setAttribute("aria-pressed", target.pinned ? "true" : "false");
       pinButton.addEventListener("click", () => onTogglePin());

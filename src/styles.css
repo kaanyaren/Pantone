@@ -1164,6 +1164,26 @@ h2 {
   padding-top: var(--space-3);
 }
 
+.copy-toast {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: var(--space-1) var(--space-2);
+  overflow: hidden;
+  border: var(--rule) solid var(--color-rule);
+  border-radius: var(--radius-sm);
+  background: var(--color-paper-2);
+  color: var(--color-muted);
+  font-size: var(--text-xs);
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.copy-toast:empty {
+  display: none;
+}
+
 /* matrix table */
 
 .result-table {
@@ -1530,20 +1550,22 @@ h2 {
 
 .nearest-requery {
   justify-self: end;
-  padding: var(--space-1) var(--space-2);
-  border: var(--rule) solid var(--color-rule);
+  margin-top: var(--space-2);
+  padding: var(--space-1);
+  border: 0;
   border-radius: var(--radius-sm);
   background: transparent;
   color: var(--color-muted);
   font-size: var(--text-xs);
-  font-weight: 600;
-  line-height: 1;
+  font-weight: 400;
+  line-height: 1.4;
+  text-decoration: underline;
+  text-underline-offset: 3px;
   white-space: nowrap;
 }
 
 .nearest-requery:hover {
-  border-color: var(--color-rule-2);
-  background: var(--color-paper-2);
+  background: transparent;
   color: var(--color-ink);
 }
 
@@ -2299,6 +2321,7 @@ h2 {
   .chip,
   .filter-pill,
   .tolerance-chip,
+  .nearest-requery,
   .suggestion {
     min-height: 44px;
   }

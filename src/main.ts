@@ -55,6 +55,7 @@ const resultStatus = byId<HTMLParagraphElement>("result-status");
 const copyAllButton = byId<HTMLButtonElement>("copy-all");
 const copyLinkButton = byId<HTMLButtonElement>("copy-link");
 const copyStatus = byId<HTMLParagraphElement>("copy-status");
+const copyToast = byId<HTMLElement>("copy-toast");
 const librariesBody = byId<HTMLDivElement>("libraries-body");
 const footData = byId<HTMLElement>("foot-data");
 const footBuild = byId<HTMLElement>("foot-build");
@@ -856,6 +857,15 @@ function handleSubmit(
 /* ---------- clipboard ---------- */
 
 const copyTimers = new WeakMap<HTMLElement, number>();
+let copyToastTimer = 0;
+
+function showCopyToast(message: string): void {
+  copyToast.textContent = message;
+  window.clearTimeout(copyToastTimer);
+  copyToastTimer = window.setTimeout(() => {
+    copyToast.textContent = "";
+  }, 2500);
+}
 
 function fallbackCopy(text: string): boolean {
   const area = document.createElement("textarea");
@@ -928,7 +938,9 @@ async function copyText(
     ok = fallbackCopy(text);
   }
   if (ok) {
-    announce(DICTIONARY[currentLang].copiedLabelToast(label));
+    const message = DICTIONARY[currentLang].copiedLabelToast(label);
+    announce(message);
+    showCopyToast(message);
     if (element) {
       if (element instanceof HTMLButtonElement) flashButton(element);
       else flashElement(element);
