@@ -44,6 +44,7 @@ const queryHelp = byId<HTMLParagraphElement>("query-help");
 const queryError = byId<HTMLParagraphElement>("query-error");
 const resultsSection = byId<HTMLElement>("results");
 const inspectorBody = byId<HTMLDivElement>("inspector-body");
+const inspectorRail = byId<HTMLDetailsElement>("inspector-rail");
 const loupeMode = byId<HTMLElement>("loupe-mode");
 const resultBody = byId<HTMLDivElement>("result-body");
 const resultStatus = byId<HTMLParagraphElement>("result-status");
@@ -734,6 +735,9 @@ document.addEventListener("keydown", (event) => {
 
 syncPickerHex("#C8102E");
 setBusy(true);
+if (window.matchMedia("(max-width: 56rem)").matches) {
+  inspectorRail.open = false;
+}
 requestAnimationFrame(() => {
   void loadData();
 });
