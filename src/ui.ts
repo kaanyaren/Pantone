@@ -176,6 +176,7 @@ export function renderInspector(
   active: ActiveComparison | null,
   onSelectSystem: (systemId: SystemId) => void,
   lang: Lang = "tr",
+  onTogglePin?: () => void,
 ): void {
   const t = DICTIONARY[lang];
   const fragment = document.createDocumentFragment();
@@ -245,6 +246,13 @@ export function renderInspector(
         `ΔE00 ${formatDelta(target.match.deltaE)} · ${band.text}`,
       ),
     );
+    if (onTogglePin) {
+      const pinButton = el("button", `seam-pin${target.pinned ? " is-on" : ""}`, target.pinned ? t.unpin : t.pin);
+      pinButton.type = "button";
+      pinButton.setAttribute("aria-pressed", target.pinned ? "true" : "false");
+      pinButton.addEventListener("click", () => onTogglePin());
+      seamBar.append(pinButton);
+    }
     loupe.append(seamBar);
   }
 
@@ -391,12 +399,11 @@ function renderRow(
 
   const headCode = el("span", "head-code mono", primary ? primary.row.code : "—");
   if (primary) {
-    const fullCode = formatRowCode(primary.row);
     headCode.dataset.copyable = "true";
-    headCode.dataset.copyCode = fullCode;
+    headCode.dataset.copyCode = primary.row.code;
     headCode.setAttribute("role", "button");
     headCode.setAttribute("tabindex", "0");
-    headCode.setAttribute("aria-label", t.copyCodeAria(fullCode));
+    headCode.setAttribute("aria-label", t.copyCodeAria(primary.row.code));
     headCode.title = t.copyCodeTitle;
   }
   headTitle.append(headCode);
@@ -409,6 +416,13 @@ function renderRow(
     headMain.append(el("span", "head-name", secondary));
   }
   if (primary) {
+    headMain.append(
+      el(
+        "span",
+        "row-recipe mono",
+        `RGB ${rgbText(primary.row.hex)} · CMYK ${cmykText(primary.row.hex)}`,
+      ),
+    );
     if (system.sameCode && !system.sameCodeIsInput) {
       headMain.append(el("span", "row-note", t.sameCodeDifferentSubstrate));
     }
@@ -488,12 +502,12 @@ export function renderResults(
   const fragment = document.createDocumentFragment();
   const primaryDelta = (sys: SystemResult): number =>
     sys.sameCode?.deltaE ?? sys.matches[0]?.deltaE ?? Number.POSITIVE_INFINITY;
-  const visibleSystems = view.systems
-    .filter((sys) => matchesFilter(sys.meta.id, filter))
+  const globalOrder = view.systems
     .slice()
     .sort((a, b) => primaryDelta(a) - primaryDelta(b));
-  const rankOf = new Map<string, number>();
-  visibleSystems.forEach((sys, index) => rankOf.set(sys.meta.id, index + 1));
+  const globalRank = new Map<string, number>();
+  globalOrder.forEach((sys, index) => globalRank.set(sys.meta.id, index + 1));
+  const visibleSystems = globalOrder.filter((sys) => matchesFilter(sys.meta.id, filter));
 
   const table = el("table", "result-table");
   table.append(
@@ -510,30 +524,14 @@ export function renderResults(
   thead.append(headRow);
   table.append(thead);
 
-  const kindOf = (sys: SystemResult): "pantone" | "threads" =>
-    sys.meta.family === "pantone" ? "pantone" : "threads";
-  const kindLabel = (kind: "pantone" | "threads"): string =>
-    kind === "pantone" ? t.groupPantone : t.groupThreads;
-
   const tbody = el("tbody", "matrix-flat");
-  let lastKind: "pantone" | "threads" | null = null;
   for (const system of visibleSystems) {
-    const kind = kindOf(system);
-    if (kind !== lastKind) {
-      lastKind = kind;
-      const divider = el("tr", `matrix-divider is-${kind}`);
-      const title = el("th", "matrix-divider-title", kindLabel(kind));
-      title.scope = "rowgroup";
-      title.colSpan = 2;
-      divider.append(title);
-      tbody.append(divider);
-    }
     tbody.append(
       renderRow(
         view.inputHex,
         system,
         selectedSystemId === system.meta.id,
-        rankOf.get(system.meta.id) ?? 0,
+        globalRank.get(system.meta.id) ?? 0,
         onInspect,
         onPickRow,
         lang,

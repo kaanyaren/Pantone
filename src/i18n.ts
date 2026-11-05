@@ -22,6 +22,8 @@ export interface Translations {
   loupeInput: string;
   loupeCompare: string;
   loupePinned: string;
+  pin: string;
+  unpin: string;
   loupeCompareEmpty: string;
   loupeNoTarget: string;
   matrixTitle: string;
@@ -74,8 +76,8 @@ export interface Translations {
   retry: string;
   colorsCount: (count: string) => string;
   statusNoLibraries: string;
-  statusNoCloseMatch: (count: number, nearest: string, delta: string) => string;
-  statusClosest: (count: number, nearest: string, delta: string) => string;
+  statusNoCloseMatch: (shown: number, total: number, nearest: string, delta: string) => string;
+  statusClosest: (shown: number, total: number, nearest: string, delta: string) => string;
   invalidHexError: string;
   rgbRangeError: string;
   cmykRangeError: string;
@@ -123,6 +125,8 @@ export const DICTIONARY: Record<Lang, Translations> = {
     loupeInput: "Girdi numunesi",
     loupeCompare: "Karşılaştırma",
     loupePinned: "Sabit",
+    pin: "Sabitle",
+    unpin: "Sabiti kaldır",
     loupeCompareEmpty: "Yalnızca giriş",
     loupeNoTarget: "hedef yok",
     matrixTitle: "Çapraz referans matrisi",
@@ -182,10 +186,10 @@ export const DICTIONARY: Record<Lang, Translations> = {
     retry: "Yeniden dene",
     colorsCount: (count) => `${count} renk`,
     statusNoLibraries: "Bu filtrede kütüphane yok.",
-    statusNoCloseMatch: (count, nearest, delta) =>
-      `${count} kütüphane · Yakın eşleşme yok · En yakın aday: ${nearest} · ΔE00 ${delta}`,
-    statusClosest: (count, nearest, delta) =>
-      `${count} kütüphane · En yakın: ${nearest} · ΔE00 ${delta}`,
+    statusNoCloseMatch: (shown, total, nearest, delta) =>
+      `${shown}/${total} kütüphane · Yakın eşleşme yok · En yakın aday: ${nearest} · ΔE00 ${delta}`,
+    statusClosest: (shown, total, nearest, delta) =>
+      `${shown}/${total} kütüphane · En yakın: ${nearest} · ΔE00 ${delta}`,
     invalidHexError: "# sonrasında hex 3 veya 6 karakter olmalı.",
     rgbRangeError: "RGB kanalları 0–255 arasında olmalı.",
     cmykRangeError: "CMYK kanalları 0–100 arasında olmalı.",
@@ -236,6 +240,8 @@ export const DICTIONARY: Record<Lang, Translations> = {
     loupeInput: "Input specimen",
     loupeCompare: "Comparison",
     loupePinned: "Pinned",
+    pin: "Pin",
+    unpin: "Unpin",
     loupeCompareEmpty: "Input only",
     loupeNoTarget: "no target",
     matrixTitle: "Cross-reference matrix",
@@ -295,10 +301,10 @@ export const DICTIONARY: Record<Lang, Translations> = {
     retry: "Retry",
     colorsCount: (count) => `${count} colors`,
     statusNoLibraries: "No libraries in this filter.",
-    statusNoCloseMatch: (count, nearest, delta) =>
-      `${count} libraries · No close match · Nearest candidate: ${nearest} · ΔE00 ${delta}`,
-    statusClosest: (count, nearest, delta) =>
-      `${count} libraries · Nearest: ${nearest} · ΔE00 ${delta}`,
+    statusNoCloseMatch: (shown, total, nearest, delta) =>
+      `${shown}/${total} libraries · No close match · Nearest candidate: ${nearest} · ΔE00 ${delta}`,
+    statusClosest: (shown, total, nearest, delta) =>
+      `${shown}/${total} libraries · Nearest: ${nearest} · ΔE00 ${delta}`,
     invalidHexError: "Hex value after # must be 3 or 6 characters.",
     rgbRangeError: "RGB channels must be between 0 and 255.",
     cmykRangeError: "CMYK channels must be between 0 and 100.",

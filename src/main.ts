@@ -446,7 +446,34 @@ function chooseSuggestion(index: number): void {
 
 /* ---------- results rendering ---------- */
 
+function togglePin(): void {
+  if (!activeComparison || !currentView) return;
+  activeComparison = {
+    meta: activeComparison.meta,
+    match: activeComparison.match,
+    pinned: !activeComparison.pinned,
+  };
+  renderInspector(
+    inspectorBody,
+    loupeMode,
+    currentView,
+    activeComparison,
+    selectSystemInLoupe,
+    currentLang,
+    togglePin,
+  );
+  highlightSelectedRow(activeComparison.meta.id);
+}
+
 function handleInspect(meta: SystemMeta, match: Match, pinned: boolean): void {
+  const sameTarget =
+    activeComparison !== null &&
+    activeComparison.meta.id === meta.id &&
+    activeComparison.match.row.code === match.row.code;
+  if (sameTarget && pinned && activeComparison?.pinned) {
+    togglePin();
+    return;
+  }
   if (activeComparison?.pinned && !pinned) return;
   activeComparison = { meta, match, pinned };
   if (!currentView) return;
@@ -457,6 +484,7 @@ function handleInspect(meta: SystemMeta, match: Match, pinned: boolean): void {
     activeComparison,
     selectSystemInLoupe,
     currentLang,
+    togglePin,
   );
   highlightSelectedRow(meta.id);
 }
@@ -482,6 +510,7 @@ function selectSystemInLoupe(systemId: SystemId): void {
     activeComparison,
     selectSystemInLoupe,
     currentLang,
+    togglePin,
   );
   highlightSelectedRow(systemId);
   const pinEl = inspectorBody.querySelector<HTMLButtonElement>(
@@ -501,6 +530,7 @@ function refreshWorkspaceView(): void {
     activeComparison,
     selectSystemInLoupe,
     currentLang,
+    togglePin,
   );
   renderResults(
     resultBody,
@@ -545,8 +575,8 @@ function updateStatus(): void {
   const deltaStr = closest.match.deltaE.toFixed(2);
   resultStatus.textContent =
     closest.match.deltaE > 5
-      ? t.statusNoCloseMatch(visible.length, nearest, deltaStr)
-      : t.statusClosest(visible.length, nearest, deltaStr);
+      ? t.statusNoCloseMatch(visible.length, currentView.systems.length, nearest, deltaStr)
+      : t.statusClosest(visible.length, currentView.systems.length, nearest, deltaStr);
 }
 
 function applyColour(hex: string, inputLabel: string, exactRow: ColorRow | null): void {
