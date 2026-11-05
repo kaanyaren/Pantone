@@ -1011,53 +1011,20 @@ h2 {
   color: var(--color-muted);
 }
 
-.system-label {
-  display: block;
-  color: var(--color-ink);
-  font-size: var(--text-sm);
-  font-weight: 600;
-  line-height: 1.25;
-}
-
-.system-subline {
+.head-title {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  margin-top: var(--space-1);
-}
-
-.system-short {
-  padding: 0 var(--space-1);
-  border: var(--rule) solid var(--color-rule-2);
-  border-radius: var(--radius-sm);
-  background: var(--color-paper-2);
-  color: var(--color-ink-2);
-  font-size: var(--text-xs);
-}
-
-.system-prov {
-  color: var(--color-muted);
-  font-size: var(--text-xs);
-}
-
-.sys-line {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0 var(--space-2);
   min-width: 0;
-  font-size: var(--text-md);
-}
-
-.code-badge {
-  display: inline-block;
-  color: var(--color-ink);
-  font-size: var(--text-sm);
+  font-size: var(--text-lg);
   font-weight: 600;
+  line-height: 1.3;
 }
 
-.cell-match {
-  min-width: 0;
+.head-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .row-title {
@@ -1068,13 +1035,6 @@ h2 {
   font-size: var(--text-sm);
   font-weight: 600;
   line-height: 1.3;
-}
-
-.row-name-text {
-  overflow: hidden;
-  font-size: var(--text-md);
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .dual-swatch {
@@ -1114,11 +1074,6 @@ h2 {
   color: var(--color-muted);
   font-size: var(--text-xs);
   line-height: 1.4;
-}
-
-.cell-hex {
-  font-size: var(--text-xs) !important;
-  font-weight: 600;
 }
 
 .de-value {
@@ -1196,8 +1151,8 @@ h2 {
 
 /* nearest disclosure */
 
-.cell-match .nearest {
-  margin-top: var(--space-2);
+.cell-head .nearest {
+  margin-top: var(--space-1);
 }
 
 .nearest-summary {
@@ -1649,7 +1604,7 @@ h2 {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--space-2);
-    align-items: start;
+    align-items: stretch;
     padding-top: var(--space-2);
   }
 
@@ -1690,8 +1645,16 @@ h2 {
     margin-bottom: 0;
   }
 
-  .result-table .cell-match .nearest {
-    margin-top: var(--space-1);
+  .result-table td.cell-head {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .result-table td.cell-head::before {
+    display: none;
+  }
+
+  .result-table td.cell-head > * {
+    grid-column: 1;
   }
 }
 
@@ -1756,6 +1719,18 @@ h2 {
 
   .result-table td > * {
     grid-column: 2;
+  }
+
+  .result-table td.cell-head {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .result-table td.cell-head::before {
+    display: none;
+  }
+
+  .result-table td.cell-head > * {
+    grid-column: 1;
   }
 
   .result-table .de-value {

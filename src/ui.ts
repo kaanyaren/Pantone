@@ -77,12 +77,6 @@ function labText(hex: string): string {
   return `${lab.l.toFixed(1)} ${lab.a.toFixed(1)} ${lab.b.toFixed(1)}`;
 }
 
-const PROVENANCE_LABELS: Record<SystemMeta["provenance"], string> = {
-  community: "topluluk",
-  manufacturer: "üretici",
-  legacy: "eski",
-};
-
 const LICENSE_LABELS: Record<string, string> = {
   "No license file": "Lisans dosyası yok",
   "manufacturer permission (not public)": "üretici izni (kamuya açık değil)",
@@ -241,7 +235,7 @@ export function renderInspector(
 
 /* ---------- right pane: 8-library matrix ---------- */
 
-const COLUMNS = ["Kütüphane", "Numune", "ΔE00"] as const;
+const COLUMNS = ["Renk", "ΔE00"] as const;
 
 function renderThreadSummary(
   view: ResultsView,
@@ -335,31 +329,26 @@ function renderRow(
     tr.addEventListener("focusin", () => onInspect(system.meta, inspectTarget, false));
   }
 
-  const tdSystem = el("td", "cell-system");
-  tdSystem.dataset.label = "Kütüphane";
-  const sysLine = el("span", "sys-line");
-  sysLine.append(
-    el("span", "system-label", system.meta.label),
-    el("span", "system-short mono", system.meta.short),
-    el("span", "system-prov", PROVENANCE_LABELS[system.meta.provenance]),
+  const tdHead = el("td", "cell-head");
+  tdHead.dataset.label = "Renk";
+  const headTitle = el("div", "head-title");
+  headTitle.append(dualSwatch(inputHex, primary ? primary.row.hex : (best ? best.row.hex : inputHex)));
+  headTitle.append(
+    el(
+      "span",
+      "head-text",
+      primary ? `${system.meta.label} - ${primary.row.name}` : system.meta.label,
+    ),
   );
-  tdSystem.append(sysLine);
-  tr.append(tdSystem);
-
-  const tdMatch = el("td", "cell-match");
-  tdMatch.dataset.label = "Numune";
+  tdHead.append(headTitle);
   if (primary) {
-    const title = el("div", "row-title");
-    title.append(dualSwatch(inputHex, primary.row.hex));
-    title.append(el("span", "row-name-text", primary.row.name));
-    tdMatch.append(title);
     if (system.sameCode && !system.sameCodeIsInput) {
-      tdMatch.append(el("span", "row-note", "aynı kod · farklı zemin"));
+      tdHead.append(el("span", "row-note", "aynı kod · farklı zemin"));
     }
   } else {
-    tdMatch.append(el("span", "row-title", "Bu kütüphanede yakın eşleşme yok (ΔE00 > 5)"));
+    tdHead.append(el("span", "row-title", "Bu kütüphanede yakın eşleşme yok (ΔE00 > 5)"));
     if (best) {
-      tdMatch.append(
+      tdHead.append(
         el(
           "span",
           "row-values mono",
@@ -369,7 +358,7 @@ function renderRow(
     }
   }
   if (system.matches.length > 1) {
-    tdMatch.append(renderNearest(system.meta, system.matches, onInspect, onPickRow));
+    tdHead.append(renderNearest(system.meta, system.matches, onInspect, onPickRow));
   }
 
   const tdDe = el("td", "cell-de");
@@ -384,7 +373,7 @@ function renderRow(
   );
   tdDe.append(deLine);
 
-  tr.append(tdMatch, tdDe);
+  tr.append(tdHead, tdDe);
   return tr;
 }
 

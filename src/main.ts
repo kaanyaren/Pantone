@@ -674,16 +674,6 @@ document.addEventListener("click", (event) => {
   const target = event.target as Element | null;
   if (!target) return;
 
-  const chip = target.closest<HTMLButtonElement>(".chip");
-  if (chip) {
-    const value = chip.dataset.q;
-    if (value) {
-      input.value = value;
-      handleSubmit(value, null, true);
-    }
-    return;
-  }
-
   const filterPill = target.closest<HTMLButtonElement>(".filter-pill");
   if (filterPill) {
     const nextFilter = (filterPill.dataset.filter ?? "all") as LibraryFilter;
