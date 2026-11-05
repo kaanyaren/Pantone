@@ -61,18 +61,21 @@ function toCmyk(values: number[]): CMYK | null {
  * clearly malformed. Rule order follows IMPLEMENTATION_PLAN.md §8.1.
  */
 export function parseQuery(raw: string): Query | null {
-  const input = raw.trim();
+  const input = raw.trim().replace(/^pantone\s+/i, "");
   if (!input) return null;
 
   // 2. #RGB, #RRGGBB, or bare 3/6 character hex.
   // A bare 3-character value made only of digits stays a Pantone code so that
-  // "186" is read as Solid Coated, per rule 7.
+  // "186" is read as Solid Coated, per rule 7. A bare 3-letter value stays
+  // free text ("bee", "cab") so real words win over hex; "#abc" or "f00"
+  // still parse as hex.
   const hexMatch = input.match(HEX_RE);
   if (hexMatch) {
     const value = hexMatch[1] ?? "";
     const isBare = !input.startsWith("#");
     const hasHexLetter = /[a-f]/i.test(value);
-    if (!isBare || value.length === 6 || hasHexLetter) {
+    const bare3HasDigit = value.length === 3 && /\d/.test(value);
+    if (!isBare || value.length === 6 || (hasHexLetter && bare3HasDigit)) {
       return { kind: "hex", hex: expandHex(value) };
     }
   }
@@ -155,8 +158,4 @@ export function parseQuery(raw: string): Query | null {
 
   // 10. Free text, usually a colour name.
   return { kind: "text", text: input };
-}
-
-export function normalizeHex(hex: string): string {
-  return expandHex(hex.replace(/^#/, ""));
 }

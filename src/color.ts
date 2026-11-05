@@ -76,6 +76,9 @@ export function rgbToLab(rgb: RGB): Lab {
 }
 
 export function labToRgb(lab: Lab): RGB {
+  if (![lab.l, lab.a, lab.b].every((value) => Number.isFinite(value))) {
+    return { r: 0, g: 0, b: 0 };
+  }
   const rgb = toSrgb({ mode: "lab", l: lab.l, a: lab.a, b: lab.b });
   return { r: byte(rgb.r * 255), g: byte(rgb.g * 255), b: byte(rgb.b * 255) };
 }
@@ -85,6 +88,9 @@ export function labToRgb(lab: Lab): RGB {
  * Input is CIELAB D50, matching the published Pantone Lab values.
  */
 export function deltaE2000(a: Lab, b: Lab): number {
+  if (![a.l, a.a, a.b, b.l, b.a, b.b].every((value) => Number.isFinite(value))) {
+    return Number.POSITIVE_INFINITY;
+  }
   const rad = Math.PI / 180;
   const pow25to7 = 25 ** 7;
 
@@ -129,7 +135,7 @@ export function deltaE2000(a: Lab, b: Lab): number {
   const cTerm = dCp / sc;
   const hTerm = dHp / sh;
 
-  return Math.sqrt(lTerm ** 2 + cTerm ** 2 + hTerm ** 2 + rt * cTerm * hTerm);
+  return Math.sqrt(Math.max(0, lTerm ** 2 + cTerm ** 2 + hTerm ** 2 + rt * cTerm * hTerm));
 }
 
 function hueAngle(y: number, x: number): number {
@@ -184,8 +190,8 @@ export function cmykToRgb(cmyk: CMYK): RGB {
 }
 
 /**
- * Clamp to the sRGB gamut and report whether anything changed. A parsed hex is
- * already sRGB by construction, so `clipped` only fires for malformed input.
+ * Clamp to the sRGB gamut and report whether anything changed. Parsed hex is
+ * usually in gamut already; out-of-gamut Lab round-trips report clipped=true.
  */
 export function gamutMap(hex: string): { hex: string; clipped: boolean } {
   const rgb = parseHex(hex);
@@ -198,7 +204,7 @@ export function gamutMap(hex: string): { hex: string; clipped: boolean } {
     b: rgb.b / 255,
   };
   const mapped = mapToSrgb(colour);
-  const clipped = !srgbInGamut(colour);
+  const clipped = !srgbInGamut(mapped);
 
   return {
     hex: rgbToHex({ r: mapped.r * 255, g: mapped.g * 255, b: mapped.b * 255 }),

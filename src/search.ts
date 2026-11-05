@@ -181,10 +181,12 @@ function scoreRow(item: IndexedRow, context: SearchContext): number {
  * (default 50). No external search library, no DOM, no fetching.
  */
 export function searchColors(rows: ColorRow[], text: string, limit = DEFAULT_LIMIT): ColorRow[] {
+  if (typeof text !== "string") return [];
   const capped = Number.isFinite(limit) ? Math.max(0, Math.floor(limit)) : DEFAULT_LIMIT;
   if (capped === 0) return [];
 
-  const raw = text.trim();
+  // ponytail: 200-char cap, names run <=80 chars; bounds subsequence cost + URL length.
+  const raw = text.trim().slice(0, 200);
   if (!raw) return [];
 
   const context = buildContext(raw);
