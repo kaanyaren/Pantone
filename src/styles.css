@@ -721,9 +721,17 @@ h2 {
 
 /* left inspector rail */
 
-.inspector-rail {
+.inspector-stack {
+  min-width: 0;
   position: sticky;
   top: var(--space-4);
+}
+
+.inspector-stack .loupe-badge {
+  margin-bottom: var(--space-3);
+}
+
+.inspector-rail {
   padding: var(--space-4);
   border: var(--rule) solid var(--color-rule-2);
   border-radius: var(--radius-panel);
@@ -1959,6 +1967,10 @@ h2 {
 @media (max-width: 68rem) {
   .studio-grid {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .inspector-stack {
+    position: static;
   }
 
   .inspector-rail {

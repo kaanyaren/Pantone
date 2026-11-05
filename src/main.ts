@@ -504,7 +504,7 @@ function selectSystemInLoupe(systemId: SystemId): void {
   if (!sys) return;
   const target = primaryOf(sys);
   if (!target) return;
-  activeComparison = { meta: sys.meta, match: target, pinned: true };
+  activeComparison = { meta: sys.meta, match: target, pinned: false };
   renderInspector(
     inspectorBody,
     loupeMode,
