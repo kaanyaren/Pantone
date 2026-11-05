@@ -1280,7 +1280,7 @@ h2 {
   display: inline-flex;
   flex: none;
   align-items: center;
-  height: 26px;
+  min-height: 32px;
   padding: 0 var(--space-2);
   border: var(--rule) solid var(--color-rule);
   border-radius: var(--radius-sm);

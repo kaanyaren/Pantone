@@ -476,7 +476,6 @@ function handleInspect(meta: SystemMeta, match: Match, pinned: boolean): void {
     togglePin();
     return;
   }
-  if (activeComparison?.pinned && !pinned) return;
   activeComparison = { meta, match, pinned };
   if (!currentView) return;
   renderInspector(
