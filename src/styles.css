@@ -93,7 +93,7 @@ a {
 .skip-link {
   position: fixed;
   top: var(--space-2);
-  left: var(--space-2);
+  inset-inline-start: var(--space-2);
   z-index: 100;
   padding: var(--space-2) var(--space-3);
   background: var(--color-ink);
@@ -157,8 +157,8 @@ a {
 .deck-title {
   min-width: 0;
   margin: 0;
-  padding-left: var(--space-4);
-  border-left: var(--rule) solid var(--color-deck-rule);
+  padding-inline-start: var(--space-4);
+  border-inline-start: var(--rule) solid var(--color-deck-rule);
   color: var(--color-deck-ink);
   font-family: var(--font-display);
   font-size: var(--text-lg);
@@ -323,7 +323,9 @@ a {
   width: 100%;
   min-width: 0;
   height: 44px;
-  padding: 0 2.75rem 0 var(--space-3);
+  padding-block: 0;
+  padding-inline-start: var(--space-3);
+  padding-inline-end: 2.75rem;
   border: var(--rule) solid var(--color-deck-rule);
   border-radius: var(--radius-control);
   outline: 2px solid transparent;
@@ -363,7 +365,7 @@ a {
 
 .input-shortcut {
   position: absolute;
-  right: var(--space-2);
+  inset-inline-end: var(--space-2);
   display: inline-grid;
   place-items: center;
   width: 24px;
@@ -384,7 +386,7 @@ a {
 .input-clear {
   position: absolute;
   top: 50%;
-  right: 4px;
+  inset-inline-end: 4px;
   display: grid;
   place-items: center;
   width: 32px;
@@ -415,8 +417,7 @@ a {
 .suggestions {
   position: absolute;
   top: calc(100% + var(--space-2));
-  right: 0;
-  left: 0;
+  inset-inline: 0;
   z-index: 60;
   max-width: 44rem;
   max-height: 20rem;
@@ -440,7 +441,7 @@ a {
   border-radius: var(--radius-sm);
   background: transparent;
   color: var(--color-deck-ink);
-  text-align: left;
+  text-align: start;
 }
 
 .suggestion:hover,
@@ -451,6 +452,7 @@ a {
 
 .suggestion-code {
   overflow: hidden;
+  min-width: 0;
   font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -458,14 +460,18 @@ a {
 
 .suggestion-name {
   overflow: hidden;
+  min-width: 0;
   color: var(--color-deck-muted);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .suggestion-system {
+  overflow: hidden;
+  min-width: 0;
   color: var(--color-deck-muted);
   font-size: var(--text-xs);
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
@@ -627,6 +633,7 @@ a {
 .feedback-slot {
   display: flex;
   align-items: center;
+  min-width: 0;
   min-height: var(--space-6);
 }
 
@@ -652,7 +659,9 @@ kbd {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
+  min-width: 0;
   margin: 0;
+  overflow-wrap: anywhere;
   color: var(--color-deck-error);
   font-size: var(--text-xs);
   font-weight: 600;
@@ -811,7 +820,7 @@ h2 {
 }
 
 .loupe-caption + .loupe-caption {
-  border-left: var(--rule) solid var(--color-rule);
+  border-inline-start: var(--rule) solid var(--color-rule);
 }
 
 .loupe-tag {
@@ -915,7 +924,7 @@ h2 {
   border-radius: var(--radius-control);
   background: var(--color-paper);
   color: var(--color-ink);
-  text-align: left;
+  text-align: start;
 }
 
 .coord-cell:hover {
@@ -1012,7 +1021,7 @@ h2 {
 }
 
 .chip-de {
-  margin-left: auto;
+  margin-inline-start: auto;
   color: var(--color-muted);
 }
 
@@ -1124,15 +1133,14 @@ h2 {
 .result-table .matrix-divider-title {
   display: block;
   width: 100%;
-  padding: var(--space-2) 0 var(--space-1);
-  border-bottom: var(--rule) solid var(--color-rule-2);
+  padding: var(--space-4) 0 var(--space-1);
   background: var(--color-paper);
   color: var(--color-ink);
   font-family: var(--font-body);
   font-size: var(--text-sm);
   font-weight: 600;
   letter-spacing: 0;
-  text-align: left;
+  text-align: start;
 }
 
 .matrix-flat .matrix-divider:first-child .matrix-divider-title {
@@ -1149,29 +1157,31 @@ h2 {
 
 .result-table th {
   padding: var(--space-2);
-  border-bottom: var(--rule) solid var(--color-rule-2);
   color: var(--color-muted);
   font-size: var(--text-xs);
   font-weight: 600;
-  text-align: left;
+  text-align: start;
   white-space: nowrap;
 }
 
 .result-table td {
   padding: var(--space-2);
-  border-bottom: var(--rule) solid var(--color-rule);
   vertical-align: top;
   font-size: var(--text-sm);
 }
 
 .result-row {
+  --row-base: color-mix(in oklch, var(--color-paper-2), var(--color-paper-3) 40%);
   position: relative;
+  background: var(--color-paper-2);
+  background: var(--row-base);
   transition: background-color var(--dur-fast) var(--ease-out);
 }
 
 .result-row:hover,
 .result-row.is-inspected {
-  background: var(--color-paper-2);
+  background: var(--color-paper-3);
+  background: color-mix(in oklch, var(--row-base), var(--color-paper-3) 45%);
 }
 
 .is-none {
@@ -1232,10 +1242,14 @@ h2 {
 }
 
 .head-code {
-  flex: none;
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  max-width: 100%;
   color: var(--color-ink);
   font-size: var(--text-lg);
   font-weight: 700;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
@@ -1255,7 +1269,7 @@ h2 {
 .head-code[data-copyable="true"]::after {
   content: "⧉";
   display: inline-block;
-  margin-left: var(--space-1);
+  margin-inline-start: var(--space-1);
   color: var(--color-muted);
   font-size: var(--text-sm);
   font-weight: 400;
@@ -1489,7 +1503,7 @@ h2 {
   background: transparent;
   color: var(--color-ink);
   font-size: var(--text-xs);
-  text-align: left;
+  text-align: start;
 }
 
 .nearest-pick:hover {
@@ -1506,11 +1520,16 @@ h2 {
 }
 
 .nearest-code {
+  overflow: hidden;
+  min-width: 0;
   font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .nearest-name {
   overflow: hidden;
+  min-width: 0;
   color: var(--color-ink-2);
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1518,8 +1537,11 @@ h2 {
 
 .nearest-hex,
 .nearest-de {
+  overflow: hidden;
   color: var(--color-muted);
-  text-align: right;
+  text-align: end;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* name search candidates */
@@ -1555,7 +1577,7 @@ h2 {
   background: transparent;
   color: var(--color-ink);
   font-size: var(--text-sm);
-  text-align: left;
+  text-align: start;
 }
 
 .candidate:hover {
@@ -1574,11 +1596,16 @@ h2 {
 }
 
 .candidate-hex {
-  text-align: right;
+  overflow: hidden;
+  min-width: 0;
+  text-align: end;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .candidate-name {
   overflow: hidden;
+  min-width: 0;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1626,12 +1653,13 @@ h2 {
   flex-direction: column;
   align-items: flex-start;
   gap: var(--space-1);
+  min-width: 0;
   padding: var(--space-3);
   border: var(--rule) solid var(--color-rule-2);
   border-radius: var(--radius-control);
   background: var(--color-paper-2);
   color: var(--color-ink);
-  text-align: left;
+  text-align: start;
 }
 
 .starter-card:hover {
@@ -1645,18 +1673,30 @@ h2 {
 }
 
 .starter-code {
+  overflow: hidden;
+  max-width: 100%;
   font-size: var(--text-sm);
   font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .starter-sub {
+  overflow: hidden;
+  max-width: 100%;
   color: var(--color-muted);
   font-size: var(--text-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .starter-hex {
+  overflow: hidden;
+  max-width: 100%;
   color: var(--color-ink-2);
   font-size: var(--text-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* loading and data error */
@@ -1713,7 +1753,7 @@ h2 {
 }
 
 .data-error .button {
-  margin-left: auto;
+  margin-inline-start: auto;
 }
 
 /* ---------- reference strip ---------- */
@@ -1844,7 +1884,9 @@ h2 {
 }
 
 .foot-meta {
-  margin: 0 0 0 auto;
+  margin-block: 0;
+  margin-inline-start: auto;
+  margin-inline-end: 0;
   color: var(--color-ink-2);
   font-size: var(--text-xs);
   white-space: nowrap;
@@ -1891,12 +1933,12 @@ h2 {
   .result-row {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
+    align-self: stretch;
     gap: 0;
-    padding: var(--space-2) 0;
+    padding: var(--space-3) var(--space-4);
     border: 0;
-    border-bottom: var(--rule) solid var(--color-rule-2);
     border-radius: 0;
-    background: transparent;
+    background: var(--row-base);
   }
 
   .result-table td {
@@ -1976,8 +2018,7 @@ h2 {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     gap: 0;
-    padding-block: var(--space-1);
-    border-bottom: var(--rule) solid var(--color-rule-2);
+    padding: var(--space-3) var(--space-4);
   }
 
   .result-table td {
@@ -2039,8 +2080,8 @@ h2 {
   }
 
   .deck-title {
-    padding-left: 0;
-    border-left: 0;
+    padding-inline-start: 0;
+    border-inline-start: 0;
     font-size: var(--text-md);
   }
 
@@ -2102,7 +2143,7 @@ h2 {
   }
 
   .foot-meta {
-    margin-left: 0;
+    margin-inline-start: 0;
     white-space: normal;
   }
 }
@@ -2117,13 +2158,13 @@ h2 {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  padding-right: 0;
+  padding-inline-end: 0;
 }
 
 .card-head-main {
   min-width: 0;
   min-height: 3rem;
-  padding-right: 7.5rem;
+  padding-inline-end: 7.5rem;
 }
 
 .card-foot {
@@ -2132,15 +2173,17 @@ h2 {
   align-items: start;
   gap: var(--space-2);
   margin-top: auto;
-  padding-top: var(--space-2);
-  border-top: var(--rule) solid var(--color-rule);
+  padding: var(--space-2) var(--space-4) 0;
+  margin-inline: calc(var(--space-4) * -1);
+  background: var(--color-paper-2);
+  background: color-mix(in oklch, var(--row-base), var(--color-paper-3) 40%);
 }
 
 .card-actions {
   display: flex;
   grid-column: 2;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: end;
   flex-wrap: wrap;
   gap: var(--space-2);
 }
@@ -2148,7 +2191,7 @@ h2 {
 .result-table td.cell-de {
   position: absolute;
   top: var(--space-2);
-  right: var(--space-2);
+  inset-inline-end: var(--space-2);
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -2225,11 +2268,11 @@ h2 {
   }
 
   .result-table td.cell-head {
-    padding-right: 0;
+    padding-inline-end: 0;
   }
 
   .card-head-main {
-    padding-right: 6.75rem;
+    padding-inline-end: 6.75rem;
   }
 
   .dual-swatch {
@@ -2259,11 +2302,11 @@ h2 {
   }
 
   .result-table td.cell-head {
-    padding-right: 0;
+    padding-inline-end: 0;
   }
 
   .card-head-main {
-    padding-right: 0;
+    padding-inline-end: 0;
   }
 
   .result-table td.cell-de {
@@ -2275,7 +2318,6 @@ h2 {
     width: 100%;
     margin-top: var(--space-2);
     padding-top: var(--space-2);
-    border-top: var(--rule) dashed var(--color-rule);
   }
 
   .de-line {

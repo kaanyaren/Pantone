@@ -293,7 +293,7 @@ export const DICTIONARY: Record<Lang, Translations> = {
     dataErrorTitle: "Could not load color dataset.",
     dataErrorDetail: "JSON bundle failed to load. Refresh the page or try again.",
     retry: "Retry",
-    colorsCount: (count) => `${count} colors`,
+    colorsCount: (count) => (count === "1" ? "1 color" : `${count} colors`),
     statusNoLibraries: "No libraries in this filter.",
     statusNoCloseMatch: (count, nearest, delta) =>
       `${count} libraries · No close match · Nearest candidate: ${nearest} · ΔE00 ${delta}`,

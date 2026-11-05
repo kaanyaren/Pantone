@@ -9,6 +9,7 @@ import {
   renderDataError,
   renderEmptyState,
   renderInspector,
+  renderLoading,
   matchesFilter,
   renderLibraries,
   renderResults,
@@ -247,7 +248,9 @@ function fail(message: string): void {
     resultStatus.textContent = "";
   }
   queryHelp.hidden = true;
-  queryError.textContent = message;
+  // Clamp user echo so a 200-char query cannot blow out the deck error slot.
+  const clamped = message.length > 220 ? `${message.slice(0, 220)}…` : message;
+  queryError.textContent = clamped;
   queryError.hidden = false;
   input.setAttribute("aria-invalid", "true");
   input.setAttribute("aria-describedby", "query-error");
@@ -280,6 +283,8 @@ async function loadData(): Promise<void> {
 
   const pending = queryFromUrl();
   resultStatus.textContent = DICTIONARY[currentLang].loadingStatus;
+  renderLoading(resultBody);
+  renderLoading(inspectorBody, 2);
 
   try {
     const controller = new AbortController();
@@ -945,6 +950,7 @@ form.addEventListener("submit", (event) => {
 input.addEventListener("input", () => {
   if (!queryError.hidden && input.value.trim()) clearError();
   closeSuggestions();
+  window.clearTimeout(suggestTimer);
   suggestTimer = window.setTimeout(updateSuggestions, 60);
 });
 

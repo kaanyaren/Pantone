@@ -515,6 +515,14 @@ export function renderResults(
   const kindLabel = (kind: "pantone" | "threads"): string =>
     kind === "pantone" ? t.groupPantone : t.groupThreads;
 
+  if (visibleSystems.length === 0) {
+    const empty = el("div", "empty-inspector");
+    empty.append(el("p", "empty-text", t.statusNoLibraries));
+    fragment.append(empty);
+    root.replaceChildren(fragment);
+    return;
+  }
+
   const tbody = el("tbody", "matrix-flat");
   let lastKind: "pantone" | "threads" | null = null;
   for (const system of visibleSystems) {
