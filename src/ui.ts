@@ -481,10 +481,17 @@ export function renderResults(
   const fragment = document.createDocumentFragment();
   const primaryDelta = (sys: SystemResult): number =>
     sys.sameCode?.deltaE ?? sys.matches[0]?.deltaE ?? Number.POSITIVE_INFINITY;
+  const kindOrder = (sys: SystemResult): number =>
+    sys.meta.family === "pantone" ? 0 : 1;
   const visibleSystems = view.systems
     .filter((sys) => matchesFilter(sys.meta.id, filter))
     .slice()
-    .sort((a, b) => primaryDelta(a) - primaryDelta(b));
+    .sort(
+      (a, b) =>
+        kindOrder(a) - kindOrder(b) ||
+        primaryDelta(a) - primaryDelta(b) ||
+        a.meta.id.localeCompare(b.meta.id, "en"),
+    );
   const rankOf = new Map<string, number>();
   visibleSystems.forEach((sys, index) => rankOf.set(sys.meta.id, index + 1));
 
