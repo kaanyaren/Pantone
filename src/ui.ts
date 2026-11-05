@@ -372,13 +372,6 @@ function renderRow(
     if (system.sameCode && !system.sameCodeIsInput) {
       tdMatch.append(el("span", "row-note", "aynı kod · farklı zemin"));
     }
-    tdMatch.append(
-      el(
-        "span",
-        "row-values mono",
-        `RGB ${rgbText(primary.row.hex)} · CMYK ${cmykText(primary.row.hex)}`,
-      ),
-    );
   } else {
     tdMatch.append(el("span", "row-title", "Bu kütüphanede yakın eşleşme yok (ΔE00 > 5)"));
     if (best) {
