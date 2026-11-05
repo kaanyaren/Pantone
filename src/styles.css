@@ -1040,6 +1040,15 @@ h2 {
   font-size: var(--text-xs);
 }
 
+.sys-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--space-2);
+  min-width: 0;
+  font-size: var(--text-md);
+}
+
 .code-badge {
   display: inline-block;
   color: var(--color-ink);
@@ -1063,6 +1072,7 @@ h2 {
 
 .row-name-text {
   overflow: hidden;
+  font-size: var(--text-md);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1117,6 +1127,13 @@ h2 {
   font-size: var(--text-sm);
   font-weight: 600;
   line-height: 1.1;
+}
+
+.de-line {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
 }
 
 .swatch {
@@ -1670,11 +1687,7 @@ h2 {
   }
 
   .result-table .de-value {
-    margin-bottom: 2px;
-  }
-
-  .result-table .system-subline {
-    margin-top: 0;
+    margin-bottom: 0;
   }
 
   .result-table .cell-match .nearest {
@@ -1743,6 +1756,10 @@ h2 {
 
   .result-table td > * {
     grid-column: 2;
+  }
+
+  .result-table .de-value {
+    margin-bottom: 0;
   }
 
   .starter-grid {

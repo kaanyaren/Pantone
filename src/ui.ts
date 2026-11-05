@@ -337,13 +337,13 @@ function renderRow(
 
   const tdSystem = el("td", "cell-system");
   tdSystem.dataset.label = "Kütüphane";
-  tdSystem.append(el("span", "system-label", system.meta.label));
-  const sysMetaLine = el("span", "system-subline");
-  sysMetaLine.append(
+  const sysLine = el("span", "sys-line");
+  sysLine.append(
+    el("span", "system-label", system.meta.label),
     el("span", "system-short mono", system.meta.short),
     el("span", "system-prov", PROVENANCE_LABELS[system.meta.provenance]),
   );
-  tdSystem.append(sysMetaLine);
+  tdSystem.append(sysLine);
   tr.append(tdSystem);
 
   const tdMatch = el("td", "cell-match");
@@ -377,8 +377,12 @@ function renderRow(
   const band = primary
     ? deltaBand(primary.deltaE)
     : { text: "yakın eşleşme yok", tone: "none" as Tone };
-  tdDe.append(el("span", "de-value mono", primary ? formatDelta(primary.deltaE) : "—"));
-  tdDe.append(el("span", `tone-pill tone-${band.tone}`, band.text));
+  const deLine = el("span", "de-line");
+  deLine.append(
+    el("span", "de-value mono", primary ? formatDelta(primary.deltaE) : "—"),
+    el("span", `tone-pill tone-${band.tone}`, band.text),
+  );
+  tdDe.append(deLine);
 
   tr.append(tdMatch, tdDe);
   return tr;
