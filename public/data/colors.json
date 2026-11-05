@@ -4,7 +4,7 @@
   "systems": [
     {
       "id": "C",
-      "label": "Pantone Düz Kaplı",
+      "label": "Pantone C",
       "short": "C",
       "family": "pantone",
       "provenance": "community",
@@ -14,7 +14,7 @@
     },
     {
       "id": "U",
-      "label": "Pantone Düz Kaplamasız",
+      "label": "Pantone U",
       "short": "U",
       "family": "pantone",
       "provenance": "community",
@@ -34,7 +34,7 @@
     },
     {
       "id": "TPX",
-      "label": "Pantone TPX (eski)",
+      "label": "Pantone TPX",
       "short": "TPX",
       "family": "pantone",
       "provenance": "legacy",

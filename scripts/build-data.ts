@@ -74,7 +74,7 @@ const SYSTEM_ORDER: SystemId[] = ["C", "U", "TCX", "TPX", "MP", "MR", "DPS", "DV
 const SYSTEM_META: Omit<SystemMeta, "count">[] = [
   {
     id: "C",
-    label: "Pantone Düz Kaplı",
+    label: "Pantone C",
     short: "C",
     family: "pantone",
     provenance: "community",
@@ -83,7 +83,7 @@ const SYSTEM_META: Omit<SystemMeta, "count">[] = [
   },
   {
     id: "U",
-    label: "Pantone Düz Kaplamasız",
+    label: "Pantone U",
     short: "U",
     family: "pantone",
     provenance: "community",
@@ -101,7 +101,7 @@ const SYSTEM_META: Omit<SystemMeta, "count">[] = [
   },
   {
     id: "TPX",
-    label: "Pantone TPX (eski)",
+    label: "Pantone TPX",
     short: "TPX",
     family: "pantone",
     provenance: "legacy",

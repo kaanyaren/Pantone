@@ -475,7 +475,7 @@ export function renderCandidates(
 /* ---------- interactive empty state ---------- */
 
 const STARTER_SWATCHES: Array<{ q: string; label: string; sub: string; hex: string }> = [
-  { q: "186 C", label: "186 C", sub: "Pantone Düz Kaplı", hex: "#C8102E" },
+  { q: "186 C", label: "186 C", sub: "Pantone C", hex: "#C8102E" },
   { q: "19-4052 TCX", label: "19-4052 TCX", sub: "Classic Blue · Pamuk", hex: "#0F4C81" },
   { q: "Rayon 1147", label: "Rayon 1147", sub: "Madeira Rayon 40", hex: "#B60F2F" },
   { q: "Polyneon 1610", label: "Polyneon 1610", sub: "Madeira Polyneon 40", hex: "#B7C3C5" },
