@@ -2,7 +2,14 @@ import type { ColorRow, Dataset, Lab, Match, Query, SystemId, SystemMeta } from 
 import { cmykToRgb, deltaE2000, hexToRgb, rgbToHex, rgbToLab } from "./color.ts";
 import { parseQuery } from "./query.ts";
 import { searchColors } from "./search.ts";
-import { DICTIONARY, getStoredLang, setStoredLang, type Lang } from "./i18n.ts";
+import {
+  DICTIONARY,
+  detectLanguageByGeo,
+  getStoredLang,
+  getStoredLangOrNull,
+  setStoredLang,
+  type Lang,
+} from "./i18n.ts";
 import {
   formatCount,
   renderCandidates,
@@ -60,7 +67,6 @@ const langToggle = byId<HTMLButtonElement>("lang-toggle");
 const pageTitle = byId<HTMLElement>("page-title");
 const inspectorTitle = byId<HTMLElement>("inspector-title");
 const resultsTitle = byId<HTMLElement>("results-title");
-const substrateNote = document.getElementById("substrate-note");
 
 const SYSTEM_IDS = new Set<SystemId>(["C", "U", "TCX", "TPX", "MP", "MR", "DPS", "DVS"]);
 const SAME_CODE_FAMILY: Partial<Record<SystemId, readonly SystemId[]>> = {
@@ -115,7 +121,6 @@ function syncPickerHex(hex: string): void {
 
 function applyLanguage(lang: Lang): void {
   currentLang = lang;
-  setStoredLang(lang);
   document.documentElement.lang = lang;
   const t = DICTIONARY[lang];
 
@@ -142,17 +147,6 @@ function applyLanguage(lang: Lang): void {
 
   // Suggestions
   suggestionsRoot.setAttribute("aria-label", t.querySuggestionsAria);
-
-  // Substrate explainer (deck, above fold)
-  if (substrateNote) {
-    substrateNote.replaceChildren(
-      document.createTextNode(`${t.substrateNote} `),
-      Object.assign(document.createElement("a"), {
-        href: "#tolerance-note",
-        textContent: t.substrateLink,
-      }),
-    );
-  }
 
   // Titles
   inspectorTitle.textContent = t.loupeTitle;
@@ -1015,6 +1009,7 @@ clearButton.addEventListener("click", () => {
 
 langToggle.addEventListener("click", () => {
   const nextLang: Lang = currentLang === "tr" ? "en" : "tr";
+  setStoredLang(nextLang);
   applyLanguage(nextLang);
 });
 
@@ -1118,4 +1113,24 @@ if (window.matchMedia("(max-width: 68rem)").matches) {
 }
 requestAnimationFrame(() => {
   void loadData();
+  void detectGeoLang();
 });
+
+/**
+ * First visit only: pick tr/en from visitor IP. An explicit toggle choice
+ * is stored and always wins; failures keep the boot language.
+ */
+async function detectGeoLang(): Promise<void> {
+  if (getStoredLangOrNull() !== null) return;
+  const controller = new AbortController();
+  const timer = window.setTimeout(() => controller.abort(), 3000);
+  try {
+    const geo = await detectLanguageByGeo(controller.signal);
+    if (geo && geo !== currentLang) {
+      setStoredLang(geo);
+      applyLanguage(geo);
+    }
+  } finally {
+    window.clearTimeout(timer);
+  }
+}

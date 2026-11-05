@@ -12,8 +12,6 @@ export interface Translations {
   matchButton: string;
   matchBusy: string;
   querySuggestionsAria: string;
-  substrateNote: string;
-  substrateLink: string;
   loupeTitle: string;
   loupeInput: string;
   loupeCompare: string;
@@ -104,9 +102,6 @@ export const DICTIONARY: Record<Lang, Translations> = {
     matchButton: "Eşleştir",
     matchBusy: "Eşleştiriliyor…",
     querySuggestionsAria: "Kod veya renk önerileri",
-    substrateNote:
-      "C/U baskı mürekkebi, TCX/TPX pamuklu tekstildir — aynı kod farklı zeminde farklı görünür.",
-    substrateLink: "Tolerans ölçeği",
     loupeTitle: "Numune büyüteci",
     loupeInput: "Girdi numunesi",
     loupeCompare: "Karşılaştırma",
@@ -209,9 +204,6 @@ export const DICTIONARY: Record<Lang, Translations> = {
     matchButton: "Match",
     matchBusy: "Matching…",
     querySuggestionsAria: "Code or color suggestions",
-    substrateNote:
-      "C/U is print ink, TCX/TPX is cotton textile — same code looks different on each substrate.",
-    substrateLink: "Tolerance scale",
     loupeTitle: "Specimen loupe",
     loupeInput: "Input specimen",
     loupeCompare: "Comparison",
@@ -304,13 +296,39 @@ export const DICTIONARY: Record<Lang, Translations> = {
 const STORAGE_KEY = "pantonak_lang";
 
 export function getStoredLang(): Lang {
+  return getStoredLangOrNull() ?? "tr";
+}
+
+/** Stored choice, or null on first visit (geo-detect may then decide). */
+export function getStoredLangOrNull(): Lang | null {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved === "en" || saved === "tr") return saved;
   } catch {
     // localStorage not accessible
   }
-  return "tr";
+  return null;
+}
+
+/** ISO 3166-1 alpha-2 country code to app language. Only TR stays Turkish. */
+export function countryCodeToLang(code: string): Lang {
+  return code.trim().toUpperCase() === "TR" ? "tr" : "en";
+}
+
+/**
+ * Best-effort language from visitor IP (ipapi.co, plain-text country code,
+ * no key). Resolves null on any failure so callers keep the current language.
+ */
+export async function detectLanguageByGeo(signal?: AbortSignal): Promise<Lang | null> {
+  try {
+    const response = await fetch("https://ipapi.co/country_code/", { signal });
+    if (!response.ok) return null;
+    const code = (await response.text()).trim();
+    if (!/^[A-Za-z]{2}$/.test(code)) return null;
+    return countryCodeToLang(code);
+  } catch {
+    return null;
+  }
 }
 
 export function setStoredLang(lang: Lang): void {
