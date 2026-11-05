@@ -936,24 +936,6 @@ async function copyText(
   }
 }
 
-async function handleRowCodeCopy(codeElement: HTMLElement): Promise<void> {
-  const code = codeElement.dataset.copyCode ?? codeElement.textContent?.trim() ?? "";
-  if (!code || code === "—") return;
-  let ok = false;
-  try {
-    await navigator.clipboard.writeText(code);
-    ok = true;
-  } catch {
-    ok = fallbackCopy(code);
-  }
-  if (ok) {
-    flashElement(codeElement, 1200);
-    announce(DICTIONARY[currentLang].copiedAnnouncement(code));
-  } else {
-    announce(DICTIONARY[currentLang].copyFailed);
-  }
-}
-
 /* ---------- events ---------- */
 
 form.addEventListener("submit", (event) => {
@@ -1074,13 +1056,6 @@ document.addEventListener("click", (event) => {
   const target = event.target as Element | null;
   if (!target) return;
 
-  const copyableCode = target.closest<HTMLElement>('[data-copyable="true"]');
-  if (copyableCode) {
-    event.stopPropagation();
-    void handleRowCodeCopy(copyableCode);
-    return;
-  }
-
   const filterPill = target.closest<HTMLButtonElement>(".filter-pill");
   if (filterPill) {
     const nextFilter = (filterPill.dataset.filter ?? "all") as LibraryFilter;
@@ -1109,16 +1084,6 @@ document.addEventListener("click", (event) => {
 });
 
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Enter" || event.key === " ") {
-    const target = event.target as Element | null;
-    const copyableCode = target?.closest<HTMLElement>('[data-copyable="true"]');
-    if (copyableCode) {
-      event.preventDefault();
-      void handleRowCodeCopy(copyableCode);
-      return;
-    }
-  }
-
   if (event.key === "Escape") {
     const target = event.target as Element | null;
     const details = target?.closest("details") as HTMLDetailsElement | null;

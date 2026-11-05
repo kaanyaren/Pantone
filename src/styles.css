@@ -1234,48 +1234,6 @@ h2 {
   white-space: nowrap;
 }
 
-.head-code[data-copyable="true"] {
-  cursor: pointer;
-  padding: 1px var(--space-1);
-  margin: -1px calc(var(--space-1) * -1);
-  border-radius: var(--radius-sm);
-  text-decoration: underline dotted 1px;
-  text-underline-offset: 3px;
-  transition:
-    background-color var(--dur-fast) var(--ease-out),
-    color var(--dur-fast) var(--ease-out),
-    outline-color var(--dur-fast) var(--ease-out);
-}
-
-.head-code[data-copyable="true"]::after {
-  content: "⧉";
-  display: inline-block;
-  margin-left: var(--space-1);
-  color: var(--color-muted);
-  font-size: var(--text-sm);
-  font-weight: 400;
-  line-height: 1;
-}
-
-.head-code[data-copyable="true"]:hover::after {
-  color: var(--color-accent);
-}
-
-.head-code[data-copyable="true"]:hover {
-  background: var(--color-paper-2);
-  color: var(--color-accent);
-}
-
-.head-code[data-copyable="true"]:focus-visible {
-  outline: 2px solid var(--color-focus);
-  outline-offset: 1px;
-}
-
-.head-code[data-state="success"] {
-  background: var(--color-exact-bg) !important;
-  color: var(--color-success) !important;
-}
-
 .head-name {
   display: block;
   flex: 1 1 auto;
@@ -1287,7 +1245,8 @@ h2 {
   white-space: nowrap;
 }
 
-.card-copy {
+.card-copy,
+.card-inspect {
   display: inline-flex;
   flex: none;
   align-items: center;
@@ -1308,17 +1267,20 @@ h2 {
     color var(--dur-fast) var(--ease-out);
 }
 
-.card-copy:hover {
+.card-copy:hover,
+.card-inspect:hover {
   border-color: var(--color-rule-2);
   background: var(--color-paper-3);
   color: var(--color-ink);
 }
 
-.card-copy:active {
+.card-copy:active,
+.card-inspect:active {
   transform: translateY(1px);
 }
 
-.card-copy:focus-visible {
+.card-copy:focus-visible,
+.card-inspect:focus-visible {
   outline: 2px solid var(--color-focus);
   outline-offset: 1px;
 }
@@ -2297,6 +2259,7 @@ h2 {
 
 @media (pointer: coarse) {
   .card-copy,
+  .card-inspect,
   .chip,
   .filter-pill,
   .tolerance-chip,
@@ -2327,7 +2290,8 @@ h2 {
   .button:active,
   .chip:active,
   .coord-cell:active,
-  .card-copy:active {
+  .card-copy:active,
+  .card-inspect:active {
     transform: none;
   }
 }
@@ -2343,6 +2307,7 @@ h2 {
   .button,
   .chip,
   .card-copy,
+  .card-inspect,
   .coord-cell,
   .tolerance-chip,
   .input-clear,

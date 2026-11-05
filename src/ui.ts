@@ -116,6 +116,11 @@ export function secondaryName(row: ColorRow, systemShort: string): string {
   if (lower === code.toLowerCase()) return "";
   if (lower === `${code} ${short}`.toLowerCase()) return "";
   if (lower === `${short} ${code}`.toLowerCase()) return "";
+  const fold = (value: string): string => value.toLowerCase().replace(/[^a-z0-9]/g, "");
+  const folded = fold(name);
+  if (folded === fold(code)) return "";
+  if (folded === fold(code + short)) return "";
+  if (folded === fold(short + code)) return "";
   return name;
 }
 
@@ -378,17 +383,7 @@ function renderRow(
   tr.dataset.systemId = system.meta.id;
   const best = system.matches[0] ?? null;
   const primary = system.sameCode ?? (system.noClose ? null : best);
-  const inspectTarget = primary ?? best;
   if (!primary) tr.classList.add("is-none");
-
-  if (inspectTarget) {
-    const target = inspectTarget;
-    tr.addEventListener("click", (event) => {
-      const origin = event.target as Element | null;
-      if (origin?.closest("button, summary, details, a, input, [data-copyable=\"true\"]")) return;
-      onInspect(system.meta, target, true);
-    });
-  }
 
   const tdHead = el("td", "cell-head");
   tdHead.dataset.label = t.columns[0];
@@ -397,16 +392,7 @@ function renderRow(
   headTitle.append(dualSwatch(inputHex, primary ? primary.row.hex : (best ? best.row.hex : inputHex)));
   headTitle.append(el("span", "head-lib", `${system.meta.label}\u00A0`));
 
-  const headCode = el("span", "head-code mono", primary ? primary.row.code : "—");
-  if (primary) {
-    headCode.dataset.copyable = "true";
-    headCode.dataset.copyCode = primary.row.code;
-    headCode.setAttribute("role", "button");
-    headCode.setAttribute("tabindex", "0");
-    headCode.setAttribute("aria-label", t.copyCodeAria(primary.row.code));
-    headCode.title = t.copyCodeTitle;
-  }
-  headTitle.append(headCode);
+  headTitle.append(el("span", "head-code mono", primary ? primary.row.code : "—"));
 
   const headMain = el("div", "card-head-main");
   headMain.append(headTitle);
@@ -442,11 +428,22 @@ function renderRow(
 
   const foot = el("div", "card-foot");
   if (system.matches.length > 1) {
-    foot.append(renderNearest(system.meta, system.matches, onInspect, onPickRow, lang));
+    const nearest = renderNearest(system.meta, system.matches, onInspect, onPickRow, lang);
+    if (rank === 1) nearest.open = true;
+    foot.append(nearest);
   }
 
   const actions = el("div", "card-actions");
   if (primary) {
+    const inspect = el("button", "card-inspect", t.inspect);
+    inspect.type = "button";
+    inspect.setAttribute("aria-label", t.inspectAria(system.meta.label, primary.row.code));
+    inspect.addEventListener("click", (event) => {
+      event.stopPropagation();
+      onInspect(system.meta, primary, true);
+    });
+    actions.append(inspect);
+
     const copyLabel = formatRowLabel(primary.row, system.meta.label);
     const copy = el("button", "card-copy", t.copyCardButton);
     copy.type = "button";

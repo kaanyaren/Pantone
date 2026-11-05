@@ -37,8 +37,8 @@ export interface Translations {
   linkCopy: string;
   convert: string;
   convertAria: (label: string, code: string) => string;
-  copyCodeAria: (code: string) => string;
-  copyCodeTitle: string;
+  inspect: string;
+  inspectAria: (label: string, code: string) => string;
   copyCardButton: string;
   copyCardAria: (label: string) => string;
   copyCardTitle: string;
@@ -140,8 +140,8 @@ export const DICTIONARY: Record<Lang, Translations> = {
     linkCopy: "Bağlantıyı kopyala",
     convert: "Dönüştür",
     convertAria: (label, code) => `Dönüştür: ${label} ${code}`,
-    copyCodeAria: (code) => `Kodu kopyala: ${code}`,
-    copyCodeTitle: "Kodu kopyala",
+    inspect: "İncele",
+    inspectAria: (label, code) => `İncele: ${label} ${code}`,
     copyCardButton: "Kopyala",
     copyCardAria: (label) => `Kopyala: ${label}`,
     copyCardTitle: "Adı ve kodu kopyala",
@@ -255,8 +255,8 @@ export const DICTIONARY: Record<Lang, Translations> = {
     linkCopy: "Copy link",
     convert: "Convert",
     convertAria: (label, code) => `Convert: ${label} ${code}`,
-    copyCodeAria: (code) => `Copy code: ${code}`,
-    copyCodeTitle: "Copy code",
+    inspect: "Inspect",
+    inspectAria: (label, code) => `Inspect: ${label} ${code}`,
     copyCardButton: "Copy",
     copyCardAria: (label) => `Copy: ${label}`,
     copyCardTitle: "Copy name and code",
