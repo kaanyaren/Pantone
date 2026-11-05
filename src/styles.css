@@ -1235,7 +1235,7 @@ h2 {
   min-width: 0;
   overflow: hidden;
   color: var(--color-ink-2);
-  font-size: var(--text-base);
+  font-size: var(--text-display);
   font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1247,7 +1247,7 @@ h2 {
   overflow: hidden;
   max-width: 100%;
   color: var(--color-ink);
-  font-size: var(--text-lg);
+  font-size: var(--text-display);
   font-weight: 700;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2281,11 +2281,20 @@ h2 {
   }
 
   .head-code {
-    font-size: 1rem;
+    font-size: var(--text-xl);
   }
 
   .head-lib {
-    font-size: var(--text-sm);
+    font-size: var(--text-xl);
+  }
+
+  .head-title {
+    flex-wrap: wrap;
+  }
+
+  .head-lib,
+  .head-code {
+    flex: 1 1 100%;
   }
 
   .de-value {
