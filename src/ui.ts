@@ -189,6 +189,16 @@ export function renderInspector(
 
   const loupe = el("div", "loupe-card");
   const split = el("div", "loupe-split");
+  split.setAttribute("role", "img");
+  const inputHexVal = view.inputHex.toUpperCase();
+  const targetLabel = target
+    ? `${target.meta.label} ${target.match.row.code} ${target.match.row.hex.toUpperCase()}`
+    : t.loupeNoTarget;
+  const deltaLabel = target ? `ΔE00 ${formatDelta(target.match.deltaE)}` : "";
+  split.setAttribute(
+    "aria-label",
+    `${t.loupeInput}: ${view.inputLabel} ${inputHexVal}. ${t.loupeCompare}: ${targetLabel}. ${deltaLabel}`.trim(),
+  );
 
   const leftHalf = el("div", "loupe-half loupe-left");
   leftHalf.style.setProperty("--swatch", view.inputHex);
@@ -208,12 +218,14 @@ export function renderInspector(
   leftCap.append(el("span", "loupe-tag", t.loupeInput));
   leftCap.append(el("strong", "loupe-code mono", view.inputLabel));
   leftCap.append(el("span", "loupe-hex mono", view.inputHex.toUpperCase()));
+  leftCap.append(el("span", "loupe-lab mono", `Lab ${labText(view.inputHex)}`));
 
   const rightCap = el("div", "loupe-caption loupe-caption-right");
   if (target) {
     rightCap.append(el("span", "loupe-tag", target.meta.short));
     rightCap.append(el("strong", "loupe-code mono", target.match.row.code));
-    rightCap.append(el("span", "loupe-hex mono", target.match.row.hex));
+    rightCap.append(el("span", "loupe-hex mono", target.match.row.hex.toUpperCase()));
+    rightCap.append(el("span", "loupe-lab mono", `Lab ${labText(target.match.row.hex)}`));
   } else {
     rightCap.append(el("span", "loupe-tag", t.loupeCompare));
     rightCap.append(el("span", "loupe-hex mono", t.loupeNoTarget));
@@ -256,7 +268,7 @@ export function renderInspector(
     const btn = el("button", "coord-cell");
     btn.type = "button";
     btn.dataset.copy = item.copy;
-    btn.dataset.copyLabel = item.label;
+    btn.dataset.copyLabel = `${item.label} ${item.value}`;
     btn.setAttribute("aria-label", t.coordCopyAria(item.label, item.value));
     btn.append(
       el("span", "coord-label", item.label),
@@ -336,8 +348,6 @@ function renderNearest(
       el("span", "nearest-hex mono", match.row.hex),
       el("span", "nearest-de mono", `ΔE ${formatDelta(match.deltaE)}`),
     );
-    pick.addEventListener("mouseenter", () => onInspect(meta, match, false));
-    pick.addEventListener("focus", () => onInspect(meta, match, false));
     pick.addEventListener("click", () => onPickRow(match.row));
     item.append(pick);
     list.append(item);
@@ -350,12 +360,13 @@ function renderRow(
   inputHex: string,
   system: SystemResult,
   isSelected: boolean,
+  rank: number,
   onInspect: (meta: SystemMeta, match: Match, pinned: boolean) => void,
   onPickRow: (row: ColorRow) => void,
   lang: Lang = "tr",
 ): HTMLTableRowElement {
   const t = DICTIONARY[lang];
-  const tr = el("tr", `result-row${isSelected ? " is-inspected" : ""}`);
+  const tr = el("tr", `result-row${isSelected ? " is-inspected" : ""}${rank === 1 ? " is-lead" : ""}${rank <= 3 ? " is-top" : ""}`);
   tr.dataset.systemId = system.meta.id;
   const best = system.matches[0] ?? null;
   const primary = system.sameCode ?? (system.noClose ? null : best);
@@ -363,13 +374,18 @@ function renderRow(
   if (!primary) tr.classList.add("is-none");
 
   if (inspectTarget) {
-    tr.addEventListener("mouseenter", () => onInspect(system.meta, inspectTarget, false));
-    tr.addEventListener("focusin", () => onInspect(system.meta, inspectTarget, false));
+    const target = inspectTarget;
+    tr.addEventListener("click", (event) => {
+      const origin = event.target as Element | null;
+      if (origin?.closest("button, summary, details, a, input, [data-copyable=\"true\"]")) return;
+      onInspect(system.meta, target, true);
+    });
   }
 
   const tdHead = el("td", "cell-head");
   tdHead.dataset.label = t.columns[0];
   const headTitle = el("div", "head-title");
+  headTitle.append(el("span", "rank-badge mono", `#${rank}`));
   headTitle.append(dualSwatch(inputHex, primary ? primary.row.hex : (best ? best.row.hex : inputHex)));
   headTitle.append(el("span", "head-lib", `${system.meta.label}\u00A0`));
 
@@ -470,7 +486,14 @@ export function renderResults(
 ): void {
   const t = DICTIONARY[lang];
   const fragment = document.createDocumentFragment();
-  const visibleSystems = view.systems.filter((sys) => matchesFilter(sys.meta.id, filter));
+  const primaryDelta = (sys: SystemResult): number =>
+    sys.sameCode?.deltaE ?? sys.matches[0]?.deltaE ?? Number.POSITIVE_INFINITY;
+  const visibleSystems = view.systems
+    .filter((sys) => matchesFilter(sys.meta.id, filter))
+    .slice()
+    .sort((a, b) => primaryDelta(a) - primaryDelta(b));
+  const rankOf = new Map<string, number>();
+  visibleSystems.forEach((sys, index) => rankOf.set(sys.meta.id, index + 1));
 
   const table = el("table", "result-table");
   table.append(
@@ -487,46 +510,37 @@ export function renderResults(
   thead.append(headRow);
   table.append(thead);
 
-  const renderGroup = (
-    systems: SystemResult[],
-    label: string,
-    className: string,
-  ): HTMLTableSectionElement | null => {
-    if (systems.length === 0) return null;
-    const tbody = el("tbody", `matrix-group ${className}`);
-    const groupHead = el("tr", "matrix-group-head");
-    const groupTitle = el("th", "matrix-group-title", `${label} (${systems.length})`);
-    groupTitle.scope = "rowgroup";
-    groupTitle.colSpan = 2;
-    groupHead.append(groupTitle);
-    tbody.append(groupHead);
-    for (const system of systems) {
-      tbody.append(
-        renderRow(
-          view.inputHex,
-          system,
-          selectedSystemId === system.meta.id,
-          onInspect,
-          onPickRow,
-          lang,
-        ),
-      );
-    }
-    return tbody;
-  };
+  const kindOf = (sys: SystemResult): "pantone" | "threads" =>
+    sys.meta.family === "pantone" ? "pantone" : "threads";
+  const kindLabel = (kind: "pantone" | "threads"): string =>
+    kind === "pantone" ? t.groupPantone : t.groupThreads;
 
-  const threadGroup = renderGroup(
-    visibleSystems.filter((system) => system.meta.family !== "pantone"),
-    t.groupThreads,
-    "is-threads",
-  );
-  const pantoneGroup = renderGroup(
-    visibleSystems.filter((system) => system.meta.family === "pantone"),
-    t.groupPantone,
-    "is-pantone",
-  );
-  if (threadGroup) table.append(threadGroup);
-  if (pantoneGroup) table.append(pantoneGroup);
+  const tbody = el("tbody", "matrix-flat");
+  let lastKind: "pantone" | "threads" | null = null;
+  for (const system of visibleSystems) {
+    const kind = kindOf(system);
+    if (kind !== lastKind) {
+      lastKind = kind;
+      const divider = el("tr", `matrix-divider is-${kind}`);
+      const title = el("th", "matrix-divider-title", kindLabel(kind));
+      title.scope = "rowgroup";
+      title.colSpan = 2;
+      divider.append(title);
+      tbody.append(divider);
+    }
+    tbody.append(
+      renderRow(
+        view.inputHex,
+        system,
+        selectedSystemId === system.meta.id,
+        rankOf.get(system.meta.id) ?? 0,
+        onInspect,
+        onPickRow,
+        lang,
+      ),
+    );
+  }
+  table.append(tbody);
 
   fragment.append(table);
   root.replaceChildren(fragment);

@@ -61,6 +61,9 @@ const langToggle = byId<HTMLButtonElement>("lang-toggle");
 const pageTitle = byId<HTMLElement>("page-title");
 const inspectorTitle = byId<HTMLElement>("inspector-title");
 const resultsTitle = byId<HTMLElement>("results-title");
+const examplesLabel = document.getElementById("examples-label");
+const substrateNote = document.getElementById("substrate-note");
+const sampleChipsRoot = document.getElementById("sample-chips");
 
 const SYSTEM_IDS = new Set<SystemId>(["C", "U", "TCX", "TPX", "MP", "MR", "DPS", "DVS"]);
 const SAME_CODE_FAMILY: Partial<Record<SystemId, readonly SystemId[]>> = {
@@ -82,6 +85,9 @@ let currentSuggestions: Suggestion[] = [];
 let activeSuggestion = -1;
 let suggestTimer = 0;
 let blurTimer = 0;
+let submitInFlight = false;
+let lastSubmitKey = "";
+let lastSubmitAt = 0;
 
 /* ---------- URL state ---------- */
 
@@ -140,6 +146,24 @@ function applyLanguage(lang: Lang): void {
   // Suggestions & Help
   suggestionsRoot.setAttribute("aria-label", t.querySuggestionsAria);
   queryHelp.innerHTML = `${t.queryHelp} <kbd>/</kbd>`;
+
+  // Starter chips & substrate explainer (deck, above fold)
+  if (examplesLabel) examplesLabel.textContent = t.examplesLabel;
+  if (substrateNote) {
+    substrateNote.replaceChildren(
+      document.createTextNode(`${t.substrateNote} `),
+      Object.assign(document.createElement("a"), {
+        href: "#tolerance-note",
+        textContent: t.substrateLink,
+      }),
+    );
+  }
+  if (sampleChipsRoot) {
+    for (const chip of sampleChipsRoot.querySelectorAll<HTMLButtonElement>(".chip")) {
+      const q = chip.dataset.query ?? chip.textContent?.trim() ?? "";
+      chip.setAttribute("aria-label", t.chipAria(q));
+    }
+  }
 
   // Titles
   inspectorTitle.textContent = t.loupeTitle;
@@ -209,10 +233,7 @@ function showEmptyWorkbench(): void {
   activeComparison = null;
   copyAllButton.disabled = true;
   const t = DICTIONARY[currentLang];
-  resultStatus.textContent =
-    currentLang === "en"
-      ? "Ready — select a starter specimen or enter a query above."
-      : "Hazır — bir başlangıç numunesi seçin veya yukarıya bir sorgu girin.";
+  resultStatus.textContent = t.readyStatus;
   renderEmptyState(resultBody, inspectorBody, loupeMode, (q) => {
     input.value = q;
     handleSubmit(q, null, true);
@@ -220,14 +241,17 @@ function showEmptyWorkbench(): void {
 }
 
 function fail(message: string): void {
-  commitUrl(null);
-  showEmptyWorkbench();
+  const hadView = currentView !== null;
+  if (!hadView) {
+    showEmptyWorkbench();
+    resultStatus.textContent = "";
+  }
   queryHelp.hidden = true;
   queryError.textContent = message;
   queryError.hidden = false;
   input.setAttribute("aria-invalid", "true");
   input.setAttribute("aria-describedby", "query-error");
-  input.focus();
+  if (document.activeElement !== input) input.focus();
 }
 
 function setBusy(busy: boolean): void {
@@ -255,8 +279,7 @@ async function loadData(): Promise<void> {
   setBusy(true);
 
   const pending = queryFromUrl();
-  resultStatus.textContent =
-    currentLang === "en" ? "Loading color libraries…" : "Renk kütüphaneleri yükleniyor…";
+  resultStatus.textContent = DICTIONARY[currentLang].loadingStatus;
 
   try {
     const controller = new AbortController();
@@ -302,7 +325,7 @@ async function loadData(): Promise<void> {
     loadState = "ready";
 
     renderLibraries(librariesBody, data.systems, currentLang);
-    footData.textContent = `${data.systems.length} ${currentLang === "en" ? "systems" : "sistem"} · ${formatCount(rows.length, currentLang)} ${currentLang === "en" ? "rows" : "satır"} · ${data.generated}`;
+    footData.textContent = `${data.systems.length} ${DICTIONARY[currentLang].footSystems} · ${formatCount(rows.length, currentLang)} ${DICTIONARY[currentLang].footRows} · ${data.generated}`;
     footBuild.textContent = `PantonAK · ${__BUILD_HASH__}`;
     setBusy(false);
     clearError();
@@ -489,6 +512,7 @@ function refreshWorkspaceView(): void {
       clearError();
       handleSubmit(labelForRow(row), row, true);
       requestAnimationFrame(() => {
+        if (document.activeElement !== document.body) return;
         const next = resultBody.querySelector<HTMLButtonElement>(
           `tr[data-system-id="${CSS.escape(row.system)}"] .card-convert`,
         );
@@ -652,11 +676,15 @@ function handleSubmit(
   syncUrl = true,
 ): void {
   clearError();
-  if (loadState === "loading") return;
-  if (loadState === "error") {
-    renderDataError(resultBody, () => void loadData(), currentLang);
+  if (loadState === "loading" || loadState === "error") {
+    if (loadState === "error") renderDataError(resultBody, () => void loadData(), currentLang);
     return;
   }
+  const dupeKey = exactRow ? `row:${exactRow.system}:${canonCode(exactRow.code)}` : `q:${raw.trim()}`;
+  const now = Date.now();
+  if (dupeKey === lastSubmitKey && now - lastSubmitAt < 400) return;
+  lastSubmitKey = dupeKey;
+  lastSubmitAt = now;
   if (exactRow) {
     const label = labelForRow(exactRow);
     input.value = label;
@@ -675,29 +703,13 @@ function handleSubmit(
   const query = parseQuery(trimmed);
   if (!query) {
     if (trimmed.startsWith("#")) {
-      fail(
-        currentLang === "en"
-          ? "Hex value after # must be 3 or 6 characters."
-          : "# sonrasında hex 3 veya 6 karakter olmalı.",
-      );
+      fail(DICTIONARY[currentLang].invalidHexError);
     } else if (/^rgb\s*\(/i.test(trimmed)) {
-      fail(
-        currentLang === "en"
-          ? "RGB channels must be between 0 and 255."
-          : "RGB kanalları 0–255 arasında olmalı.",
-      );
+      fail(DICTIONARY[currentLang].rgbRangeError);
     } else if (/^cmyk\s*\(/i.test(trimmed)) {
-      fail(
-        currentLang === "en"
-          ? "CMYK channels must be between 0 and 100."
-          : "CMYK kanalları 0–100 arasında olmalı.",
-      );
+      fail(DICTIONARY[currentLang].cmykRangeError);
     } else {
-      fail(
-        currentLang === "en"
-          ? "Enter a hex value, rgb(), cmyk(), Pantone code or thread code."
-          : "Bir hex değeri, rgb(), cmyk(), Pantone kodu veya iplik kodu girin.",
-      );
+      fail(DICTIONARY[currentLang].genericQueryError);
     }
     return;
   }
@@ -717,11 +729,7 @@ function handleSubmit(
       const { r, g, b } = query.rgb;
       const valid = [r, g, b].every((v) => Number.isFinite(v) && v >= 0 && v <= 255);
       if (!valid) {
-        fail(
-          currentLang === "en"
-            ? "RGB channels must be between 0 and 255."
-            : "RGB kanalları 0–255 arasında olmalı.",
-        );
+        fail(DICTIONARY[currentLang].rgbRangeError);
         return;
       }
       applyColour(rgbToHex(query.rgb), trimmed, null);
@@ -732,11 +740,7 @@ function handleSubmit(
       const { c, m, y, k } = query.cmyk;
       const valid = [c, m, y, k].every((v) => Number.isFinite(v) && v >= 0 && v <= 100);
       if (!valid) {
-        fail(
-          currentLang === "en"
-            ? "CMYK channels must be between 0 and 100."
-            : "CMYK kanalları 0–100 arasında olmalı.",
-        );
+        fail(DICTIONARY[currentLang].cmykRangeError);
         return;
       }
       applyColour(rgbToHex(cmykToRgb(query.cmyk)), trimmed, null);
@@ -754,11 +758,7 @@ function handleSubmit(
             canonCode(entry.row.code) === canonCode(query.code),
         );
         if (threadHit) {
-          fail(
-            currentLang === "en"
-              ? `"${query.code}" exists in both print and thread. Use "1225 C" for Pantone, or "Madeira 1225" / "Classic 1225" for thread.`
-              : `"${query.code}" hem baskı hem iplikte var. Pantone için "1225 C", iplik için "Madeira 1225" veya "Classic 1225" yazın.`,
-          );
+          fail(DICTIONARY[currentLang].ambiguousThreadError(query.code));
           return;
         }
       }
@@ -781,28 +781,16 @@ function handleSubmit(
         }
       }
       if (!madeiraOnly && query.system === null && /^\d{4}$/.test(query.code)) {
-        fail(
-          currentLang === "en"
-            ? `Add "Madeira" or "Classic" to disambiguate code "${query.code}".`
-            : `"${query.code}" kodunu ayırt etmek için "Madeira" veya "Classic" ekleyin.`,
-        );
+        fail(DICTIONARY[currentLang].disambiguateMadeiraError(query.code));
         return;
       }
-      fail(
-        currentLang === "en"
-          ? `Code "${trimmed}" not found in loaded libraries. Try "186 C", "19-4052 TCX", or "Classic 1147".`
-          : `Yüklenen kütüphanelerde "${trimmed}" kodu yok. "186 C", "19-4052 TCX" veya "Classic 1147" deneyin.`,
-      );
+      fail(DICTIONARY[currentLang].codeNotFoundError(trimmed));
       return;
     }
     case "text": {
       const results = searchColors(colorRows, query.text);
       if (results.length === 0) {
-        fail(
-          currentLang === "en"
-            ? `No matching code or name for "${query.text}". Try "186 C", "19-4052 TCX", or "Classic 1147".`
-            : `"${query.text}" ile eşleşen kod veya ad yok. "186 C", "19-4052 TCX" veya "Classic 1147" deneyin.`,
-        );
+        fail(DICTIONARY[currentLang].nameNoMatchError(query.text));
         return;
       }
       const shown = results.slice(0, 10);
@@ -940,8 +928,18 @@ async function handleRowCodeCopy(codeElement: HTMLElement): Promise<void> {
 
 form.addEventListener("submit", (event) => {
   event.preventDefault();
-  closeSuggestions();
-  handleSubmit(input.value, null, true);
+  if (submitInFlight) return;
+  submitInFlight = true;
+  setBusy(true);
+  try {
+    closeSuggestions();
+    handleSubmit(input.value, null, true);
+  } finally {
+    requestAnimationFrame(() => {
+      submitInFlight = false;
+      if (loadState === "ready") setBusy(false);
+    });
+  }
 });
 
 input.addEventListener("input", () => {
@@ -1027,6 +1025,16 @@ clearButton.addEventListener("click", () => {
   input.focus();
 });
 
+sampleChipsRoot?.addEventListener("click", (event) => {
+  const chip = (event.target as Element | null)?.closest<HTMLButtonElement>(".chip");
+  const q = chip?.dataset.query?.trim();
+  if (!q) return;
+  closeSuggestions();
+  clearError();
+  input.value = q;
+  handleSubmit(q, null, true);
+});
+
 langToggle.addEventListener("click", () => {
   const nextLang: Lang = currentLang === "tr" ? "en" : "tr";
   applyLanguage(nextLang);
@@ -1064,7 +1072,7 @@ document.addEventListener("click", (event) => {
       void copyText(
         value,
         copyButton,
-        copyButton.dataset.copyLabel ?? (currentLang === "en" ? "values" : "değerler"),
+        copyButton.dataset.copyLabel ?? DICTIONARY[currentLang].valuesCopiedLabel,
       );
     }
   }
@@ -1110,7 +1118,7 @@ copyAllButton.addEventListener("click", () => {
   void copyText(
     resultsToTsv(currentView, currentLang),
     copyAllButton,
-    currentLang === "en" ? "all systems" : "tüm sistemler",
+    DICTIONARY[currentLang].tsvCopiedLabel,
   );
 });
 
@@ -1118,7 +1126,7 @@ copyLinkButton.addEventListener("click", () => {
   void copyText(
     window.location.href,
     copyLinkButton,
-    currentLang === "en" ? "link" : "bağlantı",
+    DICTIONARY[currentLang].linkCopiedLabel,
   );
 });
 

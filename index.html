@@ -124,6 +124,15 @@
           </div>
 
           <div class="deck-subbar">
+            <div class="examples">
+              <span class="examples-label" id="examples-label">Örnek:</span>
+              <ul class="chips" id="sample-chips" aria-labelledby="examples-label">
+                <li><button class="chip mono" type="button" data-query="186 C">186 C</button></li>
+                <li><button class="chip mono" type="button" data-query="19-4052 TCX">19-4052 TCX</button></li>
+                <li><button class="chip mono" type="button" data-query="#C8102E">#C8102E</button></li>
+                <li><button class="chip mono" type="button" data-query="Classic 1147">Classic 1147</button></li>
+              </ul>
+            </div>
             <div class="feedback-slot">
               <p class="help" id="query-help">
                 8 kütüphane · CIEDE2000 (D50) · Odak için <kbd>/</kbd>
@@ -131,6 +140,10 @@
               <p class="error" id="query-error" role="alert" hidden></p>
             </div>
           </div>
+          <p class="substrate-note" id="substrate-note">
+            C/U baskı mürekkebi, TCX/TPX pamuklu tekstildir — aynı kod farklı zeminde farklı görünür.
+            <a href="#tolerance-note">Tolerans ölçeği</a>
+          </p>
         </form>
       </div>
     </header>
@@ -183,8 +196,8 @@
         </div>
       </section>
 
-      <section class="reference-strip" aria-label="Teknik notlar ve kütüphane kaynakları">
-        <details class="reference-block">
+      <section id="reference-strip" class="reference-strip" aria-label="Teknik notlar ve kütüphane kaynakları">
+        <details class="reference-block" id="tolerance-note">
           <summary>CIEDE2000 (D50) tolerans ölçeği ve renk uzayı uyarıları</summary>
           <div class="reference-body">
             <p>

@@ -13,6 +13,10 @@ export interface Translations {
   matchBusy: string;
   querySuggestionsAria: string;
   queryHelp: string;
+  examplesLabel: string;
+  substrateNote: string;
+  substrateLink: string;
+  chipAria: (q: string) => string;
   loupeTitle: string;
   loupeNearest: string;
   loupeInput: string;
@@ -73,9 +77,23 @@ export interface Translations {
   statusNoCloseMatch: (count: number, nearest: string, delta: string) => string;
   statusClosest: (count: number, nearest: string, delta: string) => string;
   invalidHexError: string;
+  rgbRangeError: string;
+  cmykRangeError: string;
+  genericQueryError: string;
+  ambiguousThreadError: (code: string) => string;
+  disambiguateMadeiraError: (code: string) => string;
+  codeNotFoundError: (query: string) => string;
+  nameNoMatchError: (query: string) => string;
+  readyStatus: string;
+  loadingStatus: string;
+  footSystems: string;
+  footRows: string;
   copyFailed: string;
   copiedToast: string;
   copiedLabelToast: (label: string) => string;
+  tsvCopiedLabel: string;
+  linkCopiedLabel: string;
+  valuesCopiedLabel: string;
   langToggleAria: string;
 }
 
@@ -89,12 +107,17 @@ export const DICTIONARY: Record<Lang, Translations> = {
     fieldLabel: "Pantone kodu, iplik no veya renk değeri",
     colorPickerTitle: "Görsel olarak renk seç",
     searchPlaceholder:
-      "Pantone / Madeira / Durak kodu, hex (#186 C, #c8102e, 19-4052) veya renk adı...",
+      "186 C, 19-4052 TCX, #C8102E, Classic 1147, Polyneon 1610…",
     clearAria: "Sorguyu temizle",
     matchButton: "Eşleştir",
     matchBusy: "Eşleştiriliyor…",
     querySuggestionsAria: "Kod veya renk önerileri",
     queryHelp: "8 kütüphane · CIEDE2000 (D50) · Odak için",
+    examplesLabel: "Örnek:",
+    substrateNote:
+      "C/U baskı mürekkebi, TCX/TPX pamuklu tekstildir — aynı kod farklı zeminde farklı görünür.",
+    substrateLink: "Tolerans ölçeği",
+    chipAria: (q) => `Örnek sorgu: ${q}`,
     loupeTitle: "Numune büyüteci",
     loupeNearest: "En yakın eşleşme",
     loupeInput: "Girdi numunesi",
@@ -153,7 +176,7 @@ export const DICTIONARY: Record<Lang, Translations> = {
       "Bölünmüş karşılaştırıcıyı açmak için bir başlangıç rengi seçin veya yukarıya herhangi bir Pantone, Madeira, Durak, hex, RGB ya da CMYK değeri girin.",
     starterHeading: "Hızlı başlangıç numuneleri",
     starterSub:
-      "Sekiz baskı, tekstil ve nakış ipliği kütüphanesinin tamamında karşılaştırmak için aşağıdan bir numune seçin.",
+      "Sekiz baskı, tekstil ve nakış ipliği kütüphanesinin tamamında karşılaştırmak için aşağıdan bir numune seçin. Örn: 186 C yazıp Eşleştir'e basın — loupe + 8 ΔE00 sırası + TSV kopyala.",
     dataErrorTitle: "Renk veri kümesi yüklenemedi.",
     dataErrorDetail: "JSON paketi gelmedi. Sayfayı yenileyin veya tekrar deneyin.",
     retry: "Yeniden dene",
@@ -164,9 +187,28 @@ export const DICTIONARY: Record<Lang, Translations> = {
     statusClosest: (count, nearest, delta) =>
       `${count} kütüphane · En yakın: ${nearest} · ΔE00 ${delta}`,
     invalidHexError: "# sonrasında hex 3 veya 6 karakter olmalı.",
+    rgbRangeError: "RGB kanalları 0–255 arasında olmalı.",
+    cmykRangeError: "CMYK kanalları 0–100 arasında olmalı.",
+    genericQueryError:
+      "Bir hex değeri, rgb(), cmyk(), Pantone kodu veya iplik kodu girin.",
+    ambiguousThreadError: (code) =>
+      `"${code}" hem baskı hem iplikte var. Pantone için "1225 C", iplik için "Madeira 1225" veya "Classic 1225" yazın.`,
+    disambiguateMadeiraError: (code) =>
+      `"${code}" kodunu ayırt etmek için "Madeira" veya "Classic" ekleyin.`,
+    codeNotFoundError: (query) =>
+      `Yüklenen kütüphanelerde "${query}" kodu yok. "186 C", "19-4052 TCX" veya "Classic 1147" deneyin.`,
+    nameNoMatchError: (query) =>
+      `"${query}" ile eşleşen kod veya ad yok. "186 C", "19-4052 TCX" veya "Classic 1147" deneyin.`,
+    readyStatus: "Hazır — bir başlangıç numunesi seçin veya yukarıya bir sorgu girin.",
+    loadingStatus: "Renk kütüphaneleri yükleniyor…",
+    footSystems: "sistem",
+    footRows: "satır",
     copyFailed: "Kopyalama başarısız. Değeri seçip elle kopyalayın.",
     copiedToast: "Kopyalandı",
     copiedLabelToast: (label) => `${label} panoya kopyalandı.`,
+    tsvCopiedLabel: "TSV (tüm sistemler)",
+    linkCopiedLabel: "bağlantı",
+    valuesCopiedLabel: "değerler",
     langToggleAria: "Dili değiştir (Türkçe / English)",
   },
   en: {
@@ -178,12 +220,17 @@ export const DICTIONARY: Record<Lang, Translations> = {
     fieldLabel: "Pantone code, thread no or color value",
     colorPickerTitle: "Choose color visually",
     searchPlaceholder:
-      "Pantone / Madeira / Durak code, hex (#186 C, #c8102e, 19-4052) or color name...",
+      "186 C, 19-4052 TCX, #C8102E, Classic 1147, Polyneon 1610…",
     clearAria: "Clear query",
     matchButton: "Match",
     matchBusy: "Matching…",
     querySuggestionsAria: "Code or color suggestions",
     queryHelp: "8 libraries · CIEDE2000 (D50) · Focus with",
+    examplesLabel: "Try:",
+    substrateNote:
+      "C/U is print ink, TCX/TPX is cotton textile — same code looks different on each substrate.",
+    substrateLink: "Tolerance scale",
+    chipAria: (q) => `Sample query: ${q}`,
     loupeTitle: "Specimen loupe",
     loupeNearest: "Nearest match",
     loupeInput: "Input specimen",
@@ -242,7 +289,7 @@ export const DICTIONARY: Record<Lang, Translations> = {
       "Choose a starter specimen or enter any Pantone, Madeira, Durak, hex, RGB, or CMYK value above to open the split comparator.",
     starterHeading: "Quick starter swatches",
     starterSub:
-      "Select a specimen below to compare across all eight print, textile, and embroidery thread libraries.",
+      "Select a specimen below to compare across all eight print, textile, and embroidery thread libraries. E.g. type 186 C and hit Match — loupe + 8 ΔE00 ranks + copy TSV.",
     dataErrorTitle: "Could not load color dataset.",
     dataErrorDetail: "JSON bundle failed to load. Refresh the page or try again.",
     retry: "Retry",
@@ -253,9 +300,27 @@ export const DICTIONARY: Record<Lang, Translations> = {
     statusClosest: (count, nearest, delta) =>
       `${count} libraries · Nearest: ${nearest} · ΔE00 ${delta}`,
     invalidHexError: "Hex value after # must be 3 or 6 characters.",
+    rgbRangeError: "RGB channels must be between 0 and 255.",
+    cmykRangeError: "CMYK channels must be between 0 and 100.",
+    genericQueryError: "Enter a hex value, rgb(), cmyk(), Pantone code or thread code.",
+    ambiguousThreadError: (code) =>
+      `"${code}" exists in both print and thread. Use "1225 C" for Pantone, or "Madeira 1225" / "Classic 1225" for thread.`,
+    disambiguateMadeiraError: (code) =>
+      `Add "Madeira" or "Classic" to disambiguate code "${code}".`,
+    codeNotFoundError: (query) =>
+      `Code "${query}" not found in loaded libraries. Try "186 C", "19-4052 TCX", or "Classic 1147".`,
+    nameNoMatchError: (query) =>
+      `No matching code or name for "${query}". Try "186 C", "19-4052 TCX", or "Classic 1147".`,
+    readyStatus: "Ready — select a starter specimen or enter a query above.",
+    loadingStatus: "Loading color libraries…",
+    footSystems: "systems",
+    footRows: "rows",
     copyFailed: "Copy failed. Please select and copy manually.",
     copiedToast: "Copied",
     copiedLabelToast: (label) => `${label} copied to clipboard.`,
+    tsvCopiedLabel: "TSV (all systems)",
+    linkCopiedLabel: "link",
+    valuesCopiedLabel: "values",
     langToggleAria: "Switch language (Türkçe / English)",
   },
 };
