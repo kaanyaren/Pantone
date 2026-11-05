@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>PantonAK — Renk ve İplik Tezgâhı</title>
+    <title>PantonAK — Pantone Karşılığı Bulucu</title>
     <meta
       name="description"
       content="Pantone C, U, TCX ve TPX, Madeira Polyneon ve Rayon, Durak Polysoft ve Visco, hex, RGB ve CMYK değerlerini CIEDE2000 en yakın eşleşmelerle dönüştürün."
@@ -14,7 +14,7 @@
     <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
     <link rel="manifest" href="./site.webmanifest" />
     <meta name="theme-color" content="#10141B" />
-    <meta property="og:title" content="PantonAK — Renk ve İplik Tezgâhı" />
+    <meta property="og:title" content="PantonAK — Pantone Karşılığı Bulucu" />
     <meta
       property="og:description"
       content="Pantone, Madeira ve Durak renk çapraz referansı; CIEDE2000 (D50) en yakın eşleşmelerle."
@@ -47,7 +47,7 @@
             <a class="brand" href="./" aria-label="PantonAK ana sayfa">
               <img src="./brand/logo-deck.svg" alt="PantonAK" width="107" height="36" />
             </a>
-            <h1 id="page-title" class="deck-title">Renk ve İplik Tezgâhı</h1>
+            <h1 id="page-title" class="deck-title">Pantone Karşılığı Bulucu</h1>
           </div>
           <nav class="deck-nav" aria-label="Proje bağlantıları">
             <a
@@ -63,7 +63,7 @@
 
         <form id="convert-form" class="command-form" novalidate>
           <label class="field-label" for="query-input">
-            Pantone kodu, Madeira / Durak iplik numarası, hex, RGB, CMYK veya renk adı girin
+            Pantone kodu, iplik no veya renk değeri
           </label>
           <div class="search-row">
             <label class="color-well" for="color-picker" title="Görsel olarak renk seç">
@@ -108,14 +108,11 @@
                 <li><button class="chip" type="button" data-q="19-4052 TCX">19-4052 TCX</button></li>
                 <li><button class="chip" type="button" data-q="#C8102E">#C8102E</button></li>
                 <li><button class="chip" type="button" data-q="Rayon 1147">Rayon 1147</button></li>
-                <li><button class="chip" type="button" data-q="Polyneon 1610">Polyneon 1610</button></li>
-                <li><button class="chip" type="button" data-q="Polysoft 00118">Polysoft 00118</button></li>
               </ul>
             </div>
             <div class="feedback-slot">
               <p class="help" id="query-help">
-                D50 CIELAB · 8 kütüphanede CIEDE2000 sıralaması. Odaklanmak için <kbd>/</kbd>,
-                temizlemek için <kbd>Esc</kbd>.
+                8 kütüphane · CIEDE2000 (D50) · Odak için <kbd>/</kbd>
               </p>
               <p class="error" id="query-error" role="alert" hidden></p>
             </div>
@@ -158,17 +155,17 @@
                   Durak
                 </button>
               </div>
-              <div class="export-tools">
-                <button id="copy-all" class="button button-quiet" type="button" disabled>
-                  TSV kopyala
-                </button>
-                <button id="copy-link" class="button button-quiet" type="button">
-                  Bağlantıyı kopyala
-                </button>
-              </div>
             </div>
           </div>
           <div id="result-body"></div>
+          <div class="results-foot">
+            <button id="copy-all" class="button button-quiet" type="button" disabled>
+              TSV kopyala
+            </button>
+            <button id="copy-link" class="button button-quiet" type="button">
+              Bağlantıyı kopyala
+            </button>
+          </div>
         </div>
       </section>
 

@@ -318,7 +318,11 @@ function parseDurak(raw: unknown, sourceId: string, short: string): ParsedRow[] 
       if (typeof record.colorHexCode !== "string") {
         fail(`${sourceId}[${columnIndex}][${colorIndex}]: missing colorHexCode`);
       }
-      const code = cleanCode(String(record.colorCode), `${sourceId}[${columnIndex}][${colorIndex}]`);
+      const rawCode = String(record.colorCode).trim();
+      const normalizedCode = /^\d+$/.test(rawCode)
+        ? rawCode.replace(/^0+(?=\d)/, "")
+        : rawCode;
+      const code = cleanCode(normalizedCode, `${sourceId}[${columnIndex}][${colorIndex}]`);
       rows.push({
         code,
         name: cleanName(`${short} ${code}`, `${sourceId}[${columnIndex}][${colorIndex}]`),

@@ -44,7 +44,7 @@ const EXPECTED_COUNTS: Record<SystemId, number> = {
 const SYSTEM_ORDER: SystemId[] = ["C", "U", "TCX", "TPX", "MP", "MR", "DPS", "DVS"];
 
 // sha256 of JSON.stringify(rows). Guards against silent source or adapter drift.
-const GOLDEN_ROWS_SHA256 = "97d2e38f0421da15624621ba97482c2c951f194330d6089aa7dcc585b55e3134";
+const GOLDEN_ROWS_SHA256 = "f1e327389aaa3fdcb0693489cdd42f8576df8ff4f8a60554b624fa472f12bd26";
 
 const HEX_RE = /^#[0-9A-F]{6}$/;
 
@@ -143,5 +143,12 @@ test("Durak names use the system fallback", () => {
   for (const [system, code, name] of durak) {
     const prefix = system === "DPS" ? "Polysoft" : "Visco";
     assert.equal(name, `${prefix} ${code}`);
+  }
+});
+
+test("Durak codes carry no leading zeroes", () => {
+  const durak = dataset.rows.filter((row) => row[0] === "DPS" || row[0] === "DVS");
+  for (const [, code] of durak) {
+    assert.match(code, /^[1-9]\d*$/, `Durak code ${code} has a leading zero`);
   }
 });

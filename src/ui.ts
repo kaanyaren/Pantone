@@ -216,49 +216,32 @@ export function renderInspector(
   }
   fragment.append(coords);
 
-  /* Perceptual ΔE00 strip across the 8 systems */
+  /* Compact ΔE00 readout across the 8 systems */
   const ruler = el("div", "tolerance-card");
   const rulerHead = el("div", "tolerance-head");
-  rulerHead.append(
-    el("span", "tolerance-title", "Kütüphaneler arası ΔE00 dağılımı"),
-    el("span", "tolerance-hint mono", "0 → 5+"),
-  );
+  rulerHead.append(el("span", "tolerance-title", "ΔE00 dağılımı"));
   ruler.append(rulerHead);
 
-  const track = el("div", "tolerance-track");
-  track.setAttribute("aria-hidden", "true");
-  for (const zone of ["≤1", "1–2", "2–3.5", "3.5–5", ">5"]) {
-    track.append(el("span", "tolerance-zone mono", zone));
-  }
-  ruler.append(track);
-
-  const pinList = el("div", "tolerance-pins");
+  const pinList = el("div", "tolerance-list");
   for (const sys of view.systems) {
     const primary = sys.sameCode ?? sys.matches[0];
     if (!primary) continue;
     const band = deltaBand(primary.deltaE);
     const pin = el(
       "button",
-      `tolerance-pin tone-${band.tone}${target?.meta.id === sys.meta.id ? " is-selected" : ""}`,
+      `tolerance-chip tone-${band.tone}${target?.meta.id === sys.meta.id ? " is-selected" : ""}`,
     );
     pin.type = "button";
     pin.dataset.systemId = sys.meta.id;
-    const pct = Math.min(100, Math.max(2, (primary.deltaE / 5) * 100));
-    pin.style.setProperty("--de-pct", `${pct.toFixed(1)}%`);
     pin.setAttribute(
       "aria-label",
       `İncele ${sys.meta.label}: ${primary.row.code}, ΔE00 ${formatDelta(primary.deltaE)}`,
     );
-    const pinTop = el("span", "pin-top");
-    pinTop.append(
+    pin.append(
       swatch(primary.row.hex, "swatch swatch-xs"),
       el("span", "pin-short mono", sys.meta.short),
       el("span", "pin-de mono", formatDelta(primary.deltaE)),
     );
-    const pinBar = el("span", "pin-bar");
-    pinBar.setAttribute("aria-hidden", "true");
-    pinBar.append(el("span", "pin-fill"));
-    pin.append(pinTop, pinBar);
     pin.addEventListener("click", () => onSelectSystem(sys.meta.id));
     pinList.append(pin);
   }
@@ -285,29 +268,26 @@ function renderThreadSummary(
 
   const section = el("section", "thread-summary");
   section.setAttribute("aria-label", "En iyi iplik önerileri");
-  const heading = el("p", "thread-heading", "En iyi iplik önerileri");
-  heading.append(el("span", "thread-note", "Yalnızca iplik kütüphaneleri · ΔE00 sırasına göre"));
-  section.append(heading);
+  section.append(el("span", "thread-heading", "İplik önerileri"));
 
-  const grid = el("div", "thread-grid");
+  const row = el("div", "thread-row");
   for (const pick of picks) {
-    const band = deltaBand(pick.match.deltaE);
-    const card = el("button", "starter-card thread-card");
-    card.type = "button";
-    card.setAttribute(
+    const chip = el("button", "thread-pick");
+    chip.type = "button";
+    chip.setAttribute(
       "aria-label",
       `Dönüştür ${pick.meta.label} ${pick.match.row.code} (${pick.match.row.name}), ΔE00 ${formatDelta(pick.match.deltaE)}`,
     );
-    card.append(
-      swatch(pick.match.row.hex, "swatch starter-swatch"),
-      el("span", "starter-code mono", pick.match.row.code),
-      el("span", "starter-sub", pick.match.row.name),
-      el("span", "thread-meta mono", `${pick.meta.short} · ΔE00 ${formatDelta(pick.match.deltaE)} (${band.text})`),
+    chip.append(
+      swatch(pick.match.row.hex, "swatch thread-swatch"),
+      el("span", "thread-name", pick.meta.short),
+      el("span", "thread-code mono", pick.match.row.code),
+      el("span", "thread-de mono", `ΔE ${formatDelta(pick.match.deltaE)}`),
     );
-    card.addEventListener("click", () => onPickRow(pick.match.row));
-    grid.append(card);
+    chip.addEventListener("click", () => onPickRow(pick.match.row));
+    row.append(chip);
   }
-  section.append(grid);
+  section.append(row);
   return section;
 }
 
