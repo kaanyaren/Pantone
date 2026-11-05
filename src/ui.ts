@@ -234,7 +234,9 @@ export function renderInspector(
   const rightCap = el("div", "loupe-caption loupe-caption-right");
   if (target) {
     rightCap.append(el("span", "loupe-tag", target.meta.short));
-    rightCap.append(el("strong", "loupe-code mono", target.match.row.code));
+    const loupeCode = el("strong", "loupe-code mono", target.match.row.code);
+    loupeCode.title = target.match.row.code;
+    rightCap.append(loupeCode);
     rightCap.append(el("span", "loupe-hex mono", target.match.row.hex.toUpperCase()));
     rightCap.append(el("span", "loupe-lab mono", `Lab ${labText(target.match.row.hex)}`));
   } else {
@@ -248,8 +250,10 @@ export function renderInspector(
   if (target) {
     const band = deltaBand(target.match.deltaE, lang);
     const seamBar = el("div", "loupe-seam-bar");
+    const seamName = el("span", "seam-name", `${target.meta.label} · ${target.match.row.name}`);
+    seamName.title = `${target.meta.label} · ${target.match.row.name}`;
     seamBar.append(
-      el("span", "seam-name", `${target.meta.label} · ${target.match.row.name}`),
+      seamName,
       el(
         "span",
         `tone-pill tone-${band.tone} mono`,
@@ -307,25 +311,32 @@ export function renderInspector(
 
   const pinList = el("div", "tolerance-list");
   for (const sys of view.systems) {
-    const primary = sys.sameCode ?? sys.matches[0];
-    if (!primary) continue;
-    const band = deltaBand(primary.deltaE, lang);
+    const primary = primaryOf(sys);
+    const shown = primary ?? sys.matches[0];
+    if (!shown) continue;
+    const band = deltaBand(shown.deltaE, lang);
     const pin = el(
       "button",
-      `tolerance-chip tone-${band.tone}${target?.meta.id === sys.meta.id ? " is-selected" : ""}`,
+      `tolerance-chip tone-${band.tone}${target?.meta.id === sys.meta.id ? " is-selected" : ""}${primary ? "" : " is-none"}`,
     );
     pin.type = "button";
     pin.dataset.systemId = sys.meta.id;
     pin.setAttribute(
       "aria-label",
-      `${sys.meta.label}: ${primary.row.code}, ΔE00 ${formatDelta(primary.deltaE)} · ${band.text}`,
+      `${sys.meta.label}: ${shown.row.code}, ΔE00 ${formatDelta(shown.deltaE)} · ${band.text}`,
     );
     pin.title = band.text;
     if (target?.meta.id === sys.meta.id) pin.setAttribute("aria-current", "true");
     pin.append(
       el("span", "chip-lib mono", sys.meta.short),
-      el("span", "chip-de mono", formatDelta(primary.deltaE)),
+      el("span", "chip-de mono", formatDelta(shown.deltaE)),
+      el("span", "chip-band", band.text),
     );
+    if (!primary) {
+      pin.disabled = true;
+      pinList.append(pin);
+      continue;
+    }
     pin.addEventListener("click", () => onSelectSystem(sys.meta.id));
     pinList.append(pin);
   }
@@ -355,15 +366,7 @@ function renderNearest(
     const item = el("li", "nearest-item");
     const pick = el("button", "nearest-pick");
     pick.type = "button";
-    pick.setAttribute(
-      "aria-label",
-      t.inspectCandidateAria(
-        meta.short,
-        match.row.code,
-        match.row.name,
-        formatDelta(match.deltaE),
-      ),
-    );
+    pick.setAttribute("aria-label", t.inspectAria(meta.label, match.row.code));
     pick.append(
       swatch(match.row.hex, "swatch swatch-xs"),
       el("span", "nearest-code mono", match.row.code),
@@ -371,8 +374,12 @@ function renderNearest(
       el("span", "nearest-hex mono", match.row.hex),
       el("span", "nearest-de mono", `ΔE ${formatDelta(match.deltaE)}`),
     );
-    pick.addEventListener("click", () => onPickRow(match.row));
-    item.append(pick);
+    pick.addEventListener("click", () => onInspect(meta, match, true));
+    const requery = el("button", "nearest-requery", t.requery);
+    requery.type = "button";
+    requery.setAttribute("aria-label", t.requeryAria(meta.short, match.row.code, match.row.name));
+    requery.addEventListener("click", () => onPickRow(match.row));
+    item.append(pick, requery);
     list.append(item);
   }
   details.append(list);

@@ -502,7 +502,7 @@ function selectSystemInLoupe(systemId: SystemId): void {
   if (!currentView) return;
   const sys = currentView.systems.find((s) => s.meta.id === systemId);
   if (!sys) return;
-  const target = sys.sameCode ?? sys.matches[0];
+  const target = primaryOf(sys);
   if (!target) return;
   activeComparison = { meta: sys.meta, match: target, pinned: true };
   renderInspector(

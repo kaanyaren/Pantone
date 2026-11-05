@@ -37,6 +37,8 @@ export interface Translations {
   linkCopy: string;
   inspect: string;
   inspectAria: (label: string, code: string) => string;
+  requery: string;
+  requeryAria: (system: string, code: string, name: string) => string;
   copyCardButton: string;
   copyCardAria: (label: string) => string;
   copyCardTitle: string;
@@ -138,9 +140,11 @@ export const DICTIONARY: Record<Lang, Translations> = {
     linkCopy: "Bağlantıyı kopyala",
     inspect: "İncele",
     inspectAria: (label, code) => `Loupe'ta karşılaştır: ${label} ${code}`,
+    requery: "Sorgula",
+    requeryAria: (system, code, name) => `Bunu sorgula: ${system} ${code} (${name})`,
     copyCardButton: "Kopyala",
     copyCardAria: (label) => `Kopyala: ${label}`,
-    copyCardTitle: "Adı ve kodu kopyala",
+    copyCardTitle: "Adı, kodu ve HEX değerini kopyala",
     copiedAnnouncement: (code) => `${code} kopyalandı`,
     coordCopyAria: (label, value) => `${label} ${value} değerini kopyala`,
     deltaBands: {
@@ -251,9 +255,11 @@ export const DICTIONARY: Record<Lang, Translations> = {
     linkCopy: "Copy link",
     inspect: "Inspect",
     inspectAria: (label, code) => `Compare in loupe: ${label} ${code}`,
+    requery: "Re-query",
+    requeryAria: (system, code, name) => `Re-query with ${system} ${code} (${name})`,
     copyCardButton: "Copy",
     copyCardAria: (label) => `Copy: ${label}`,
-    copyCardTitle: "Copy name and code",
+    copyCardTitle: "Copy name, code and HEX",
     copiedAnnouncement: (code) => `${code} copied`,
     coordCopyAria: (label, value) => `Copy ${label} ${value}`,
     deltaBands: {
