@@ -1631,15 +1631,16 @@ h2 {
   .result-table tbody {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-3);
+    gap: var(--space-2);
     align-items: start;
-    padding-top: var(--space-3);
+    padding-top: var(--space-2);
   }
 
   .result-row {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    padding: var(--space-3);
+    gap: 0;
+    padding: var(--space-2) var(--space-3);
     border: var(--rule) solid var(--color-rule-2);
     border-radius: var(--radius-control);
     background: var(--color-paper);
@@ -1647,10 +1648,10 @@ h2 {
 
   .result-table td {
     display: grid;
-    grid-template-columns: 5.5rem minmax(0, 1fr);
-    gap: var(--space-2);
+    grid-template-columns: 4.5rem minmax(0, 1fr);
+    gap: var(--space-1);
     align-items: baseline;
-    padding: var(--space-1) 0;
+    padding: 2px 0;
     border-bottom: 0;
   }
 
@@ -1668,8 +1669,16 @@ h2 {
     min-width: 0;
   }
 
-  .cell-copy .copy-button {
-    width: fit-content;
+  .result-table .de-value {
+    margin-bottom: 2px;
+  }
+
+  .result-table .system-subline {
+    margin-top: 0;
+  }
+
+  .result-table .cell-match .nearest {
+    margin-top: var(--space-1);
   }
 }
 
@@ -1709,16 +1718,17 @@ h2 {
   .result-row {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    padding-block: var(--space-2);
+    gap: 0;
+    padding-block: var(--space-1);
     border-bottom: var(--rule) solid var(--color-rule-2);
   }
 
   .result-table td {
     display: grid;
-    grid-template-columns: 5.5rem minmax(0, 1fr);
-    gap: var(--space-2);
+    grid-template-columns: 4.5rem minmax(0, 1fr);
+    gap: var(--space-1);
     align-items: baseline;
-    padding: var(--space-1) 0;
+    padding: 2px 0;
     border-bottom: 0;
   }
 
@@ -1733,10 +1743,6 @@ h2 {
 
   .result-table td > * {
     grid-column: 2;
-  }
-
-  .cell-copy .copy-button {
-    width: fit-content;
   }
 
   .starter-grid {

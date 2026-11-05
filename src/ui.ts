@@ -101,18 +101,6 @@ function formatDelta(deltaE: number): string {
   return deltaE.toFixed(2);
 }
 
-function rowCopyLine(meta: SystemMeta, match: Match): string {
-  return [
-    meta.label,
-    match.row.code,
-    match.row.name,
-    match.row.hex,
-    `RGB ${rgbText(match.row.hex)}`,
-    `CMYK ${cmykText(match.row.hex)}`,
-    `ΔE00 ${formatDelta(match.deltaE)} (${deltaBand(match.deltaE).text})`,
-  ].join(" · ");
-}
-
 export function matchesFilter(id: SystemId, filter: LibraryFilter): boolean {
   switch (filter) {
     case "all":
@@ -253,7 +241,7 @@ export function renderInspector(
 
 /* ---------- right pane: 8-library matrix ---------- */
 
-const COLUMNS = ["Kütüphane", "Kod", "Numune ve formül", "Hex", "ΔE00", "Kopyala"] as const;
+const COLUMNS = ["Kütüphane", "Numune", "ΔE00"] as const;
 
 function renderThreadSummary(
   view: ResultsView,
@@ -358,10 +346,6 @@ function renderRow(
   tdSystem.append(sysMetaLine);
   tr.append(tdSystem);
 
-  const tdCode = el("td", "cell-code");
-  tdCode.dataset.label = "Kod";
-  tdCode.append(el("span", "code-badge mono", primary ? primary.row.code : "—"));
-
   const tdMatch = el("td", "cell-match");
   tdMatch.dataset.label = "Numune";
   if (primary) {
@@ -388,10 +372,6 @@ function renderRow(
     tdMatch.append(renderNearest(system.meta, system.matches, onInspect, onPickRow));
   }
 
-  const tdHex = el("td", "cell-hex");
-  tdHex.dataset.label = "Hex";
-  tdHex.append(el("span", "mono", primary ? primary.row.hex : "—"));
-
   const tdDe = el("td", "cell-de");
   tdDe.dataset.label = "ΔE00";
   const band = primary
@@ -400,24 +380,7 @@ function renderRow(
   tdDe.append(el("span", "de-value mono", primary ? formatDelta(primary.deltaE) : "—"));
   tdDe.append(el("span", `tone-pill tone-${band.tone}`, band.text));
 
-  const tdCopy = el("td", "cell-copy");
-  tdCopy.dataset.label = "Kopyala";
-  const copy = el("button", "copy-button", "Satırı kopyala");
-  copy.type = "button";
-  copy.disabled = !primary;
-  copy.setAttribute(
-    "aria-label",
-    primary
-      ? `${system.meta.label} içindeki ${primary.row.code} için tam özellik satırını kopyala`
-      : "Kopyalanacak değer yok",
-  );
-  if (primary) {
-    copy.dataset.copy = rowCopyLine(system.meta, primary);
-    copy.dataset.copyLabel = `${primary.row.code} satırı (${system.meta.label})`;
-  }
-  tdCopy.append(copy);
-
-  tr.append(tdCode, tdMatch, tdHex, tdDe, tdCopy);
+  tr.append(tdMatch, tdDe);
   return tr;
 }
 
