@@ -144,7 +144,7 @@ export const DICTIONARY: Record<Lang, Translations> = {
     requeryAria: (system, code, name) => `Bunu sorgula: ${system} ${code} (${name})`,
     copyCardButton: "Kopyala",
     copyCardAria: (label) => `Kopyala: ${label}`,
-    copyCardTitle: "Adı, kodu ve HEX değerini kopyala",
+    copyCardTitle: "Kodu ve HEX değerini kopyala",
     copiedAnnouncement: (code) => `${code} kopyalandı`,
     coordCopyAria: (label, value) => `${label} ${value} değerini kopyala`,
     deltaBands: {
@@ -259,7 +259,7 @@ export const DICTIONARY: Record<Lang, Translations> = {
     requeryAria: (system, code, name) => `Re-query with ${system} ${code} (${name})`,
     copyCardButton: "Copy",
     copyCardAria: (label) => `Copy: ${label}`,
-    copyCardTitle: "Copy name, code and HEX",
+    copyCardTitle: "Copy code and HEX",
     copiedAnnouncement: (code) => `${code} copied`,
     coordCopyAria: (label, value) => `Copy ${label} ${value}`,
     deltaBands: {

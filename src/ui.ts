@@ -374,7 +374,7 @@ function renderNearest(
       el("span", "nearest-hex mono", match.row.hex),
       el("span", "nearest-de mono", `ΔE ${formatDelta(match.deltaE)}`),
     );
-    pick.addEventListener("click", () => onInspect(meta, match, true));
+    pick.addEventListener("click", () => onInspect(meta, match, false));
     const requery = el("button", "nearest-requery", t.requery);
     requery.type = "button";
     requery.setAttribute("aria-label", t.requeryAria(meta.short, match.row.code, match.row.name));
