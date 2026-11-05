@@ -482,7 +482,7 @@ export function renderResults(
   const primaryDelta = (sys: SystemResult): number =>
     sys.sameCode?.deltaE ?? sys.matches[0]?.deltaE ?? Number.POSITIVE_INFINITY;
   const kindOrder = (sys: SystemResult): number =>
-    sys.meta.family === "pantone" ? 0 : 1;
+    sys.meta.family === "pantone" ? 1 : 0;
   const visibleSystems = view.systems
     .filter((sys) => matchesFilter(sys.meta.id, filter))
     .slice()
