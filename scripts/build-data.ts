@@ -74,7 +74,7 @@ const SYSTEM_ORDER: SystemId[] = ["C", "U", "TCX", "TPX", "MP", "MR", "DPS", "DV
 const SYSTEM_META: Omit<SystemMeta, "count">[] = [
   {
     id: "C",
-    label: "Pantone Solid Coated",
+    label: "Pantone Düz Kaplı",
     short: "C",
     family: "pantone",
     provenance: "community",
@@ -83,7 +83,7 @@ const SYSTEM_META: Omit<SystemMeta, "count">[] = [
   },
   {
     id: "U",
-    label: "Pantone Solid Uncoated",
+    label: "Pantone Düz Kaplamasız",
     short: "U",
     family: "pantone",
     provenance: "community",
@@ -101,7 +101,7 @@ const SYSTEM_META: Omit<SystemMeta, "count">[] = [
   },
   {
     id: "TPX",
-    label: "Pantone TPX (legacy)",
+    label: "Pantone TPX (eski)",
     short: "TPX",
     family: "pantone",
     provenance: "legacy",
@@ -132,7 +132,7 @@ const SYSTEM_META: Omit<SystemMeta, "count">[] = [
     short: "Polysoft",
     family: "durak",
     provenance: "manufacturer",
-    source: "Durak digital chart",
+    source: "Durak dijital renk kartı",
     license: "manufacturer permission (not public)",
   },
   {
@@ -141,7 +141,7 @@ const SYSTEM_META: Omit<SystemMeta, "count">[] = [
     short: "Visco",
     family: "durak",
     provenance: "manufacturer",
-    source: "Durak digital chart",
+    source: "Durak dijital renk kartı",
     license: "manufacturer permission (not public)",
   },
 ];
