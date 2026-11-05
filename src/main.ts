@@ -232,6 +232,7 @@ function showEmptyWorkbench(): void {
   currentView = null;
   activeComparison = null;
   copyAllButton.disabled = true;
+  if (window.matchMedia("(max-width: 68rem)").matches) inspectorRail.open = false;
   const t = DICTIONARY[currentLang];
   resultStatus.textContent = t.readyStatus;
   renderEmptyState(resultBody, inspectorBody, loupeMode, (q) => {
@@ -544,7 +545,7 @@ function refreshWorkspaceView(): void {
       requestAnimationFrame(() => {
         if (document.activeElement !== document.body) return;
         const next = resultBody.querySelector<HTMLButtonElement>(
-          `tr[data-system-id="${CSS.escape(row.system)}"] .card-convert`,
+          `tr[data-system-id="${CSS.escape(row.system)}"] .card-inspect`,
         );
         (next ?? input).focus({ preventScroll: true });
       });
@@ -680,6 +681,7 @@ function applyColour(hex: string, inputLabel: string, exactRow: ColorRow | null)
   activeComparison = initialLoupe ? { ...initialLoupe, pinned: false } : null;
 
   refreshWorkspaceView();
+  inspectorRail.open = true;
   resultsSection.hidden = false;
   copyAllButton.disabled = false;
 
@@ -1091,12 +1093,9 @@ document.addEventListener("keydown", (event) => {
       details.open = false;
       return;
     }
-    if (input.value || currentView || !queryError.hidden) {
-      input.value = "";
-      clearError();
-      commitUrl(null);
-      showEmptyWorkbench();
-      input.focus();
+    if (!suggestionsRoot.hidden) {
+      closeSuggestions();
+      return;
     }
     return;
   }
@@ -1130,7 +1129,7 @@ copyLinkButton.addEventListener("click", () => {
 applyLanguage(currentLang);
 syncPickerHex("#C8102E");
 setBusy(true);
-if (window.matchMedia("(max-width: 68rem)").matches) {
+if (!currentView && window.matchMedia("(max-width: 68rem)").matches) {
   inspectorRail.open = false;
 }
 requestAnimationFrame(() => {

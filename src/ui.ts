@@ -283,9 +283,12 @@ export function renderInspector(
     btn.dataset.copy = item.copy;
     btn.dataset.copyLabel = `${item.label} ${item.value}`;
     btn.setAttribute("aria-label", t.coordCopyAria(item.label, item.value));
+    const hint = el("span", "coord-hint", "⧉");
+    hint.setAttribute("aria-hidden", "true");
     btn.append(
       el("span", "coord-label", item.label),
       el("span", "coord-value mono", item.value),
+      hint,
     );
     coords.append(btn);
   }
@@ -312,6 +315,7 @@ export function renderInspector(
       "aria-label",
       `${sys.meta.label}: ${primary.row.code}, ΔE00 ${formatDelta(primary.deltaE)}`,
     );
+    if (target?.meta.id === sys.meta.id) pin.setAttribute("aria-current", "true");
     pin.append(
       el("span", "chip-lib mono", sys.meta.short),
       el("span", "chip-de mono", formatDelta(primary.deltaE)),
@@ -429,7 +433,7 @@ function renderRow(
   const foot = el("div", "card-foot");
   if (system.matches.length > 1) {
     const nearest = renderNearest(system.meta, system.matches, onInspect, onPickRow, lang);
-    if (rank === 1) nearest.open = true;
+    if (rank <= 3) nearest.open = true;
     foot.append(nearest);
   }
 
@@ -452,15 +456,6 @@ function renderRow(
     copy.setAttribute("aria-label", t.copyCardAria(copyLabel));
     copy.title = t.copyCardTitle;
     actions.append(copy);
-
-    const convert = el("button", "card-convert", t.convert);
-    convert.type = "button";
-    convert.setAttribute("aria-label", t.convertAria(system.meta.label, primary.row.code));
-    convert.addEventListener("click", (event) => {
-      event.stopPropagation();
-      onPickRow(primary.row);
-    });
-    actions.append(convert);
   }
   if (actions.childElementCount > 0) {
     foot.append(actions);

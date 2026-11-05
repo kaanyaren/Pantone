@@ -969,6 +969,14 @@ h2 {
   white-space: nowrap;
 }
 
+.coord-hint {
+  margin-left: auto;
+  color: var(--color-muted);
+  font-size: var(--text-xs);
+  font-weight: 400;
+  line-height: 1;
+}
+
 /* tolerance ruler */
 
 .tolerance-card {
@@ -1347,14 +1355,17 @@ h2 {
 }
 
 .row-recipe {
-  display: block;
+  display: -webkit-box;
   margin-top: var(--space-1);
   overflow: hidden;
   color: var(--color-muted);
   font-size: var(--text-xs);
   line-height: 1.4;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .de-value {
@@ -1986,6 +1997,12 @@ h2 {
     margin-bottom: 0;
   }
 
+  .row-recipe {
+    display: block;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   .starter-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -2162,31 +2179,6 @@ h2 {
   justify-self: end;
 }
 
-.card-convert {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 26px;
-  padding: 0 var(--space-2);
-  border: var(--rule) solid var(--color-rule-2);
-  border-radius: var(--radius-control);
-  background: var(--color-paper);
-  color: var(--color-ink-2);
-  font-size: var(--text-xs);
-  font-weight: 600;
-  line-height: 1;
-  white-space: nowrap;
-}
-
-.card-convert:hover {
-  background: var(--color-paper-2);
-  color: var(--color-ink);
-}
-
-.card-convert:focus-visible {
-  outline-color: var(--color-focus);
-}
-
 @media (max-width: 42rem) {
   .result-row {
     min-height: 6.25rem;
@@ -2263,8 +2255,7 @@ h2 {
   .chip,
   .filter-pill,
   .tolerance-chip,
-  .suggestion,
-  .card-convert {
+  .suggestion {
     min-height: 44px;
   }
 
@@ -2311,8 +2302,7 @@ h2 {
   .coord-cell,
   .tolerance-chip,
   .input-clear,
-  .suggestion,
-  .card-convert {
+  .suggestion {
     border: 1px solid CanvasText;
   }
 

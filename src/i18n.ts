@@ -35,8 +35,6 @@ export interface Translations {
   filterGroupAria: string;
   tsvCopy: string;
   linkCopy: string;
-  convert: string;
-  convertAria: (label: string, code: string) => string;
   inspect: string;
   inspectAria: (label: string, code: string) => string;
   copyCardButton: string;
@@ -138,8 +136,6 @@ export const DICTIONARY: Record<Lang, Translations> = {
     filterGroupAria: "Kütüphaneleri aileye göre filtrele",
     tsvCopy: "TSV kopyala",
     linkCopy: "Bağlantıyı kopyala",
-    convert: "Dönüştür",
-    convertAria: (label, code) => `Dönüştür: ${label} ${code}`,
     inspect: "İncele",
     inspectAria: (label, code) => `İncele: ${label} ${code}`,
     copyCardButton: "Kopyala",
@@ -253,8 +249,6 @@ export const DICTIONARY: Record<Lang, Translations> = {
     filterGroupAria: "Filter libraries by family",
     tsvCopy: "Copy TSV",
     linkCopy: "Copy link",
-    convert: "Convert",
-    convertAria: (label, code) => `Convert: ${label} ${code}`,
     inspect: "Inspect",
     inspectAria: (label, code) => `Inspect: ${label} ${code}`,
     copyCardButton: "Copy",
