@@ -1021,8 +1021,25 @@ h2 {
   line-height: 1.3;
 }
 
-.head-text {
+.head-lib {
+  flex: none;
+  color: var(--color-ink-2);
+  font-size: var(--text-md);
+  font-weight: 600;
+}
+
+.head-sep {
+  flex: none;
+  color: var(--color-muted);
+  font-weight: 400;
+}
+
+.head-val {
+  min-width: 0;
   overflow: hidden;
+  color: var(--color-ink);
+  font-size: var(--text-lg);
+  font-weight: 700;
   text-overflow: ellipsis;
   white-space: nowrap;
 }

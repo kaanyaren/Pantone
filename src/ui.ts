@@ -333,13 +333,11 @@ function renderRow(
   tdHead.dataset.label = "Renk";
   const headTitle = el("div", "head-title");
   headTitle.append(dualSwatch(inputHex, primary ? primary.row.hex : (best ? best.row.hex : inputHex)));
-  headTitle.append(
-    el(
-      "span",
-      "head-text",
-      primary ? `${system.meta.label} - ${primary.row.name}` : system.meta.label,
-    ),
-  );
+  headTitle.append(el("span", "head-lib", system.meta.label));
+  if (primary) {
+    headTitle.append(el("span", "head-sep", "-"));
+    headTitle.append(el("span", "head-val mono", primary.row.name));
+  }
   tdHead.append(headTitle);
   if (primary) {
     if (system.sameCode && !system.sameCodeIsInput) {
