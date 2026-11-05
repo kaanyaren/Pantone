@@ -568,18 +568,6 @@ a {
   margin-top: var(--space-3);
 }
 
-.substrate-note {
-  margin: var(--space-2) 0 0;
-  color: var(--color-deck-muted);
-  font-size: var(--text-xs);
-  line-height: 1.4;
-}
-
-.substrate-note a {
-  color: var(--color-deck-ink);
-  text-underline-offset: 3px;
-}
-
 .feedback-slot {
   display: flex;
   align-items: center;
