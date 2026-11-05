@@ -4,6 +4,7 @@ import { describe, it } from "node:test";
 import {
   cmykToRgb,
   contrastRatio,
+  deltaE2000,
   gamutMap,
   hexToRgb,
   labToRgb,
@@ -125,6 +126,13 @@ describe("gamutMap", () => {
 
   it("does not throw on malformed input", () => {
     assert.deepEqual(gamutMap("nope"), { hex: "#000000", clipped: true });
+  });
+
+  it("returns Infinity for non-finite Lab instead of NaN", () => {
+    assert.equal(
+      deltaE2000({ l: Number.NaN, a: 0, b: 0 }, { l: 50, a: 0, b: 0 }),
+      Number.POSITIVE_INFINITY,
+    );
   });
 });
 

@@ -120,3 +120,8 @@ test("search returns nothing for an empty query", () => {
   const rows = loadFixture();
   assert.deepEqual(searchColors(rows, "   "), []);
 });
+
+test("search returns nothing for non-string input instead of throwing", () => {
+  const rows = loadFixture();
+  assert.deepEqual(searchColors(rows, 123 as unknown as string), []);
+});

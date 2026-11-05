@@ -18,7 +18,11 @@ const cases: ParserCase[] = [
   { label: "hex lowercase", input: "#c8102e", expected: { kind: "hex", hex: "#C8102E" } },
   { label: "hex shorthand", input: "#fff", expected: { kind: "hex", hex: "#FFFFFF" } },
   { label: "bare six hex", input: "C8102E", expected: { kind: "hex", hex: "#C8102E" } },
-  { label: "bare three hex letters", input: "abc", expected: { kind: "hex", hex: "#AABBCC" } },
+  { label: "hex shorthand letters", input: "#abc", expected: { kind: "hex", hex: "#AABBCC" } },
+  { label: "bare three hex with digit", input: "f00", expected: { kind: "hex", hex: "#FF0000" } },
+  { label: "bare three letters stay text", input: "abc", expected: { kind: "text", text: "abc" } },
+  { label: "bare word bee stays text", input: "bee", expected: { kind: "text", text: "bee" } },
+  { label: "bare word cab stays text", input: "cab", expected: { kind: "text", text: "cab" } },
   { label: "bare six hex digits", input: "123456", expected: { kind: "hex", hex: "#123456" } },
   { label: "malformed hash", input: "#12", expected: null },
   { label: "malformed hash length", input: "#12345", expected: null },
@@ -53,6 +57,8 @@ const cases: ParserCase[] = [
   { label: "cmyk missing channel", input: "cmyk(0, 100, 100)", expected: null },
 
   { label: "pantone coated", input: "186 C", expected: { kind: "code", system: "C", code: "186" } },
+  { label: "pantone prefix stripped", input: "Pantone 186 C", expected: { kind: "code", system: "C", code: "186" } },
+  { label: "pantone prefix textile", input: "pantone 19-4052 tcx", expected: { kind: "code", system: "TCX", code: "19-4052" } },
   { label: "pantone coated compact", input: "186c", expected: { kind: "code", system: "C", code: "186" } },
   { label: "pantone uncoated", input: "186 U", expected: { kind: "code", system: "U", code: "186" } },
   {

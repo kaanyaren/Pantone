@@ -74,7 +74,7 @@ let activeFilter: LibraryFilter = "all";
 
 function queryFromUrl(): string {
   try {
-    return new URLSearchParams(window.location.search).get("q")?.trim() ?? "";
+    return new URLSearchParams(window.location.search).get("q")?.trim().slice(0, 200) ?? "";
   } catch {
     return "";
   }
@@ -82,7 +82,7 @@ function queryFromUrl(): string {
 
 function commitUrl(value: string | null): void {
   const url = new URL(window.location.href);
-  if (value) url.searchParams.set("q", value);
+  if (value) url.searchParams.set("q", value.slice(0, 200));
   else url.searchParams.delete("q");
   history.replaceState(null, "", url);
 }
@@ -158,7 +158,18 @@ async function loadData(): Promise<void> {
   renderLoading(librariesBody, 6);
 
   try {
-    const response = await fetch("./data/colors.json", { cache: "no-cache" });
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => controller.abort(), 15_000);
+    let response: Response;
+    try {
+      // Unversioned data file: no-cache stays correct after each deploy.
+      response = await fetch("./data/colors.json", {
+        cache: "no-cache",
+        signal: controller.signal,
+      });
+    } finally {
+      window.clearTimeout(timer);
+    }
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = acceptDataset(await response.json());
 
@@ -269,10 +280,10 @@ function selectSystemInLoupe(systemId: SystemId): void {
     : { meta: sys.meta, match: target, pinned: true };
   refreshWorkspaceView();
   const pinEl = inspectorBody.querySelector<HTMLButtonElement>(
-    `.tolerance-pin[data-system-id="${systemId}"]`,
+    `.tolerance-pin[data-system-id="${CSS.escape(systemId)}"]`,
   );
   pinEl?.focus({ preventScroll: true });
-  const rowEl = resultBody.querySelector<HTMLElement>(`tr[data-system-id="${systemId}"]`);
+  const rowEl = resultBody.querySelector<HTMLElement>(`tr[data-system-id="${CSS.escape(systemId)}"]`);
   rowEl?.scrollIntoView({ block: "nearest" });
 }
 
@@ -322,7 +333,7 @@ function applyColour(hex: string, inputLabel: string, exactRow: ColorRow | null)
       });
     }
     if (scored.length === 0) continue;
-    scored.sort((a, b) => a.deltaE - b.deltaE || a.row.code.localeCompare(b.row.code));
+    scored.sort((a, b) => a.deltaE - b.deltaE || a.row.code.localeCompare(b.row.code, "en"));
 
     const matches = scored.slice(0, 5);
     const best = matches[0];
@@ -490,6 +501,22 @@ function handleSubmit(
       const madeiraOnly = /^madeira\b/i.test(trimmed);
       const allowed: readonly SystemId[] | undefined = madeiraOnly ? ["MP", "MR"] : undefined;
       const exact = findExactRow(query, allowed);
+      // Bare digits carry no system suffix: when a 4-digit code exists in
+      // both print and thread libraries, guessing C silently misroutes
+      // thread users (34 colliding codes, e.g. 1225). Ask instead.
+      if (exact && /^\d{3,4}$/.test(trimmed) && exact.system === "C") {
+        const threadHit = entries.some(
+          (entry) =>
+            (entry.row.system === "MP" || entry.row.system === "MR") &&
+            canonCode(entry.row.code) === canonCode(query.code),
+        );
+        if (threadHit) {
+          fail(
+            `"${query.code}" hem baskı hem iplikte var. Pantone için "1225 C", iplik için "Madeira 1225" veya "Rayon 1225" yazın.`,
+          );
+          return;
+        }
+      }
       if (exact) {
         applyColour(exact.hex, trimmed, exact);
         if (syncUrl) commitUrl(trimmed);
@@ -625,10 +652,14 @@ input.addEventListener("input", () => {
   if (!queryError.hidden && input.value.trim()) clearError();
 });
 
+let pickerTimer = 0;
 colorPicker.addEventListener("input", () => {
-  const hex = colorPicker.value.toUpperCase();
-  input.value = hex;
-  handleSubmit(hex, null, true);
+  window.clearTimeout(pickerTimer);
+  pickerTimer = window.setTimeout(() => {
+    const hex = colorPicker.value.toUpperCase();
+    input.value = hex;
+    handleSubmit(hex, null, true);
+  }, 120);
 });
 
 clearButton.addEventListener("click", () => {
