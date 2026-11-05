@@ -44,12 +44,10 @@ const pickerSwatch = byId<HTMLElement>("picker-swatch");
 const clearButton = byId<HTMLButtonElement>("clear-button");
 const matchButton = byId<HTMLButtonElement>("match-button");
 const suggestionsRoot = byId<HTMLElement>("query-suggestions");
-const queryHelp = byId<HTMLParagraphElement>("query-help");
 const queryError = byId<HTMLParagraphElement>("query-error");
 const resultsSection = byId<HTMLElement>("results");
 const inspectorBody = byId<HTMLDivElement>("inspector-body");
 const inspectorRail = byId<HTMLDetailsElement>("inspector-rail");
-const loupeMode = byId<HTMLElement>("loupe-mode");
 const resultBody = byId<HTMLDivElement>("result-body");
 const resultStatus = byId<HTMLParagraphElement>("result-status");
 const copyAllButton = byId<HTMLButtonElement>("copy-all");
@@ -62,9 +60,7 @@ const langToggle = byId<HTMLButtonElement>("lang-toggle");
 const pageTitle = byId<HTMLElement>("page-title");
 const inspectorTitle = byId<HTMLElement>("inspector-title");
 const resultsTitle = byId<HTMLElement>("results-title");
-const examplesLabel = document.getElementById("examples-label");
 const substrateNote = document.getElementById("substrate-note");
-const sampleChipsRoot = document.getElementById("sample-chips");
 
 const SYSTEM_IDS = new Set<SystemId>(["C", "U", "TCX", "TPX", "MP", "MR", "DPS", "DVS"]);
 const SAME_CODE_FAMILY: Partial<Record<SystemId, readonly SystemId[]>> = {
@@ -144,12 +140,10 @@ function applyLanguage(lang: Lang): void {
   const matchBusySpan = matchButton.querySelector<HTMLElement>(".button-busy");
   if (matchBusySpan) matchBusySpan.textContent = t.matchBusy;
 
-  // Suggestions & Help
+  // Suggestions
   suggestionsRoot.setAttribute("aria-label", t.querySuggestionsAria);
-  queryHelp.innerHTML = `${t.queryHelp} <kbd>/</kbd>`;
 
-  // Starter chips & substrate explainer (deck, above fold)
-  if (examplesLabel) examplesLabel.textContent = t.examplesLabel;
+  // Substrate explainer (deck, above fold)
   if (substrateNote) {
     substrateNote.replaceChildren(
       document.createTextNode(`${t.substrateNote} `),
@@ -158,12 +152,6 @@ function applyLanguage(lang: Lang): void {
         textContent: t.substrateLink,
       }),
     );
-  }
-  if (sampleChipsRoot) {
-    for (const chip of sampleChipsRoot.querySelectorAll<HTMLButtonElement>(".chip")) {
-      const q = chip.dataset.query ?? chip.textContent?.trim() ?? "";
-      chip.setAttribute("aria-label", t.chipAria(q));
-    }
   }
 
   // Titles
@@ -224,9 +212,8 @@ function applyLanguage(lang: Lang): void {
 function clearError(): void {
   queryError.textContent = "";
   queryError.hidden = true;
-  queryHelp.hidden = false;
   input.removeAttribute("aria-invalid");
-  input.setAttribute("aria-describedby", "query-help");
+  input.removeAttribute("aria-describedby");
 }
 
 function showEmptyWorkbench(): void {
@@ -235,7 +222,7 @@ function showEmptyWorkbench(): void {
   copyAllButton.disabled = true;
   const t = DICTIONARY[currentLang];
   resultStatus.textContent = t.readyStatus;
-  renderEmptyState(resultBody, inspectorBody, loupeMode, (q) => {
+  renderEmptyState(resultBody, inspectorBody, (q) => {
     input.value = q;
     handleSubmit(q, null, true);
   }, currentLang);
@@ -247,7 +234,6 @@ function fail(message: string): void {
     showEmptyWorkbench();
     resultStatus.textContent = "";
   }
-  queryHelp.hidden = true;
   // Clamp user echo so a 200-char query cannot blow out the deck error slot.
   const clamped = message.length > 220 ? `${message.slice(0, 220)}…` : message;
   queryError.textContent = clamped;
@@ -457,7 +443,6 @@ function handleInspect(meta: SystemMeta, match: Match, pinned: boolean): void {
   if (!currentView) return;
   renderInspector(
     inspectorBody,
-    loupeMode,
     currentView,
     activeComparison,
     selectSystemInLoupe,
@@ -482,7 +467,6 @@ function selectSystemInLoupe(systemId: SystemId): void {
   activeComparison = { meta: sys.meta, match: target, pinned: true };
   renderInspector(
     inspectorBody,
-    loupeMode,
     currentView,
     activeComparison,
     selectSystemInLoupe,
@@ -501,7 +485,6 @@ function refreshWorkspaceView(): void {
   if (!currentView) return;
   renderInspector(
     inspectorBody,
-    loupeMode,
     currentView,
     activeComparison,
     selectSystemInLoupe,
@@ -805,7 +788,6 @@ function handleSubmit(
       renderCandidates(
         resultBody,
         inspectorBody,
-        loupeMode,
         query.text,
         shown,
         (row) => {
@@ -1029,16 +1011,6 @@ clearButton.addEventListener("click", () => {
   commitUrl(null);
   showEmptyWorkbench();
   input.focus();
-});
-
-sampleChipsRoot?.addEventListener("click", (event) => {
-  const chip = (event.target as Element | null)?.closest<HTMLButtonElement>(".chip");
-  const q = chip?.dataset.query?.trim();
-  if (!q) return;
-  closeSuggestions();
-  clearError();
-  input.value = q;
-  handleSubmit(q, null, true);
 });
 
 langToggle.addEventListener("click", () => {

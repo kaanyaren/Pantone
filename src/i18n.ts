@@ -12,17 +12,11 @@ export interface Translations {
   matchButton: string;
   matchBusy: string;
   querySuggestionsAria: string;
-  queryHelp: string;
-  examplesLabel: string;
   substrateNote: string;
   substrateLink: string;
-  chipAria: (q: string) => string;
   loupeTitle: string;
-  loupeNearest: string;
   loupeInput: string;
   loupeCompare: string;
-  loupePinned: string;
-  loupeCompareEmpty: string;
   loupeNoTarget: string;
   matrixTitle: string;
   filterAll: string;
@@ -61,11 +55,9 @@ export interface Translations {
   columns: readonly [string, string];
   cmykUnprofiled: string;
   deltaDistribution: string;
-  nameSearchTitle: string;
   nameSearchEmpty: (query: string) => string;
   nameSearchHeading: string;
   nameSearchResultsStatus: (total: number, shown: number) => string;
-  idleBadge: string;
   idleInspectorText: string;
   starterHeading: string;
   starterSub: string;
@@ -112,18 +104,12 @@ export const DICTIONARY: Record<Lang, Translations> = {
     matchButton: "Eşleştir",
     matchBusy: "Eşleştiriliyor…",
     querySuggestionsAria: "Kod veya renk önerileri",
-    queryHelp: "8 kütüphane · CIEDE2000 (D50) · Odak için",
-    examplesLabel: "Örnek:",
     substrateNote:
       "C/U baskı mürekkebi, TCX/TPX pamuklu tekstildir — aynı kod farklı zeminde farklı görünür.",
     substrateLink: "Tolerans ölçeği",
-    chipAria: (q) => `Örnek sorgu: ${q}`,
     loupeTitle: "Numune büyüteci",
-    loupeNearest: "En yakın eşleşme",
     loupeInput: "Girdi numunesi",
     loupeCompare: "Karşılaştırma",
-    loupePinned: "Sabit",
-    loupeCompareEmpty: "Yalnızca giriş",
     loupeNoTarget: "hedef yok",
     matrixTitle: "Çapraz referans matrisi",
     filterAll: "Tümü (8)",
@@ -163,7 +149,6 @@ export const DICTIONARY: Record<Lang, Translations> = {
     columns: ["Renk", "ΔE00"] as const,
     cmykUnprofiled: "CMYK (profilsiz)",
     deltaDistribution: "ΔE00 dağılımı",
-    nameSearchTitle: "Ad araması",
     nameSearchEmpty: (query) =>
       `"${query}" için ad eşleşmeleri gösteriliyor. 8 kütüphaneli karşılaştırmayı ve bölünmüş büyüteci açmak için sağdaki renk örneklerinden birini seçin.`,
     nameSearchHeading: "Eşleşen renk adları — dönüştürmek için birini seçin",
@@ -171,7 +156,6 @@ export const DICTIONARY: Record<Lang, Translations> = {
       shown < total
         ? `${total} ad eşleşmesinden ${shown} tanesi gösteriliyor. Dönüştürmek için birini seçin.`
         : `${total} ad eşleşmesi. Dönüştürmek için birini seçin.`,
-    idleBadge: "Beklemede",
     idleInspectorText:
       "Bölünmüş karşılaştırıcıyı açmak için bir başlangıç rengi seçin veya yukarıya herhangi bir Pantone, Madeira, Durak, hex, RGB ya da CMYK değeri girin.",
     starterHeading: "Hızlı başlangıç numuneleri",
@@ -225,18 +209,12 @@ export const DICTIONARY: Record<Lang, Translations> = {
     matchButton: "Match",
     matchBusy: "Matching…",
     querySuggestionsAria: "Code or color suggestions",
-    queryHelp: "8 libraries · CIEDE2000 (D50) · Focus with",
-    examplesLabel: "Try:",
     substrateNote:
       "C/U is print ink, TCX/TPX is cotton textile — same code looks different on each substrate.",
     substrateLink: "Tolerance scale",
-    chipAria: (q) => `Sample query: ${q}`,
     loupeTitle: "Specimen loupe",
-    loupeNearest: "Nearest match",
     loupeInput: "Input specimen",
     loupeCompare: "Comparison",
-    loupePinned: "Pinned",
-    loupeCompareEmpty: "Input only",
     loupeNoTarget: "no target",
     matrixTitle: "Cross-reference matrix",
     filterAll: "All (8)",
@@ -276,7 +254,6 @@ export const DICTIONARY: Record<Lang, Translations> = {
     columns: ["Color", "ΔE00"] as const,
     cmykUnprofiled: "CMYK (unprofiled)",
     deltaDistribution: "ΔE00 distribution",
-    nameSearchTitle: "Name search",
     nameSearchEmpty: (query) =>
       `Showing name matches for "${query}". Select one of the color swatches to open 8-library matrix and split loupe.`,
     nameSearchHeading: "Matching color names — select one to convert",
@@ -284,7 +261,6 @@ export const DICTIONARY: Record<Lang, Translations> = {
       shown < total
         ? `Showing ${shown} of ${total} name matches. Select one to convert.`
         : `${total} name matches. Select one to convert.`,
-    idleBadge: "Standby",
     idleInspectorText:
       "Choose a starter specimen or enter any Pantone, Madeira, Durak, hex, RGB, or CMYK value above to open the split comparator.",
     starterHeading: "Quick starter swatches",

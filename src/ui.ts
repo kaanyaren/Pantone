@@ -171,7 +171,6 @@ export function matchesFilter(id: SystemId, filter: LibraryFilter): boolean {
 
 export function renderInspector(
   root: HTMLElement,
-  badgeNode: HTMLElement,
   view: ResultsView,
   active: ActiveComparison | null,
   onSelectSystem: (systemId: SystemId) => void,
@@ -180,12 +179,6 @@ export function renderInspector(
   const t = DICTIONARY[lang];
   const fragment = document.createDocumentFragment();
   const target = active ?? (view.closest ? { ...view.closest, pinned: false } : null);
-
-  badgeNode.textContent = target
-    ? active?.pinned
-      ? `${t.loupePinned} · ${target.meta.short}`
-      : `${t.loupeCompare} · ${target.meta.short}`
-    : t.loupeCompareEmpty;
 
   const loupe = el("div", "loupe-card");
   const split = el("div", "loupe-split");
@@ -559,14 +552,12 @@ export function renderResults(
 export function renderCandidates(
   root: HTMLElement,
   inspectorRoot: HTMLElement,
-  badgeNode: HTMLElement,
   queryText: string,
   rows: ColorRow[],
   onPick: (row: ColorRow) => void,
   lang: Lang = "tr",
 ): void {
   const t = DICTIONARY[lang];
-  badgeNode.textContent = t.nameSearchTitle;
   const inspectNote = el("div", "empty-inspector");
   inspectNote.append(
     el(
@@ -612,12 +603,10 @@ const STARTER_SWATCHES: Array<{ q: string; label: string; sub: string; hex: stri
 export function renderEmptyState(
   resultRoot: HTMLElement,
   inspectorRoot: HTMLElement,
-  badgeNode: HTMLElement,
   onPickQuery: (q: string) => void,
   lang: Lang = "tr",
 ): void {
   const t = DICTIONARY[lang];
-  badgeNode.textContent = t.idleBadge;
 
   const inspectEmpty = el("div", "empty-inspector");
   inspectEmpty.append(
