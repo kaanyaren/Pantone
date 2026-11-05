@@ -136,6 +136,26 @@ const cases: ParserCase[] = [
     input: "Visco 00144",
     expected: { kind: "code", system: "DVS", code: "00144" },
   },
+  {
+    label: "durak short code",
+    input: "Polysoft 10",
+    expected: { kind: "code", system: "DPS", code: "10" },
+  },
+  {
+    label: "durak three digit code",
+    input: "Visco 266",
+    expected: { kind: "code", system: "DVS", code: "266" },
+  },
+  {
+    label: "named pantone code with system",
+    input: "Black 2 C",
+    expected: { kind: "code", system: "C", code: "Black 2" },
+  },
+  {
+    label: "named pantone code with uncoated system",
+    input: "Cool Gray 11 U",
+    expected: { kind: "code", system: "U", code: "Cool Gray 11" },
+  },
 
   { label: "free text name", input: "classic blue", expected: { kind: "text", text: "classic blue" } },
   { label: "free text trims", input: "  fiery red  ", expected: { kind: "text", text: "fiery red" } },

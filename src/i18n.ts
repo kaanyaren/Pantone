@@ -1,0 +1,272 @@
+export type Lang = "tr" | "en";
+
+export interface Translations {
+  pageTitle: string;
+  metaDescription: string;
+  brandAria: string;
+  skipLink: string;
+  fieldLabel: string;
+  colorPickerTitle: string;
+  searchPlaceholder: string;
+  clearAria: string;
+  matchButton: string;
+  matchBusy: string;
+  querySuggestionsAria: string;
+  queryHelp: string;
+  loupeTitle: string;
+  loupeNearest: string;
+  loupeInput: string;
+  loupeCompare: string;
+  loupePinned: string;
+  loupeCompareEmpty: string;
+  loupeNoTarget: string;
+  matrixTitle: string;
+  filterAll: string;
+  filterPrint: string;
+  filterTextile: string;
+  filterMadeira: string;
+  filterDurak: string;
+  filterGroupAria: string;
+  tsvCopy: string;
+  linkCopy: string;
+  convert: string;
+  convertAria: (label: string, code: string) => string;
+  copyCodeAria: (code: string) => string;
+  copyCodeTitle: string;
+  copiedAnnouncement: (code: string) => string;
+  coordCopyAria: (label: string, value: string) => string;
+  deltaBands: {
+    exact: string;
+    near: string;
+    close: string;
+    noticeable: string;
+    loose: string;
+    noClose: string;
+  };
+  sameCodeDifferentSubstrate: string;
+  noCloseMatchHeading: string;
+  closestCandidate: (code: string, hex: string, delta: string) => string;
+  nearestFirst5: string;
+  inspectCandidateAria: (system: string, code: string, name: string, delta: string) => string;
+  threadSummaryLabel: string;
+  threadHeading: string;
+  matrixCaption: string;
+  columns: readonly [string, string];
+  cmykUnprofiled: string;
+  deltaDistribution: string;
+  nameSearchTitle: string;
+  nameSearchEmpty: (query: string) => string;
+  nameSearchHeading: string;
+  nameSearchResultsStatus: (total: number, shown: number) => string;
+  idleBadge: string;
+  idleInspectorText: string;
+  starterHeading: string;
+  starterSub: string;
+  dataErrorTitle: string;
+  dataErrorDetail: string;
+  retry: string;
+  colorsCount: (count: string) => string;
+  statusNoLibraries: string;
+  statusNoCloseMatch: (count: number, nearest: string, delta: string) => string;
+  statusClosest: (count: number, nearest: string, delta: string) => string;
+  invalidHexError: string;
+  copyFailed: string;
+  copiedToast: string;
+  copiedLabelToast: (label: string) => string;
+  langToggleAria: string;
+}
+
+export const DICTIONARY: Record<Lang, Translations> = {
+  tr: {
+    pageTitle: "Pantone Karşılığı Bulucu",
+    metaDescription:
+      "Pantone C, U, TCX ve TPX, Madeira Polyneon ve Classic, Durak Polysoft ve Visco, hex, RGB ve CMYK değerlerini CIEDE2000 en yakın eşleşmelerle dönüştürün.",
+    brandAria: "PantonAK ana sayfa",
+    skipLink: "Dönüştürücüye geç",
+    fieldLabel: "Pantone kodu, iplik no veya renk değeri",
+    colorPickerTitle: "Görsel olarak renk seç",
+    searchPlaceholder:
+      "Pantone / Madeira / Durak kodu, hex (#186 C, #c8102e, 19-4052) veya renk adı...",
+    clearAria: "Sorguyu temizle",
+    matchButton: "Eşleştir",
+    matchBusy: "Eşleştiriliyor…",
+    querySuggestionsAria: "Kod veya renk önerileri",
+    queryHelp: "8 kütüphane · CIEDE2000 (D50) · Odak için",
+    loupeTitle: "Numune büyüteci",
+    loupeNearest: "En yakın eşleşme",
+    loupeInput: "Girdi numunesi",
+    loupeCompare: "Karşılaştırma",
+    loupePinned: "Sabit",
+    loupeCompareEmpty: "Yalnızca giriş",
+    loupeNoTarget: "hedef yok",
+    matrixTitle: "Çapraz referans matrisi",
+    filterAll: "Tümü (8)",
+    filterPrint: "Baskı C/U",
+    filterTextile: "Tekstil TCX/TPX",
+    filterMadeira: "Madeira",
+    filterDurak: "Durak",
+    filterGroupAria: "Kütüphaneleri aileye göre filtrele",
+    tsvCopy: "TSV kopyala",
+    linkCopy: "Bağlantıyı kopyala",
+    convert: "Dönüştür",
+    convertAria: (label, code) => `Dönüştür: ${label} ${code}`,
+    copyCodeAria: (code) => `Kodu kopyala: ${code}`,
+    copyCodeTitle: "Kodu kopyala",
+    copiedAnnouncement: (code) => `${code} kopyalandı`,
+    coordCopyAria: (label, value) => `${label} ${value} değerini kopyala`,
+    deltaBands: {
+      exact: "aynı değer",
+      near: "neredeyse aynı",
+      close: "yakın",
+      noticeable: "fark edilir",
+      loose: "zayıf",
+      noClose: "yakın eşleşme yok",
+    },
+    sameCodeDifferentSubstrate: "aynı kod · farklı zemin",
+    noCloseMatchHeading: "Bu kütüphanede yakın eşleşme yok (ΔE00 > 5)",
+    closestCandidate: (code, hex, delta) => `En yakın aday: ${code} (${hex}) · ΔE00 ${delta}`,
+    nearestFirst5: "Bu kütüphanede ilk 5",
+    inspectCandidateAria: (system, code, name, delta) =>
+      `Dönüştür ${system} ${code} (${name}), ΔE00 ${delta}`,
+    threadSummaryLabel: "En iyi iplik önerileri",
+    threadHeading: "İplik önerileri",
+    matrixCaption: "Her kütüphanedeki en yakın renk; kodlar ve değerlerle.",
+    columns: ["Renk", "ΔE00"] as const,
+    cmykUnprofiled: "CMYK (profilsiz)",
+    deltaDistribution: "ΔE00 dağılımı",
+    nameSearchTitle: "Ad araması",
+    nameSearchEmpty: (query) =>
+      `"${query}" için ad eşleşmeleri gösteriliyor. 8 kütüphaneli karşılaştırmayı ve bölünmüş büyüteci açmak için sağdaki renk örneklerinden birini seçin.`,
+    nameSearchHeading: "Eşleşen renk adları — dönüştürmek için birini seçin",
+    nameSearchResultsStatus: (total, shown) =>
+      shown < total
+        ? `${total} ad eşleşmesinden ${shown} tanesi gösteriliyor. Dönüştürmek için birini seçin.`
+        : `${total} ad eşleşmesi. Dönüştürmek için birini seçin.`,
+    idleBadge: "Beklemede",
+    idleInspectorText:
+      "Bölünmüş karşılaştırıcıyı açmak için bir başlangıç rengi seçin veya yukarıya herhangi bir Pantone, Madeira, Durak, hex, RGB ya da CMYK değeri girin.",
+    starterHeading: "Hızlı başlangıç numuneleri",
+    starterSub:
+      "Sekiz baskı, tekstil ve nakış ipliği kütüphanesinin tamamında karşılaştırmak için aşağıdan bir numune seçin.",
+    dataErrorTitle: "Renk veri kümesi yüklenemedi.",
+    dataErrorDetail: "JSON paketi gelmedi. Sayfayı yenileyin veya tekrar deneyin.",
+    retry: "Yeniden dene",
+    colorsCount: (count) => `${count} renk`,
+    statusNoLibraries: "Bu filtrede kütüphane yok.",
+    statusNoCloseMatch: (count, nearest, delta) =>
+      `${count} kütüphane · Yakın eşleşme yok · En yakın aday: ${nearest} · ΔE00 ${delta}`,
+    statusClosest: (count, nearest, delta) =>
+      `${count} kütüphane · En yakın: ${nearest} · ΔE00 ${delta}`,
+    invalidHexError: "# sonrasında hex 3 veya 6 karakter olmalı.",
+    copyFailed: "Kopyalama başarısız. Değeri seçip elle kopyalayın.",
+    copiedToast: "Kopyalandı",
+    copiedLabelToast: (label) => `${label} panoya kopyalandı.`,
+    langToggleAria: "Dili değiştir (Türkçe / English)",
+  },
+  en: {
+    pageTitle: "Pantone Match Finder",
+    metaDescription:
+      "Convert Pantone C, U, TCX and TPX, Madeira Polyneon and Classic, Durak Polysoft and Visco, hex, RGB, and CMYK with CIEDE2000 nearest matches.",
+    brandAria: "PantonAK home",
+    skipLink: "Skip to converter",
+    fieldLabel: "Pantone code, thread no or color value",
+    colorPickerTitle: "Choose color visually",
+    searchPlaceholder:
+      "Pantone / Madeira / Durak code, hex (#186 C, #c8102e, 19-4052) or color name...",
+    clearAria: "Clear query",
+    matchButton: "Match",
+    matchBusy: "Matching…",
+    querySuggestionsAria: "Code or color suggestions",
+    queryHelp: "8 libraries · CIEDE2000 (D50) · Focus with",
+    loupeTitle: "Specimen loupe",
+    loupeNearest: "Nearest match",
+    loupeInput: "Input specimen",
+    loupeCompare: "Comparison",
+    loupePinned: "Pinned",
+    loupeCompareEmpty: "Input only",
+    loupeNoTarget: "no target",
+    matrixTitle: "Cross-reference matrix",
+    filterAll: "All (8)",
+    filterPrint: "Print C/U",
+    filterTextile: "Textile TCX/TPX",
+    filterMadeira: "Madeira",
+    filterDurak: "Durak",
+    filterGroupAria: "Filter libraries by family",
+    tsvCopy: "Copy TSV",
+    linkCopy: "Copy link",
+    convert: "Convert",
+    convertAria: (label, code) => `Convert: ${label} ${code}`,
+    copyCodeAria: (code) => `Copy code: ${code}`,
+    copyCodeTitle: "Copy code",
+    copiedAnnouncement: (code) => `${code} copied`,
+    coordCopyAria: (label, value) => `Copy ${label} ${value}`,
+    deltaBands: {
+      exact: "identical",
+      near: "near identical",
+      close: "close",
+      noticeable: "noticeable",
+      loose: "loose",
+      noClose: "no close match",
+    },
+    sameCodeDifferentSubstrate: "same code · different substrate",
+    noCloseMatchHeading: "No close match in this library (ΔE00 > 5)",
+    closestCandidate: (code, hex, delta) => `Nearest candidate: ${code} (${hex}) · ΔE00 ${delta}`,
+    nearestFirst5: "Top 5 in this library",
+    inspectCandidateAria: (system, code, name, delta) =>
+      `Convert ${system} ${code} (${name}), ΔE00 ${delta}`,
+    threadSummaryLabel: "Best thread matches",
+    threadHeading: "Thread recommendations",
+    matrixCaption: "Nearest color in each library with codes and values.",
+    columns: ["Color", "ΔE00"] as const,
+    cmykUnprofiled: "CMYK (unprofiled)",
+    deltaDistribution: "ΔE00 distribution",
+    nameSearchTitle: "Name search",
+    nameSearchEmpty: (query) =>
+      `Showing name matches for "${query}". Select one of the color swatches to open 8-library matrix and split loupe.`,
+    nameSearchHeading: "Matching color names — select one to convert",
+    nameSearchResultsStatus: (total, shown) =>
+      shown < total
+        ? `Showing ${shown} of ${total} name matches. Select one to convert.`
+        : `${total} name matches. Select one to convert.`,
+    idleBadge: "Standby",
+    idleInspectorText:
+      "Choose a starter specimen or enter any Pantone, Madeira, Durak, hex, RGB, or CMYK value above to open the split comparator.",
+    starterHeading: "Quick starter swatches",
+    starterSub:
+      "Select a specimen below to compare across all eight print, textile, and embroidery thread libraries.",
+    dataErrorTitle: "Could not load color dataset.",
+    dataErrorDetail: "JSON bundle failed to load. Refresh the page or try again.",
+    retry: "Retry",
+    colorsCount: (count) => `${count} colors`,
+    statusNoLibraries: "No libraries in this filter.",
+    statusNoCloseMatch: (count, nearest, delta) =>
+      `${count} libraries · No close match · Nearest candidate: ${nearest} · ΔE00 ${delta}`,
+    statusClosest: (count, nearest, delta) =>
+      `${count} libraries · Nearest: ${nearest} · ΔE00 ${delta}`,
+    invalidHexError: "Hex value after # must be 3 or 6 characters.",
+    copyFailed: "Copy failed. Please select and copy manually.",
+    copiedToast: "Copied",
+    copiedLabelToast: (label) => `${label} copied to clipboard.`,
+    langToggleAria: "Switch language (Türkçe / English)",
+  },
+};
+
+const STORAGE_KEY = "pantonak_lang";
+
+export function getStoredLang(): Lang {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved === "en" || saved === "tr") return saved;
+  } catch {
+    // localStorage not accessible
+  }
+  return "tr";
+}
+
+export function setStoredLang(lang: Lang): void {
+  try {
+    localStorage.setItem(STORAGE_KEY, lang);
+  } catch {
+    // localStorage not accessible
+  }
+}

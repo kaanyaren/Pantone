@@ -6,7 +6,7 @@
     <title>PantonAK — Pantone Karşılığı Bulucu</title>
     <meta
       name="description"
-      content="Pantone C, U, TCX ve TPX, Madeira Polyneon ve Rayon, Durak Polysoft ve Visco, hex, RGB ve CMYK değerlerini CIEDE2000 en yakın eşleşmelerle dönüştürün."
+      content="Pantone C, U, TCX ve TPX, Madeira Polyneon ve Classic, Durak Polysoft ve Visco, hex, RGB ve CMYK değerlerini CIEDE2000 en yakın eşleşmelerle dönüştürün."
     />
     <meta name="color-scheme" content="light" />
     <link rel="icon" href="./favicon.ico" sizes="any" />
@@ -38,10 +38,11 @@
     <link rel="stylesheet" href="/src/styles.css" />
   </head>
   <body>
-    <a class="skip-link" href="#query-input">Dönüştürücüye geç</a>
+    <div class="site-shell">
+      <a class="skip-link" href="#query-input">Dönüştürücüye geç</a>
 
-    <header class="command-deck">
-      <div class="shell deck-inner">
+      <header class="command-deck">
+        <div class="shell deck-inner">
         <div class="deck-top">
           <div class="brand-group">
             <a class="brand" href="./" aria-label="PantonAK ana sayfa">
@@ -50,6 +51,16 @@
             <h1 id="page-title" class="deck-title">Pantone Karşılığı Bulucu</h1>
           </div>
           <nav class="deck-nav" aria-label="Proje bağlantıları">
+            <button
+              id="lang-toggle"
+              class="lang-toggle"
+              type="button"
+              aria-label="Dili değiştir (Türkçe / English)"
+            >
+              <span class="lang-opt is-active" data-lang="tr">TR</span>
+              <span class="lang-sep" aria-hidden="true">|</span>
+              <span class="lang-opt" data-lang="en">EN</span>
+            </button>
             <a
               class="nav-link"
               href="https://github.com/kaanyaren/Pantone"
@@ -87,18 +98,29 @@
                 autocapitalize="off"
                 spellcheck="false"
                 enterkeyhint="search"
-                placeholder="186 C, 19-4052 TCX, #C8102E, Rayon 1147…"
+                placeholder="186 C, 19-4052 TCX, #C8102E, Classic 1147…"
+                role="combobox"
+                aria-autocomplete="list"
+                aria-expanded="false"
+                aria-controls="query-suggestions"
                 aria-describedby="query-help"
               />
               <span class="input-shortcut mono" aria-hidden="true">/</span>
+              <button id="clear-button" class="input-clear" type="button" aria-label="Sorguyu temizle">
+                <span aria-hidden="true">×</span>
+              </button>
             </div>
-            <button id="clear-button" class="button button-deck-Secondary" type="button">
-              Temizle
-            </button>
             <button id="match-button" class="button button-primary" type="submit">
               <span class="button-label">Eşleştir</span>
               <span class="button-busy" aria-hidden="true">Eşleştiriliyor…</span>
             </button>
+            <div
+              id="query-suggestions"
+              class="suggestions"
+              role="listbox"
+              aria-label="Kod veya renk önerileri"
+              hidden
+            ></div>
           </div>
 
           <div class="deck-subbar">
@@ -127,7 +149,7 @@
           <div class="results-head">
             <div class="results-title-group">
               <h2 id="results-title">Çapraz referans matrisi</h2>
-              <p id="result-status" class="status visually-hidden" role="status" aria-live="polite"></p>
+              <p id="result-status" class="status" role="status" aria-live="polite"></p>
             </div>
             <div class="results-tools">
               <div class="filter-bar" role="group" aria-label="Kütüphaneleri aileye göre filtrele">
@@ -204,6 +226,7 @@
     </footer>
 
     <p id="copy-status" class="visually-hidden" role="status" aria-live="polite"></p>
+    </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

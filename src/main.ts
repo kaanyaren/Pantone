@@ -2,8 +2,8 @@ import type { ColorRow, Dataset, Lab, Match, Query, SystemId, SystemMeta } from 
 import { cmykToRgb, deltaE2000, hexToRgb, rgbToHex, rgbToLab } from "./color.ts";
 import { parseQuery } from "./query.ts";
 import { searchColors } from "./search.ts";
+import { DICTIONARY, getStoredLang, setStoredLang, type Lang } from "./i18n.ts";
 import {
-  deltaBand,
   formatCount,
   renderCandidates,
   renderDataError,
@@ -11,11 +11,9 @@ import {
   renderInspector,
   matchesFilter,
   renderLibraries,
-  renderLoading,
   renderResults,
   renderSuggestions,
   resultsToTsv,
-  secondaryName,
   type ActiveComparison,
   type LibraryFilter,
   type ResultsView,
@@ -59,6 +57,10 @@ const copyStatus = byId<HTMLParagraphElement>("copy-status");
 const librariesBody = byId<HTMLDivElement>("libraries-body");
 const footData = byId<HTMLElement>("foot-data");
 const footBuild = byId<HTMLElement>("foot-build");
+const langToggle = byId<HTMLButtonElement>("lang-toggle");
+const pageTitle = byId<HTMLElement>("page-title");
+const inspectorTitle = byId<HTMLElement>("inspector-title");
+const resultsTitle = byId<HTMLElement>("results-title");
 
 const SYSTEM_IDS = new Set<SystemId>(["C", "U", "TCX", "TPX", "MP", "MR", "DPS", "DVS"]);
 const SAME_CODE_FAMILY: Partial<Record<SystemId, readonly SystemId[]>> = {
@@ -68,6 +70,7 @@ const SAME_CODE_FAMILY: Partial<Record<SystemId, readonly SystemId[]>> = {
   TPX: ["TCX", "TPX"],
 };
 
+let currentLang: Lang = getStoredLang();
 let dataset: Dataset | null = null;
 let entries: Entry[] = [];
 let colorRows: ColorRow[] = [];
@@ -105,6 +108,92 @@ function syncPickerHex(hex: string): void {
   }
 }
 
+/* ---------- i18n & static UI update ---------- */
+
+function applyLanguage(lang: Lang): void {
+  currentLang = lang;
+  setStoredLang(lang);
+  document.documentElement.lang = lang;
+  const t = DICTIONARY[lang];
+
+  // Title & meta
+  pageTitle.textContent = t.pageTitle;
+  document.title = `PantonAK — ${t.pageTitle}`;
+  const metaDesc = document.querySelector('meta[name="description"]');
+  if (metaDesc) metaDesc.setAttribute("content", t.metaDescription);
+
+  // Field & inputs
+  const fieldLabel = document.querySelector<HTMLLabelElement>(".field-label");
+  if (fieldLabel) fieldLabel.textContent = t.fieldLabel;
+  input.placeholder = t.searchPlaceholder;
+  clearButton.setAttribute("aria-label", t.clearAria);
+  const colorWell = document.querySelector<HTMLLabelElement>(".color-well");
+  if (colorWell) colorWell.title = t.colorPickerTitle;
+  colorPicker.setAttribute("aria-label", t.colorPickerTitle);
+
+  // Match button
+  const matchLabelSpan = matchButton.querySelector<HTMLElement>(".button-label");
+  if (matchLabelSpan) matchLabelSpan.textContent = t.matchButton;
+  const matchBusySpan = matchButton.querySelector<HTMLElement>(".button-busy");
+  if (matchBusySpan) matchBusySpan.textContent = t.matchBusy;
+
+  // Suggestions & Help
+  suggestionsRoot.setAttribute("aria-label", t.querySuggestionsAria);
+  queryHelp.innerHTML = `${t.queryHelp} <kbd>/</kbd>`;
+
+  // Titles
+  inspectorTitle.textContent = t.loupeTitle;
+  resultsTitle.textContent = t.matrixTitle;
+
+  // Filter bar
+  const filterGroup = document.querySelector<HTMLElement>(".filter-bar");
+  if (filterGroup) filterGroup.setAttribute("aria-label", t.filterGroupAria);
+  const filterPills = document.querySelectorAll<HTMLButtonElement>(".filter-pill");
+  for (const pill of filterPills) {
+    switch (pill.dataset.filter) {
+      case "all":
+        pill.textContent = t.filterAll;
+        break;
+      case "print":
+        pill.textContent = t.filterPrint;
+        break;
+      case "textile":
+        pill.textContent = t.filterTextile;
+        break;
+      case "madeira":
+        pill.textContent = t.filterMadeira;
+        break;
+      case "durak":
+        pill.textContent = t.filterDurak;
+        break;
+    }
+  }
+
+  // Footer / Foot buttons
+  copyAllButton.textContent = t.tsvCopy;
+  copyLinkButton.textContent = t.linkCopy;
+
+  // Toggle button presentation
+  langToggle.setAttribute("aria-label", t.langToggleAria);
+  const trOpt = langToggle.querySelector<HTMLElement>('[data-lang="tr"]');
+  const enOpt = langToggle.querySelector<HTMLElement>('[data-lang="en"]');
+  trOpt?.classList.toggle("is-active", lang === "tr");
+  enOpt?.classList.toggle("is-active", lang === "en");
+
+  // Re-render current view or empty workbench
+  if (currentView) {
+    refreshWorkspaceView();
+    updateStatus();
+  } else if (loadState === "ready") {
+    showEmptyWorkbench();
+  }
+
+  if (dataset) {
+    renderLibraries(librariesBody, dataset.systems, currentLang);
+    footData.textContent = `${dataset.systems.length} ${lang === "en" ? "systems" : "sistem"} · ${formatCount(colorRows.length, currentLang)} ${lang === "en" ? "rows" : "satır"} · ${dataset.generated}`;
+  }
+}
+
 /* ---------- errors and state ---------- */
 
 function clearError(): void {
@@ -119,11 +208,15 @@ function showEmptyWorkbench(): void {
   currentView = null;
   activeComparison = null;
   copyAllButton.disabled = true;
-  resultStatus.textContent = "Hazır — bir başlangıç numunesi seçin veya yukarıya bir sorgu girin.";
+  const t = DICTIONARY[currentLang];
+  resultStatus.textContent =
+    currentLang === "en"
+      ? "Ready — select a starter specimen or enter a query above."
+      : "Hazır — bir başlangıç numunesi seçin veya yukarıya bir sorgu girin.";
   renderEmptyState(resultBody, inspectorBody, loupeMode, (q) => {
     input.value = q;
     handleSubmit(q, null, true);
-  });
+  }, currentLang);
 }
 
 function fail(message: string): void {
@@ -162,17 +255,14 @@ async function loadData(): Promise<void> {
   setBusy(true);
 
   const pending = queryFromUrl();
-  resultStatus.textContent = "Renk kütüphaneleri yükleniyor…";
-  renderLoading(resultBody, 6);
-  renderLoading(inspectorBody, 3);
-  renderLoading(librariesBody, 6);
+  resultStatus.textContent =
+    currentLang === "en" ? "Loading color libraries…" : "Renk kütüphaneleri yükleniyor…";
 
   try {
     const controller = new AbortController();
     const timer = window.setTimeout(() => controller.abort(), 15_000);
     let response: Response;
     try {
-      // Unversioned data file: no-cache stays correct after each deploy.
       response = await fetch("./data/colors.json", {
         cache: "no-cache",
         signal: controller.signal,
@@ -211,8 +301,8 @@ async function loadData(): Promise<void> {
     colorRows = rows;
     loadState = "ready";
 
-    renderLibraries(librariesBody, data.systems);
-    footData.textContent = `${data.systems.length} sistem · ${formatCount(rows.length)} satır · ${data.generated}`;
+    renderLibraries(librariesBody, data.systems, currentLang);
+    footData.textContent = `${data.systems.length} ${currentLang === "en" ? "systems" : "sistem"} · ${formatCount(rows.length, currentLang)} ${currentLang === "en" ? "rows" : "satır"} · ${data.generated}`;
     footBuild.textContent = `PantonAK · ${__BUILD_HASH__}`;
     setBusy(false);
     clearError();
@@ -232,11 +322,11 @@ async function loadData(): Promise<void> {
     colorRows = [];
     loadState = "error";
     setBusy(false);
-    resultStatus.textContent = "Renk veri kümesi yüklenemedi.";
+    resultStatus.textContent = DICTIONARY[currentLang].dataErrorTitle;
     copyAllButton.disabled = true;
-    renderDataError(resultBody, () => void loadData());
-    renderDataError(inspectorBody, () => void loadData());
-    renderDataError(librariesBody, () => void loadData());
+    renderDataError(resultBody, () => void loadData(), currentLang);
+    renderDataError(inspectorBody, () => void loadData(), currentLang);
+    renderDataError(librariesBody, () => void loadData(), currentLang);
   }
 }
 
@@ -263,53 +353,62 @@ function labelForRow(row: ColorRow): string {
 }
 
 function canonCode(code: string): string {
-  const value = code.trim().toUpperCase().replace(/\s+/g, "");
-  if (/^\d+$/.test(value)) return value.replace(/^0+(?=\d)/, "");
-  return value;
+  return code.replace(/\s+/g, "").toUpperCase();
 }
 
-/* ---------- typeahead ---------- */
+/* ---------- suggestions ---------- */
 
-function systemShortFor(id: SystemId): string {
-  return dataset?.systems.find((system) => system.id === id)?.short ?? id;
-}
+function updateSuggestions(): void {
+  const raw = input.value.trim();
+  if (!raw || loadState !== "ready") {
+    closeSuggestions();
+    return;
+  }
 
-function suggestionFor(row: ColorRow): Suggestion {
-  return {
+  const query = parseQuery(raw);
+  if (!query) {
+    closeSuggestions();
+    return;
+  }
+
+  let candidates: ColorRow[] = [];
+  if (query.kind === "code") {
+    const needle = canonCode(query.code);
+    candidates = colorRows
+      .filter((row) => {
+        if (query.system && row.system !== query.system) return false;
+        return canonCode(row.code).startsWith(needle);
+      })
+      .slice(0, 8);
+  } else if (query.kind === "text") {
+    candidates = searchColors(colorRows, query.text, 8);
+  }
+
+  if (candidates.length === 0) {
+    closeSuggestions();
+    return;
+  }
+
+  currentSuggestions = candidates.map((row) => ({
     row,
     query: labelForRow(row),
     code: row.code,
-    name: secondaryName(row, systemShortFor(row.system)),
-    system: systemShortFor(row.system),
+    name: row.name,
+    system: dataset?.systems.find((s) => s.id === row.system)?.short ?? row.system,
     hex: row.hex,
-  };
+  }));
+
+  activeSuggestion = -1;
+  renderSuggestions(suggestionsRoot, currentSuggestions, activeSuggestion);
+  input.setAttribute("aria-expanded", "true");
 }
 
 function closeSuggestions(): void {
-  window.clearTimeout(suggestTimer);
-  window.clearTimeout(blurTimer);
-  currentSuggestions = [];
-  activeSuggestion = -1;
   suggestionsRoot.hidden = true;
   suggestionsRoot.replaceChildren();
-  input.setAttribute("aria-expanded", "false");
-  input.removeAttribute("aria-activedescendant");
-}
-
-function updateSuggestions(): void {
-  if (loadState !== "ready" || colorRows.length === 0) {
-    closeSuggestions();
-    return;
-  }
-  const text = input.value.trim();
-  if (!text) {
-    closeSuggestions();
-    return;
-  }
-  currentSuggestions = searchColors(colorRows, text, 7).map(suggestionFor);
+  currentSuggestions = [];
   activeSuggestion = -1;
-  renderSuggestions(suggestionsRoot, currentSuggestions, activeSuggestion);
-  input.setAttribute("aria-expanded", currentSuggestions.length > 0 ? "true" : "false");
+  input.setAttribute("aria-expanded", "false");
   input.removeAttribute("aria-activedescendant");
 }
 
@@ -318,34 +417,52 @@ function chooseSuggestion(index: number): void {
   if (!item) return;
   input.value = item.query;
   closeSuggestions();
+  clearError();
   handleSubmit(item.query, item.row, true);
 }
 
-/* ---------- matching & rendering ---------- */
+/* ---------- results rendering ---------- */
 
 function handleInspect(meta: SystemMeta, match: Match, pinned: boolean): void {
-  if (!currentView) return;
   if (activeComparison?.pinned && !pinned) return;
   activeComparison = { meta, match, pinned };
-  renderInspector(inspectorBody, loupeMode, currentView, activeComparison, selectSystemInLoupe);
+  if (!currentView) return;
+  renderInspector(
+    inspectorBody,
+    loupeMode,
+    currentView,
+    activeComparison,
+    selectSystemInLoupe,
+    currentLang,
+  );
+  highlightSelectedRow(meta.id);
+}
+
+function highlightSelectedRow(systemId: SystemId): void {
+  const rows = resultBody.querySelectorAll<HTMLTableRowElement>(".result-row");
+  for (const row of rows) {
+    row.classList.toggle("is-inspected", row.dataset.systemId === systemId);
+  }
 }
 
 function selectSystemInLoupe(systemId: SystemId): void {
   if (!currentView) return;
-  const sys = currentView.systems.find((item) => item.meta.id === systemId);
+  const sys = currentView.systems.find((s) => s.meta.id === systemId);
   if (!sys) return;
   const target = sys.sameCode ?? sys.matches[0];
   if (!target) return;
-  const toggleOff =
-    activeComparison?.pinned && activeComparison.meta.id === systemId;
-  activeComparison = toggleOff
-    ? currentView.closest
-      ? { ...currentView.closest, pinned: false }
-      : null
-    : { meta: sys.meta, match: target, pinned: true };
-  refreshWorkspaceView();
+  activeComparison = { meta: sys.meta, match: target, pinned: true };
+  renderInspector(
+    inspectorBody,
+    loupeMode,
+    currentView,
+    activeComparison,
+    selectSystemInLoupe,
+    currentLang,
+  );
+  highlightSelectedRow(systemId);
   const pinEl = inspectorBody.querySelector<HTMLButtonElement>(
-    `.tolerance-pin[data-system-id="${CSS.escape(systemId)}"]`,
+    `.tolerance-chip[data-system-id="${CSS.escape(systemId)}"]`,
   );
   pinEl?.focus({ preventScroll: true });
   const rowEl = resultBody.querySelector<HTMLElement>(`tr[data-system-id="${CSS.escape(systemId)}"]`);
@@ -354,7 +471,14 @@ function selectSystemInLoupe(systemId: SystemId): void {
 
 function refreshWorkspaceView(): void {
   if (!currentView) return;
-  renderInspector(inspectorBody, loupeMode, currentView, activeComparison, selectSystemInLoupe);
+  renderInspector(
+    inspectorBody,
+    loupeMode,
+    currentView,
+    activeComparison,
+    selectSystemInLoupe,
+    currentLang,
+  );
   renderResults(
     resultBody,
     currentView,
@@ -371,11 +495,13 @@ function refreshWorkspaceView(): void {
         (next ?? input).focus({ preventScroll: true });
       });
     },
+    currentLang,
   );
 }
 
 function updateStatus(): void {
   if (!currentView) return;
+  const t = DICTIONARY[currentLang];
   const visible = currentView.systems.filter((system) =>
     matchesFilter(system.meta.id, activeFilter),
   );
@@ -388,20 +514,21 @@ function updateStatus(): void {
     }
   }
   if (!closest) {
-    resultStatus.textContent = "Bu filtrede kütüphane yok.";
+    resultStatus.textContent = t.statusNoLibraries;
     return;
   }
   const nearest = `${closest.meta.label} ${closest.match.row.code}`;
+  const deltaStr = closest.match.deltaE.toFixed(2);
   resultStatus.textContent =
     closest.match.deltaE > 5
-      ? `${visible.length} kütüphane · Yakın eşleşme yok · En yakın aday: ${nearest} · ΔE00 ${closest.match.deltaE.toFixed(2)}`
-      : `${visible.length} kütüphane · En yakın: ${nearest} · ΔE00 ${closest.match.deltaE.toFixed(2)}`;
+      ? t.statusNoCloseMatch(visible.length, nearest, deltaStr)
+      : t.statusClosest(visible.length, nearest, deltaStr);
 }
 
 function applyColour(hex: string, inputLabel: string, exactRow: ColorRow | null): void {
   const rgb = hexToRgb(hex);
   if (!rgb) {
-    fail("# sonrasında hex 3 veya 6 karakter olmalı.");
+    fail(DICTIONARY[currentLang].invalidHexError);
     return;
   }
   if (!dataset) return;
@@ -525,7 +652,7 @@ function handleSubmit(
   clearError();
   if (loadState === "loading") return;
   if (loadState === "error") {
-    renderDataError(resultBody, () => void loadData());
+    renderDataError(resultBody, () => void loadData(), currentLang);
     return;
   }
   if (exactRow) {
@@ -538,22 +665,37 @@ function handleSubmit(
 
   const trimmed = raw.trim();
   if (!trimmed) {
-    commitUrl(null);
     showEmptyWorkbench();
-    input.focus();
+    if (syncUrl) commitUrl(null);
     return;
   }
 
   const query = parseQuery(trimmed);
   if (!query) {
     if (trimmed.startsWith("#")) {
-      fail("# sonrasında hex 3 veya 6 karakter olmalı.");
+      fail(
+        currentLang === "en"
+          ? "Hex value after # must be 3 or 6 characters."
+          : "# sonrasında hex 3 veya 6 karakter olmalı.",
+      );
     } else if (/^rgb\s*\(/i.test(trimmed)) {
-      fail("RGB kanalları 0–255 arasında olmalı.");
+      fail(
+        currentLang === "en"
+          ? "RGB channels must be between 0 and 255."
+          : "RGB kanalları 0–255 arasında olmalı.",
+      );
     } else if (/^cmyk\s*\(/i.test(trimmed)) {
-      fail("CMYK kanalları 0–100 arasında olmalı.");
+      fail(
+        currentLang === "en"
+          ? "CMYK channels must be between 0 and 100."
+          : "CMYK kanalları 0–100 arasında olmalı.",
+      );
     } else {
-      fail("Bir hex değeri, rgb(), cmyk(), Pantone kodu veya iplik kodu girin.");
+      fail(
+        currentLang === "en"
+          ? "Enter a hex value, rgb(), cmyk(), Pantone code or thread code."
+          : "Bir hex değeri, rgb(), cmyk(), Pantone kodu veya iplik kodu girin.",
+      );
     }
     return;
   }
@@ -562,7 +704,7 @@ function handleSubmit(
     case "hex": {
       const rgb = hexToRgb(query.hex);
       if (!rgb) {
-        fail("# sonrasında hex 3 veya 6 karakter olmalı.");
+        fail(DICTIONARY[currentLang].invalidHexError);
         return;
       }
       applyColour(rgbToHex(rgb), trimmed, null);
@@ -573,7 +715,11 @@ function handleSubmit(
       const { r, g, b } = query.rgb;
       const valid = [r, g, b].every((v) => Number.isFinite(v) && v >= 0 && v <= 255);
       if (!valid) {
-        fail("RGB kanalları 0–255 arasında olmalı.");
+        fail(
+          currentLang === "en"
+            ? "RGB channels must be between 0 and 255."
+            : "RGB kanalları 0–255 arasında olmalı.",
+        );
         return;
       }
       applyColour(rgbToHex(query.rgb), trimmed, null);
@@ -584,7 +730,11 @@ function handleSubmit(
       const { c, m, y, k } = query.cmyk;
       const valid = [c, m, y, k].every((v) => Number.isFinite(v) && v >= 0 && v <= 100);
       if (!valid) {
-        fail("CMYK kanalları 0–100 arasında olmalı.");
+        fail(
+          currentLang === "en"
+            ? "CMYK channels must be between 0 and 100."
+            : "CMYK kanalları 0–100 arasında olmalı.",
+        );
         return;
       }
       applyColour(rgbToHex(cmykToRgb(query.cmyk)), trimmed, null);
@@ -595,9 +745,6 @@ function handleSubmit(
       const madeiraOnly = /^madeira\b/i.test(trimmed);
       const allowed: readonly SystemId[] | undefined = madeiraOnly ? ["MP", "MR"] : undefined;
       const exact = findExactRow(query, allowed);
-      // Bare digits carry no system suffix: when a 4-digit code exists in
-      // both print and thread libraries, guessing C silently misroutes
-      // thread users (34 colliding codes, e.g. 1225). Ask instead.
       if (exact && /^\d{3,4}$/.test(trimmed) && exact.system === "C") {
         const threadHit = entries.some(
           (entry) =>
@@ -606,7 +753,9 @@ function handleSubmit(
         );
         if (threadHit) {
           fail(
-            `"${query.code}" hem baskı hem iplikte var. Pantone için "1225 C", iplik için "Madeira 1225" veya "Classic 1225" yazın.`,
+            currentLang === "en"
+              ? `"${query.code}" exists in both print and thread. Use "1225 C" for Pantone, or "Madeira 1225" / "Classic 1225" for thread.`
+              : `"${query.code}" hem baskı hem iplikte var. Pantone için "1225 C", iplik için "Madeira 1225" veya "Classic 1225" yazın.`,
           );
           return;
         }
@@ -630,19 +779,27 @@ function handleSubmit(
         }
       }
       if (!madeiraOnly && query.system === null && /^\d{4}$/.test(query.code)) {
-        fail(`"${query.code}" kodunu ayırt etmek için "Madeira" veya "Classic" ekleyin.`);
+        fail(
+          currentLang === "en"
+            ? `Add "Madeira" or "Classic" to disambiguate code "${query.code}".`
+            : `"${query.code}" kodunu ayırt etmek için "Madeira" veya "Classic" ekleyin.`,
+        );
         return;
       }
       fail(
-        `Yüklenen kütüphanelerde "${trimmed}" kodu yok. "186 C", "19-4052 TCX" veya "Classic 1147" deneyin.`,
+        currentLang === "en"
+          ? `Code "${trimmed}" not found in loaded libraries. Try "186 C", "19-4052 TCX", or "Classic 1147".`
+          : `Yüklenen kütüphanelerde "${trimmed}" kodu yok. "186 C", "19-4052 TCX" veya "Classic 1147" deneyin.`,
       );
       return;
     }
     case "text": {
-      const results: ColorRow[] = searchColors(colorRows, query.text, 10_000);
+      const results = searchColors(colorRows, query.text);
       if (results.length === 0) {
         fail(
-          `"${query.text}" ile eşleşen kod veya ad yok. "186 C", "19-4052 TCX" veya "Classic 1147" deneyin.`,
+          currentLang === "en"
+            ? `No matching code or name for "${query.text}". Try "186 C", "19-4052 TCX", or "Classic 1147".`
+            : `"${query.text}" ile eşleşen kod veya ad yok. "186 C", "19-4052 TCX" veya "Classic 1147" deneyin.`,
         );
         return;
       }
@@ -650,14 +807,22 @@ function handleSubmit(
       currentView = null;
       activeComparison = null;
       copyAllButton.disabled = true;
-      renderCandidates(resultBody, inspectorBody, loupeMode, query.text, shown, (row) => {
-        clearError();
-        handleSubmit(labelForRow(row), row, true);
-      });
-      resultStatus.textContent =
-        shown.length < results.length
-          ? `${results.length} ad eşleşmesinden ${shown.length} tanesi gösteriliyor. Dönüştürmek için birini seçin.`
-          : `${results.length} ad eşleşmesi. Dönüştürmek için birini seçin.`;
+      renderCandidates(
+        resultBody,
+        inspectorBody,
+        loupeMode,
+        query.text,
+        shown,
+        (row) => {
+          clearError();
+          handleSubmit(labelForRow(row), row, true);
+        },
+        currentLang,
+      );
+      resultStatus.textContent = DICTIONARY[currentLang].nameSearchResultsStatus(
+        results.length,
+        shown.length,
+      );
       if (syncUrl) commitUrl(trimmed);
       input.focus();
       closeSuggestions();
@@ -668,7 +833,7 @@ function handleSubmit(
 
 /* ---------- clipboard ---------- */
 
-const copyTimers = new WeakMap<HTMLButtonElement, number>();
+const copyTimers = new WeakMap<HTMLElement, number>();
 
 function fallbackCopy(text: string): boolean {
   const area = document.createElement("textarea");
@@ -694,31 +859,42 @@ function announce(message: string): void {
   }, 10);
 }
 
-function flash(button: HTMLButtonElement): void {
+function flashElement(el: HTMLElement, duration = 1200): void {
+  el.dataset.state = "success";
+  const previous = copyTimers.get(el);
+  if (previous) window.clearTimeout(previous);
+  const timer = window.setTimeout(() => {
+    delete el.dataset.state;
+    copyTimers.delete(el);
+  }, duration);
+  copyTimers.set(el, timer);
+}
+
+function flashButton(button: HTMLButtonElement): void {
   const isCoord = button.classList.contains("coord-cell");
   if (isCoord) {
-    button.dataset.state = "success";
+    flashElement(button, 1500);
   } else {
     const original = button.dataset.originalLabel ?? button.textContent ?? "";
     button.dataset.originalLabel = original;
-    button.textContent = "Kopyalandı";
-    button.dataset.state = "success";
+    button.textContent = DICTIONARY[currentLang].copiedToast;
+    flashElement(button, 1500);
+    const previous = copyTimers.get(button);
+    if (previous) window.clearTimeout(previous);
+    const timer = window.setTimeout(() => {
+      if (button.dataset.originalLabel) {
+        button.textContent = button.dataset.originalLabel;
+      }
+      delete button.dataset.state;
+      copyTimers.delete(button);
+    }, 1500);
+    copyTimers.set(button, timer);
   }
-  const previous = copyTimers.get(button);
-  if (previous) window.clearTimeout(previous);
-  const timer = window.setTimeout(() => {
-    if (!isCoord && button.dataset.originalLabel) {
-      button.textContent = button.dataset.originalLabel;
-    }
-    delete button.dataset.state;
-    copyTimers.delete(button);
-  }, 1500);
-  copyTimers.set(button, timer);
 }
 
 async function copyText(
   text: string,
-  button: HTMLButtonElement | null,
+  element: HTMLElement | null,
   label: string,
 ): Promise<void> {
   let ok = false;
@@ -729,10 +905,31 @@ async function copyText(
     ok = fallbackCopy(text);
   }
   if (ok) {
-    announce(`${label} panoya kopyalandı.`);
-    if (button) flash(button);
+    announce(DICTIONARY[currentLang].copiedLabelToast(label));
+    if (element) {
+      if (element instanceof HTMLButtonElement) flashButton(element);
+      else flashElement(element);
+    }
   } else {
-    announce("Kopyalama başarısız. Değeri seçip elle kopyalayın.");
+    announce(DICTIONARY[currentLang].copyFailed);
+  }
+}
+
+async function handleRowCodeCopy(codeElement: HTMLElement): Promise<void> {
+  const code = codeElement.dataset.copyCode ?? codeElement.textContent?.trim() ?? "";
+  if (!code || code === "—") return;
+  let ok = false;
+  try {
+    await navigator.clipboard.writeText(code);
+    ok = true;
+  } catch {
+    ok = fallbackCopy(code);
+  }
+  if (ok) {
+    flashElement(codeElement, 1200);
+    announce(DICTIONARY[currentLang].copiedAnnouncement(code));
+  } else {
+    announce(DICTIONARY[currentLang].copyFailed);
   }
 }
 
@@ -827,9 +1024,21 @@ clearButton.addEventListener("click", () => {
   input.focus();
 });
 
+langToggle.addEventListener("click", () => {
+  const nextLang: Lang = currentLang === "tr" ? "en" : "tr";
+  applyLanguage(nextLang);
+});
+
 document.addEventListener("click", (event) => {
   const target = event.target as Element | null;
   if (!target) return;
+
+  const copyableCode = target.closest<HTMLElement>('[data-copyable="true"]');
+  if (copyableCode) {
+    event.stopPropagation();
+    void handleRowCodeCopy(copyableCode);
+    return;
+  }
 
   const filterPill = target.closest<HTMLButtonElement>(".filter-pill");
   if (filterPill) {
@@ -849,21 +1058,26 @@ document.addEventListener("click", (event) => {
   if (copyButton) {
     const value = copyButton.dataset.copy;
     if (value) {
-      void copyText(value, copyButton, copyButton.dataset.copyLabel ?? "değerler");
+      void copyText(
+        value,
+        copyButton,
+        copyButton.dataset.copyLabel ?? (currentLang === "en" ? "values" : "değerler"),
+      );
     }
   }
 });
 
-copyAllButton.addEventListener("click", () => {
-  if (!currentView) return;
-  void copyText(resultsToTsv(currentView), copyAllButton, "tüm sistemler");
-});
-
-copyLinkButton.addEventListener("click", () => {
-  void copyText(window.location.href, copyLinkButton, "bağlantı");
-});
-
 document.addEventListener("keydown", (event) => {
+  if (event.key === "Enter" || event.key === " ") {
+    const target = event.target as Element | null;
+    const copyableCode = target?.closest<HTMLElement>('[data-copyable="true"]');
+    if (copyableCode) {
+      event.preventDefault();
+      void handleRowCodeCopy(copyableCode);
+      return;
+    }
+  }
+
   if (event.key === "Escape") {
     const target = event.target as Element | null;
     const details = target?.closest("details") as HTMLDetailsElement | null;
@@ -888,8 +1102,26 @@ document.addEventListener("keydown", (event) => {
   input.focus();
 });
 
+copyAllButton.addEventListener("click", () => {
+  if (!currentView) return;
+  void copyText(
+    resultsToTsv(currentView, currentLang),
+    copyAllButton,
+    currentLang === "en" ? "all systems" : "tüm sistemler",
+  );
+});
+
+copyLinkButton.addEventListener("click", () => {
+  void copyText(
+    window.location.href,
+    copyLinkButton,
+    currentLang === "en" ? "link" : "bağlantı",
+  );
+});
+
 /* ---------- boot ---------- */
 
+applyLanguage(currentLang);
 syncPickerHex("#C8102E");
 setBusy(true);
 if (window.matchMedia("(max-width: 68rem)").matches) {

@@ -2,11 +2,12 @@ import type { CMYK, Query, RGB, SystemId } from "./types.ts";
 
 const HEX_RE = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i;
 const PANTONE_SUFFIX_RE = /^(\d{2,4}(?:-\d{2,4})?)\s*(C|U|TCX|TPX)$/i;
+const PANTONE_NAMED_SUFFIX_RE = /^(.+?)\s+(C|U)$/i;
 const BARE_TEXTILE_RE = /^(\d{2,4})-(\d{2,4})$/;
 const BARE_PRINT_RE = /^(\d{3,4})$/;
 const MADEIRA_RE = /^(?:MADEIRA\s*)?(POLYNEON|RAYON|CLASSIC)\s*(\d{3,5})$/i;
 const MADEIRA_DEFAULT_RE = /^MADEIRA\s*(\d{3,5})$/i;
-const DURAK_RE = /^(?:DURAK\s*)?(POLYSOFT|VISCO)\s*(\d{4,6})$/i;
+const DURAK_RE = /^(?:DURAK\s*)?(POLYSOFT|VISCO)\s*(\d{1,6})$/i;
 
 function expandHex(value: string): string {
   const upper = value.toUpperCase();
@@ -115,6 +116,15 @@ export function parseQuery(raw: string): Query | null {
     const code = pantone[1] ?? "";
     const system = (pantone[2] ?? "").toUpperCase() as SystemId;
     return { kind: "code", system, code };
+  }
+
+  const namedPantone = input.match(PANTONE_NAMED_SUFFIX_RE);
+  if (namedPantone) {
+    return {
+      kind: "code",
+      system: (namedPantone[2] ?? "").toUpperCase() as SystemId,
+      code: (namedPantone[1] ?? "").trim(),
+    };
   }
 
   // 6. Bare textile code NN-NNNN defaults to TCX.
