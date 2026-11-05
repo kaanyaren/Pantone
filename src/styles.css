@@ -721,17 +721,9 @@ h2 {
 
 /* left inspector rail */
 
-.inspector-stack {
-  min-width: 0;
+.inspector-rail {
   position: sticky;
   top: var(--space-4);
-}
-
-.inspector-stack .loupe-badge {
-  margin-bottom: var(--space-3);
-}
-
-.inspector-rail {
   padding: var(--space-4);
   border: var(--rule) solid var(--color-rule-2);
   border-radius: var(--radius-panel);
@@ -865,27 +857,6 @@ h2 {
   white-space: nowrap;
 }
 
-.seam-pin {
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-  padding: var(--space-1) var(--space-2);
-  border: var(--rule) solid var(--color-rule);
-  border-radius: var(--radius-sm);
-  background: var(--color-paper-2);
-  color: var(--color-ink-2);
-  cursor: pointer;
-  font-size: var(--text-xs);
-  font-weight: 600;
-  line-height: 1;
-  white-space: nowrap;
-}
-
-.seam-pin.is-on {
-  border-color: var(--color-ink);
-  color: var(--color-ink);
-}
-
 /* semantic ΔE00 pills */
 
 .tone-pill {
@@ -977,14 +948,6 @@ h2 {
   white-space: nowrap;
 }
 
-.coord-hint {
-  margin-left: auto;
-  color: var(--color-muted);
-  font-size: var(--text-xs);
-  font-weight: 400;
-  line-height: 1;
-}
-
 /* tolerance ruler */
 
 .tolerance-card {
@@ -1051,20 +1014,6 @@ h2 {
 .chip-de {
   margin-left: auto;
   color: var(--color-muted);
-}
-
-.chip-band {
-  flex-basis: 100%;
-  overflow: hidden;
-  color: var(--color-muted);
-  font-size: var(--text-xs);
-  line-height: 1.2;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.tolerance-chip {
-  flex-wrap: wrap;
 }
 
 .tolerance-chip.tone-exact .chip-de {
@@ -1162,6 +1111,32 @@ h2 {
   flex-wrap: wrap;
   gap: var(--space-2);
   padding-top: var(--space-3);
+}
+
+/* rank dividers: labels only, never re-sort (static: results-head already sticky) */
+
+.matrix-divider {
+  grid-column: 1 / -1;
+  width: 100%;
+  background: var(--color-paper);
+}
+
+.result-table .matrix-divider-title {
+  display: block;
+  width: 100%;
+  padding: var(--space-2) 0 var(--space-1);
+  border-bottom: var(--rule) solid var(--color-rule-2);
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: 0;
+  text-align: left;
+}
+
+.matrix-flat .matrix-divider:first-child .matrix-divider-title {
+  padding-top: 0;
 }
 
 /* matrix table */
@@ -1264,6 +1239,48 @@ h2 {
   white-space: nowrap;
 }
 
+.head-code[data-copyable="true"] {
+  cursor: pointer;
+  padding: 1px var(--space-1);
+  margin: -1px calc(var(--space-1) * -1);
+  border-radius: var(--radius-sm);
+  text-decoration: underline dotted 1px;
+  text-underline-offset: 3px;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    outline-color var(--dur-fast) var(--ease-out);
+}
+
+.head-code[data-copyable="true"]::after {
+  content: "⧉";
+  display: inline-block;
+  margin-left: var(--space-1);
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+  font-weight: 400;
+  line-height: 1;
+}
+
+.head-code[data-copyable="true"]:hover::after {
+  color: var(--color-accent);
+}
+
+.head-code[data-copyable="true"]:hover {
+  background: var(--color-paper-2);
+  color: var(--color-accent);
+}
+
+.head-code[data-copyable="true"]:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 1px;
+}
+
+.head-code[data-state="success"] {
+  background: var(--color-exact-bg) !important;
+  color: var(--color-success) !important;
+}
+
 .head-name {
   display: block;
   flex: 1 1 auto;
@@ -1275,8 +1292,7 @@ h2 {
   white-space: nowrap;
 }
 
-.card-copy,
-.card-inspect {
+.card-copy {
   display: inline-flex;
   flex: none;
   align-items: center;
@@ -1297,20 +1313,17 @@ h2 {
     color var(--dur-fast) var(--ease-out);
 }
 
-.card-copy:hover,
-.card-inspect:hover {
+.card-copy:hover {
   border-color: var(--color-rule-2);
   background: var(--color-paper-3);
   color: var(--color-ink);
 }
 
-.card-copy:active,
-.card-inspect:active {
+.card-copy:active {
   transform: translateY(1px);
 }
 
-.card-copy:focus-visible,
-.card-inspect:focus-visible {
+.card-copy:focus-visible {
   outline: 2px solid var(--color-focus);
   outline-offset: 1px;
 }
@@ -1374,20 +1387,6 @@ h2 {
   color: var(--color-muted);
   font-size: var(--text-xs);
   line-height: 1.4;
-}
-
-.row-recipe {
-  display: -webkit-box;
-  margin-top: var(--space-1);
-  overflow: hidden;
-  color: var(--color-muted);
-  font-size: var(--text-xs);
-  line-height: 1.4;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  text-overflow: ellipsis;
-  white-space: normal;
 }
 
 .de-value {
@@ -1521,30 +1520,6 @@ h2 {
 .nearest-de {
   color: var(--color-muted);
   text-align: right;
-}
-
-.nearest-item {
-  display: grid;
-  gap: 2px;
-}
-
-.nearest-requery {
-  justify-self: end;
-  padding: var(--space-1) var(--space-2);
-  border: var(--rule) solid var(--color-rule);
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--color-muted);
-  font-size: var(--text-xs);
-  font-weight: 600;
-  line-height: 1;
-  white-space: nowrap;
-}
-
-.nearest-requery:hover {
-  border-color: var(--color-rule-2);
-  background: var(--color-paper-2);
-  color: var(--color-ink);
 }
 
 /* name search candidates */
@@ -1969,10 +1944,6 @@ h2 {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .inspector-stack {
-    position: static;
-  }
-
   .inspector-rail {
     position: static;
   }
@@ -2223,6 +2194,31 @@ h2 {
   justify-self: end;
 }
 
+.card-convert {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 26px;
+  padding: 0 var(--space-2);
+  border: var(--rule) solid var(--color-rule-2);
+  border-radius: var(--radius-control);
+  background: var(--color-paper);
+  color: var(--color-ink-2);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.card-convert:hover {
+  background: var(--color-paper-2);
+  color: var(--color-ink);
+}
+
+.card-convert:focus-visible {
+  outline-color: var(--color-focus);
+}
+
 @media (max-width: 42rem) {
   .result-row {
     min-height: 6.25rem;
@@ -2295,11 +2291,11 @@ h2 {
 
 @media (pointer: coarse) {
   .card-copy,
-  .card-inspect,
   .chip,
   .filter-pill,
   .tolerance-chip,
-  .suggestion {
+  .suggestion,
+  .card-convert {
     min-height: 44px;
   }
 
@@ -2325,8 +2321,7 @@ h2 {
   .button:active,
   .chip:active,
   .coord-cell:active,
-  .card-copy:active,
-  .card-inspect:active {
+  .card-copy:active {
     transform: none;
   }
 }
@@ -2342,11 +2337,11 @@ h2 {
   .button,
   .chip,
   .card-copy,
-  .card-inspect,
   .coord-cell,
   .tolerance-chip,
   .input-clear,
-  .suggestion {
+  .suggestion,
+  .card-convert {
     border: 1px solid CanvasText;
   }
 

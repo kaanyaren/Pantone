@@ -22,8 +22,6 @@ export interface Translations {
   loupeInput: string;
   loupeCompare: string;
   loupePinned: string;
-  pin: string;
-  unpin: string;
   loupeCompareEmpty: string;
   loupeNoTarget: string;
   matrixTitle: string;
@@ -35,10 +33,10 @@ export interface Translations {
   filterGroupAria: string;
   tsvCopy: string;
   linkCopy: string;
-  inspect: string;
-  inspectAria: (label: string, code: string) => string;
-  requery: string;
-  requeryAria: (system: string, code: string, name: string) => string;
+  convert: string;
+  convertAria: (label: string, code: string) => string;
+  copyCodeAria: (code: string) => string;
+  copyCodeTitle: string;
   copyCardButton: string;
   copyCardAria: (label: string) => string;
   copyCardTitle: string;
@@ -76,8 +74,8 @@ export interface Translations {
   retry: string;
   colorsCount: (count: string) => string;
   statusNoLibraries: string;
-  statusNoCloseMatch: (shown: number, total: number, nearest: string, delta: string) => string;
-  statusClosest: (shown: number, total: number, nearest: string, delta: string) => string;
+  statusNoCloseMatch: (count: number, nearest: string, delta: string) => string;
+  statusClosest: (count: number, nearest: string, delta: string) => string;
   invalidHexError: string;
   rgbRangeError: string;
   cmykRangeError: string;
@@ -125,8 +123,6 @@ export const DICTIONARY: Record<Lang, Translations> = {
     loupeInput: "Girdi numunesi",
     loupeCompare: "Karşılaştırma",
     loupePinned: "Sabit",
-    pin: "Sabitle",
-    unpin: "Sabiti kaldır",
     loupeCompareEmpty: "Yalnızca giriş",
     loupeNoTarget: "hedef yok",
     matrixTitle: "Çapraz referans matrisi",
@@ -138,13 +134,13 @@ export const DICTIONARY: Record<Lang, Translations> = {
     filterGroupAria: "Kütüphaneleri aileye göre filtrele",
     tsvCopy: "TSV kopyala",
     linkCopy: "Bağlantıyı kopyala",
-    inspect: "İncele",
-    inspectAria: (label, code) => `Loupe'ta karşılaştır: ${label} ${code}`,
-    requery: "Sorgula",
-    requeryAria: (system, code, name) => `Bunu sorgula: ${system} ${code} (${name})`,
-    copyCardButton: "Kopyala kod+HEX",
+    convert: "Dönüştür",
+    convertAria: (label, code) => `Dönüştür: ${label} ${code}`,
+    copyCodeAria: (code) => `Kodu kopyala: ${code}`,
+    copyCodeTitle: "Kodu kopyala",
+    copyCardButton: "Kopyala",
     copyCardAria: (label) => `Kopyala: ${label}`,
-    copyCardTitle: "Kodu ve HEX değerini kopyala",
+    copyCardTitle: "Adı ve kodu kopyala",
     copiedAnnouncement: (code) => `${code} kopyalandı`,
     coordCopyAria: (label, value) => `${label} ${value} değerini kopyala`,
     deltaBands: {
@@ -160,7 +156,7 @@ export const DICTIONARY: Record<Lang, Translations> = {
     closestCandidate: (code, hex, delta) => `En yakın aday: ${code} (${hex}) · ΔE00 ${delta}`,
     nearestFirst5: "Bu kütüphanede ilk 5",
     inspectCandidateAria: (system, code, name, delta) =>
-      `Bunu sorgula: ${system} ${code} (${name}), ΔE00 ${delta}`,
+      `Dönüştür ${system} ${code} (${name}), ΔE00 ${delta}`,
     groupThreads: "İplikler",
     groupPantone: "Pantone",
     matrixCaption: "Her kütüphanedeki en yakın renk; kodlar ve değerlerle.",
@@ -186,10 +182,10 @@ export const DICTIONARY: Record<Lang, Translations> = {
     retry: "Yeniden dene",
     colorsCount: (count) => `${count} renk`,
     statusNoLibraries: "Bu filtrede kütüphane yok.",
-    statusNoCloseMatch: (shown, total, nearest, delta) =>
-      `${shown}/${total} kütüphane · Yakın eşleşme yok · En yakın aday: ${nearest} · ΔE00 ${delta}`,
-    statusClosest: (shown, total, nearest, delta) =>
-      `${shown}/${total} kütüphane · En yakın: ${nearest} · ΔE00 ${delta}`,
+    statusNoCloseMatch: (count, nearest, delta) =>
+      `${count} kütüphane · Yakın eşleşme yok · En yakın aday: ${nearest} · ΔE00 ${delta}`,
+    statusClosest: (count, nearest, delta) =>
+      `${count} kütüphane · En yakın: ${nearest} · ΔE00 ${delta}`,
     invalidHexError: "# sonrasında hex 3 veya 6 karakter olmalı.",
     rgbRangeError: "RGB kanalları 0–255 arasında olmalı.",
     cmykRangeError: "CMYK kanalları 0–100 arasında olmalı.",
@@ -240,8 +236,6 @@ export const DICTIONARY: Record<Lang, Translations> = {
     loupeInput: "Input specimen",
     loupeCompare: "Comparison",
     loupePinned: "Pinned",
-    pin: "Pin",
-    unpin: "Unpin",
     loupeCompareEmpty: "Input only",
     loupeNoTarget: "no target",
     matrixTitle: "Cross-reference matrix",
@@ -253,13 +247,13 @@ export const DICTIONARY: Record<Lang, Translations> = {
     filterGroupAria: "Filter libraries by family",
     tsvCopy: "Copy TSV",
     linkCopy: "Copy link",
-    inspect: "Inspect",
-    inspectAria: (label, code) => `Compare in loupe: ${label} ${code}`,
-    requery: "Re-query",
-    requeryAria: (system, code, name) => `Re-query with ${system} ${code} (${name})`,
-    copyCardButton: "Copy code+HEX",
+    convert: "Convert",
+    convertAria: (label, code) => `Convert: ${label} ${code}`,
+    copyCodeAria: (code) => `Copy code: ${code}`,
+    copyCodeTitle: "Copy code",
+    copyCardButton: "Copy",
     copyCardAria: (label) => `Copy: ${label}`,
-    copyCardTitle: "Copy code and HEX",
+    copyCardTitle: "Copy name and code",
     copiedAnnouncement: (code) => `${code} copied`,
     coordCopyAria: (label, value) => `Copy ${label} ${value}`,
     deltaBands: {
@@ -275,7 +269,7 @@ export const DICTIONARY: Record<Lang, Translations> = {
     closestCandidate: (code, hex, delta) => `Nearest candidate: ${code} (${hex}) · ΔE00 ${delta}`,
     nearestFirst5: "Top 5 in this library",
     inspectCandidateAria: (system, code, name, delta) =>
-      `Re-query with ${system} ${code} (${name}), ΔE00 ${delta}`,
+      `Convert ${system} ${code} (${name}), ΔE00 ${delta}`,
     groupThreads: "Threads",
     groupPantone: "Pantone",
     matrixCaption: "Nearest color in each library with codes and values.",
@@ -301,10 +295,10 @@ export const DICTIONARY: Record<Lang, Translations> = {
     retry: "Retry",
     colorsCount: (count) => `${count} colors`,
     statusNoLibraries: "No libraries in this filter.",
-    statusNoCloseMatch: (shown, total, nearest, delta) =>
-      `${shown}/${total} libraries · No close match · Nearest candidate: ${nearest} · ΔE00 ${delta}`,
-    statusClosest: (shown, total, nearest, delta) =>
-      `${shown}/${total} libraries · Nearest: ${nearest} · ΔE00 ${delta}`,
+    statusNoCloseMatch: (count, nearest, delta) =>
+      `${count} libraries · No close match · Nearest candidate: ${nearest} · ΔE00 ${delta}`,
+    statusClosest: (count, nearest, delta) =>
+      `${count} libraries · Nearest: ${nearest} · ΔE00 ${delta}`,
     invalidHexError: "Hex value after # must be 3 or 6 characters.",
     rgbRangeError: "RGB channels must be between 0 and 255.",
     cmykRangeError: "CMYK channels must be between 0 and 100.",

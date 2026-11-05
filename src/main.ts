@@ -5,7 +5,6 @@ import { searchColors } from "./search.ts";
 import { DICTIONARY, getStoredLang, setStoredLang, type Lang } from "./i18n.ts";
 import {
   formatCount,
-  primaryOf,
   renderCandidates,
   renderDataError,
   renderEmptyState,
@@ -233,7 +232,6 @@ function showEmptyWorkbench(): void {
   currentView = null;
   activeComparison = null;
   copyAllButton.disabled = true;
-  if (window.matchMedia("(max-width: 68rem)").matches) inspectorRail.open = false;
   const t = DICTIONARY[currentLang];
   resultStatus.textContent = t.readyStatus;
   renderEmptyState(resultBody, inspectorBody, loupeMode, (q) => {
@@ -448,34 +446,7 @@ function chooseSuggestion(index: number): void {
 
 /* ---------- results rendering ---------- */
 
-function togglePin(): void {
-  if (!activeComparison || !currentView) return;
-  activeComparison = {
-    meta: activeComparison.meta,
-    match: activeComparison.match,
-    pinned: !activeComparison.pinned,
-  };
-  renderInspector(
-    inspectorBody,
-    loupeMode,
-    currentView,
-    activeComparison,
-    selectSystemInLoupe,
-    currentLang,
-    togglePin,
-  );
-  highlightSelectedRow(activeComparison.meta.id);
-}
-
 function handleInspect(meta: SystemMeta, match: Match, pinned: boolean): void {
-  const sameTarget =
-    activeComparison !== null &&
-    activeComparison.meta.id === meta.id &&
-    activeComparison.match.row.code === match.row.code;
-  if (sameTarget && pinned && activeComparison?.pinned) {
-    togglePin();
-    return;
-  }
   if (activeComparison?.pinned && !pinned) return;
   activeComparison = { meta, match, pinned };
   if (!currentView) return;
@@ -486,7 +457,6 @@ function handleInspect(meta: SystemMeta, match: Match, pinned: boolean): void {
     activeComparison,
     selectSystemInLoupe,
     currentLang,
-    togglePin,
   );
   highlightSelectedRow(meta.id);
 }
@@ -502,9 +472,9 @@ function selectSystemInLoupe(systemId: SystemId): void {
   if (!currentView) return;
   const sys = currentView.systems.find((s) => s.meta.id === systemId);
   if (!sys) return;
-  const target = primaryOf(sys);
+  const target = sys.sameCode ?? sys.matches[0];
   if (!target) return;
-  activeComparison = { meta: sys.meta, match: target, pinned: false };
+  activeComparison = { meta: sys.meta, match: target, pinned: true };
   renderInspector(
     inspectorBody,
     loupeMode,
@@ -512,7 +482,6 @@ function selectSystemInLoupe(systemId: SystemId): void {
     activeComparison,
     selectSystemInLoupe,
     currentLang,
-    togglePin,
   );
   highlightSelectedRow(systemId);
   const pinEl = inspectorBody.querySelector<HTMLButtonElement>(
@@ -532,7 +501,6 @@ function refreshWorkspaceView(): void {
     activeComparison,
     selectSystemInLoupe,
     currentLang,
-    togglePin,
   );
   renderResults(
     resultBody,
@@ -546,7 +514,7 @@ function refreshWorkspaceView(): void {
       requestAnimationFrame(() => {
         if (document.activeElement !== document.body) return;
         const next = resultBody.querySelector<HTMLButtonElement>(
-          `tr[data-system-id="${CSS.escape(row.system)}"] .card-inspect`,
+          `tr[data-system-id="${CSS.escape(row.system)}"] .card-convert`,
         );
         (next ?? input).focus({ preventScroll: true });
       });
@@ -563,7 +531,7 @@ function updateStatus(): void {
   );
   let closest: { meta: SystemMeta; match: Match } | null = null;
   for (const system of visible) {
-    const best = primaryOf(system);
+    const best = system.matches[0];
     if (!best) continue;
     if (!closest || best.deltaE < closest.match.deltaE) {
       closest = { meta: system.meta, match: best };
@@ -577,8 +545,8 @@ function updateStatus(): void {
   const deltaStr = closest.match.deltaE.toFixed(2);
   resultStatus.textContent =
     closest.match.deltaE > 5
-      ? t.statusNoCloseMatch(visible.length, currentView.systems.length, nearest, deltaStr)
-      : t.statusClosest(visible.length, currentView.systems.length, nearest, deltaStr);
+      ? t.statusNoCloseMatch(visible.length, nearest, deltaStr)
+      : t.statusClosest(visible.length, nearest, deltaStr);
 }
 
 function applyColour(hex: string, inputLabel: string, exactRow: ColorRow | null): void {
@@ -682,7 +650,6 @@ function applyColour(hex: string, inputLabel: string, exactRow: ColorRow | null)
   activeComparison = initialLoupe ? { ...initialLoupe, pinned: false } : null;
 
   refreshWorkspaceView();
-  inspectorRail.open = true;
   resultsSection.hidden = false;
   copyAllButton.disabled = false;
 
@@ -939,6 +906,24 @@ async function copyText(
   }
 }
 
+async function handleRowCodeCopy(codeElement: HTMLElement): Promise<void> {
+  const code = codeElement.dataset.copyCode ?? codeElement.textContent?.trim() ?? "";
+  if (!code || code === "—") return;
+  let ok = false;
+  try {
+    await navigator.clipboard.writeText(code);
+    ok = true;
+  } catch {
+    ok = fallbackCopy(code);
+  }
+  if (ok) {
+    flashElement(codeElement, 1200);
+    announce(DICTIONARY[currentLang].copiedAnnouncement(code));
+  } else {
+    announce(DICTIONARY[currentLang].copyFailed);
+  }
+}
+
 /* ---------- events ---------- */
 
 form.addEventListener("submit", (event) => {
@@ -1059,6 +1044,13 @@ document.addEventListener("click", (event) => {
   const target = event.target as Element | null;
   if (!target) return;
 
+  const copyableCode = target.closest<HTMLElement>('[data-copyable="true"]');
+  if (copyableCode) {
+    event.stopPropagation();
+    void handleRowCodeCopy(copyableCode);
+    return;
+  }
+
   const filterPill = target.closest<HTMLButtonElement>(".filter-pill");
   if (filterPill) {
     const nextFilter = (filterPill.dataset.filter ?? "all") as LibraryFilter;
@@ -1087,6 +1079,16 @@ document.addEventListener("click", (event) => {
 });
 
 document.addEventListener("keydown", (event) => {
+  if (event.key === "Enter" || event.key === " ") {
+    const target = event.target as Element | null;
+    const copyableCode = target?.closest<HTMLElement>('[data-copyable="true"]');
+    if (copyableCode) {
+      event.preventDefault();
+      void handleRowCodeCopy(copyableCode);
+      return;
+    }
+  }
+
   if (event.key === "Escape") {
     const target = event.target as Element | null;
     const details = target?.closest("details") as HTMLDetailsElement | null;
@@ -1094,9 +1096,12 @@ document.addEventListener("keydown", (event) => {
       details.open = false;
       return;
     }
-    if (!suggestionsRoot.hidden) {
-      closeSuggestions();
-      return;
+    if (input.value || currentView || !queryError.hidden) {
+      input.value = "";
+      clearError();
+      commitUrl(null);
+      showEmptyWorkbench();
+      input.focus();
     }
     return;
   }
@@ -1127,25 +1132,10 @@ copyLinkButton.addEventListener("click", () => {
 
 /* ---------- boot ---------- */
 
-function openToleranceNote(): void {
-  const note = document.getElementById("tolerance-note") as HTMLDetailsElement | null;
-  if (note) note.open = true;
-}
-
-document.addEventListener("click", (event) => {
-  const anchor = (event.target as Element | null)?.closest?.('a[href="#tolerance-note"]');
-  if (anchor) openToleranceNote();
-});
-
-window.addEventListener("hashchange", () => {
-  if (window.location.hash === "#tolerance-note") openToleranceNote();
-});
-if (window.location.hash === "#tolerance-note") openToleranceNote();
-
 applyLanguage(currentLang);
 syncPickerHex("#C8102E");
 setBusy(true);
-if (!currentView && window.matchMedia("(max-width: 68rem)").matches) {
+if (window.matchMedia("(max-width: 68rem)").matches) {
   inspectorRail.open = false;
 }
 requestAnimationFrame(() => {
