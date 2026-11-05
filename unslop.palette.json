@@ -1,0 +1,48 @@
+{
+  // unslop.palette.json — PantonAK owns these colours (exact hex of the
+  // oklch tokens in tokens.css). All derive from the D50 daylight
+  // viewing-booth ritual (DESIGN.md): warm paper ground, carbon instrument
+  // deck, single rubric-vermilion signal, semantic tolerance ramps.
+  // Declared = decided; SD1 (cream+terracotta) does not apply.
+  "name": "PantonAK",
+
+  "colors": {
+    "ground":   "#faf7f1",
+    "panel":    "#f1ede6",
+    "recessed": "#e7e2da",
+    "ink":      "#0c1015",
+    "ink2":     "#282c31",
+    "muted":    "#4d5055",
+    "rule":     "#d4d0cb",
+    "rule2":    "#7d8086",
+    "deck":     "#10141b",
+    "deck2":    "#1b1f27",
+    "deck3":    "#272c33",
+    "deckInk":  "#f4f1ed",
+    "deckMuted": "#b4b1ab",
+    "deckRule": "#656970",
+    "signal":   "#b01003",
+    "signalHi": "#9e0000",
+    "signalInk": "#fcfaf6",
+    "focus":    "#be2517",
+    "deckFocus": "#f68c36",
+    "select":   "#faccb7",
+    "exact":    "#005932",
+    "exactBg":  "#d8eee1",
+    "close":    "#005178",
+    "closeBg":  "#d9ebf7",
+    "warn":     "#7b3e00",
+    "warnBg":   "#f6e5cf",
+    "error":    "#ac040c",
+    "errorBg":  "#fce1dd",
+    "deckError": "#ff8f80"
+  },
+
+  "tolerance": { "hue": 12, "sat": 18, "light": 14 },
+
+  // near-greys are structure, not brand: never reported as drift
+  "neutralsAlwaysAllowed": true,
+
+  // true if decorative one-offs outside the palette are fine
+  "allowOffPaletteDecoration": false
+}

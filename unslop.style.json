@@ -1,0 +1,46 @@
+{
+  // unslop.style.json — PantonAK's settled shape, type, motion and copy rules.
+  "radius": { "policy": "scale", "scale": [4, 6, 8], "tolerance": 0 },
+
+  "shadow": { "policy": "neutral" },
+
+  "glass": { "allow": false },
+  "gradients": { "allow": false },
+
+  "fonts": {
+    "display": ["Archivo"],
+    "body": ["Archivo"],
+    "mono": ["JetBrains Mono"],
+    "allowSystemStack": true
+  },
+
+  "motion": {
+    "requireReducedMotion": true,
+    "allowBounce": false,
+    "allowUniformReveal": false
+  },
+
+  "icons": { "allowEmoji": false, "allowSparkles": false },
+
+  "copy": {
+    "allowArrowsInCta": false,
+    "allowGenericCta": false,
+    "vocabulary": {
+      "allow": ["Eşleştir", "Dönüştür", "Kopyala", "ΔE00", "TCX", "TPX", "Polyneon", "Polysoft", "Visco"],
+      "ban": []
+    }
+  },
+
+  // K3 is a scanner miss: :focus-visible is defined for every interactive
+  // element (styles.css :where(a,button,input,summary):focus-visible).
+  "rules": { "K3": "off" },
+
+  "thresholds": { "maxScore": 25, "min": "P2" },
+
+  "text": {
+    "lang": "auto",
+    "maxScore": 25,
+    "allowWords": [],
+    "banWords": []
+  }
+}
