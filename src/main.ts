@@ -9,13 +9,17 @@ import {
   renderDataError,
   renderEmptyState,
   renderInspector,
+  matchesFilter,
   renderLibraries,
   renderLoading,
   renderResults,
+  renderSuggestions,
   resultsToTsv,
+  secondaryName,
   type ActiveComparison,
   type LibraryFilter,
   type ResultsView,
+  type Suggestion,
   type SystemResult,
 } from "./ui.ts";
 
@@ -40,6 +44,7 @@ const colorPicker = byId<HTMLInputElement>("color-picker");
 const pickerSwatch = byId<HTMLElement>("picker-swatch");
 const clearButton = byId<HTMLButtonElement>("clear-button");
 const matchButton = byId<HTMLButtonElement>("match-button");
+const suggestionsRoot = byId<HTMLElement>("query-suggestions");
 const queryHelp = byId<HTMLParagraphElement>("query-help");
 const queryError = byId<HTMLParagraphElement>("query-error");
 const resultsSection = byId<HTMLElement>("results");
@@ -70,6 +75,10 @@ let loadState: LoadState = "loading";
 let currentView: ResultsView | null = null;
 let activeComparison: ActiveComparison | null = null;
 let activeFilter: LibraryFilter = "all";
+let currentSuggestions: Suggestion[] = [];
+let activeSuggestion = -1;
+let suggestTimer = 0;
+let blurTimer = 0;
 
 /* ---------- URL state ---------- */
 
@@ -210,9 +219,11 @@ async function loadData(): Promise<void> {
 
     if (pending) {
       input.value = pending;
+      closeSuggestions();
       handleSubmit(pending, null, true);
     } else {
       input.value = DEFAULT_SAMPLE;
+      closeSuggestions();
       handleSubmit(DEFAULT_SAMPLE, null, false);
     }
   } catch {
@@ -255,6 +266,59 @@ function canonCode(code: string): string {
   const value = code.trim().toUpperCase().replace(/\s+/g, "");
   if (/^\d+$/.test(value)) return value.replace(/^0+(?=\d)/, "");
   return value;
+}
+
+/* ---------- typeahead ---------- */
+
+function systemShortFor(id: SystemId): string {
+  return dataset?.systems.find((system) => system.id === id)?.short ?? id;
+}
+
+function suggestionFor(row: ColorRow): Suggestion {
+  return {
+    row,
+    query: labelForRow(row),
+    code: row.code,
+    name: secondaryName(row, systemShortFor(row.system)),
+    system: systemShortFor(row.system),
+    hex: row.hex,
+  };
+}
+
+function closeSuggestions(): void {
+  window.clearTimeout(suggestTimer);
+  window.clearTimeout(blurTimer);
+  currentSuggestions = [];
+  activeSuggestion = -1;
+  suggestionsRoot.hidden = true;
+  suggestionsRoot.replaceChildren();
+  input.setAttribute("aria-expanded", "false");
+  input.removeAttribute("aria-activedescendant");
+}
+
+function updateSuggestions(): void {
+  if (loadState !== "ready" || colorRows.length === 0) {
+    closeSuggestions();
+    return;
+  }
+  const text = input.value.trim();
+  if (!text) {
+    closeSuggestions();
+    return;
+  }
+  currentSuggestions = searchColors(colorRows, text, 7).map(suggestionFor);
+  activeSuggestion = -1;
+  renderSuggestions(suggestionsRoot, currentSuggestions, activeSuggestion);
+  input.setAttribute("aria-expanded", currentSuggestions.length > 0 ? "true" : "false");
+  input.removeAttribute("aria-activedescendant");
+}
+
+function chooseSuggestion(index: number): void {
+  const item = currentSuggestions[index];
+  if (!item) return;
+  input.value = item.query;
+  closeSuggestions();
+  handleSubmit(item.query, item.row, true);
 }
 
 /* ---------- matching & rendering ---------- */
@@ -300,8 +364,38 @@ function refreshWorkspaceView(): void {
     (row) => {
       clearError();
       handleSubmit(labelForRow(row), row, true);
+      requestAnimationFrame(() => {
+        const next = resultBody.querySelector<HTMLButtonElement>(
+          `tr[data-system-id="${CSS.escape(row.system)}"] .card-convert`,
+        );
+        (next ?? input).focus({ preventScroll: true });
+      });
     },
   );
+}
+
+function updateStatus(): void {
+  if (!currentView) return;
+  const visible = currentView.systems.filter((system) =>
+    matchesFilter(system.meta.id, activeFilter),
+  );
+  let closest: { meta: SystemMeta; match: Match } | null = null;
+  for (const system of visible) {
+    const best = system.matches[0];
+    if (!best) continue;
+    if (!closest || best.deltaE < closest.match.deltaE) {
+      closest = { meta: system.meta, match: best };
+    }
+  }
+  if (!closest) {
+    resultStatus.textContent = "Bu filtrede kütüphane yok.";
+    return;
+  }
+  const nearest = `${closest.meta.label} ${closest.match.row.code}`;
+  resultStatus.textContent =
+    closest.match.deltaE > 5
+      ? `${visible.length} kütüphane · Yakın eşleşme yok · En yakın aday: ${nearest} · ΔE00 ${closest.match.deltaE.toFixed(2)}`
+      : `${visible.length} kütüphane · En yakın: ${nearest} · ΔE00 ${closest.match.deltaE.toFixed(2)}`;
 }
 
 function applyColour(hex: string, inputLabel: string, exactRow: ColorRow | null): void {
@@ -369,6 +463,13 @@ function applyColour(hex: string, inputLabel: string, exactRow: ColorRow | null)
     });
   }
 
+  const familyRank: Record<SystemMeta["family"], number> = {
+    madeira: 0,
+    durak: 1,
+    pantone: 2,
+  };
+  systems.sort((a, b) => familyRank[a.meta.family] - familyRank[b.meta.family]);
+
   let closest: ResultsView["closest"] = null;
   let closestCross: ResultsView["closest"] = null;
   for (const system of systems) {
@@ -399,15 +500,7 @@ function applyColour(hex: string, inputLabel: string, exactRow: ColorRow | null)
   resultsSection.hidden = false;
   copyAllButton.disabled = false;
 
-  if (closest) {
-    const band = deltaBand(closest.match.deltaE);
-    resultStatus.textContent =
-      closest.match.deltaE > 5
-        ? `Genel olarak yakın eşleşme yok. En yakın aday: ${closest.meta.label} kütüphanesinde ${closest.match.row.code}, ΔE00 ${closest.match.deltaE.toFixed(2)}.`
-        : `${systems.length} sistem eşleşti. En yakın eşleşme: ${closest.meta.label} kütüphanesinde ${closest.match.row.code}, ΔE00 ${closest.match.deltaE.toFixed(2)} (${band.text}).`;
-  } else {
-    resultStatus.textContent = "Yüklenen veri kümesinde sistem yok.";
-  }
+  updateStatus();
 }
 
 function findExactRow(
@@ -567,6 +660,7 @@ function handleSubmit(
           : `${results.length} ad eşleşmesi. Dönüştürmek için birini seçin.`;
       if (syncUrl) commitUrl(trimmed);
       input.focus();
+      closeSuggestions();
       return;
     }
   }
@@ -646,11 +740,71 @@ async function copyText(
 
 form.addEventListener("submit", (event) => {
   event.preventDefault();
+  closeSuggestions();
   handleSubmit(input.value, null, true);
 });
 
 input.addEventListener("input", () => {
   if (!queryError.hidden && input.value.trim()) clearError();
+  closeSuggestions();
+  suggestTimer = window.setTimeout(updateSuggestions, 60);
+});
+
+input.addEventListener("focus", () => {
+  window.clearTimeout(blurTimer);
+  if (input.value.trim()) updateSuggestions();
+});
+
+input.addEventListener("blur", () => {
+  window.clearTimeout(blurTimer);
+  blurTimer = window.setTimeout(closeSuggestions, 120);
+});
+
+input.addEventListener("keydown", (event) => {
+  if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+    if (suggestionsRoot.hidden) {
+      updateSuggestions();
+      if (suggestionsRoot.hidden) return;
+    }
+    event.preventDefault();
+    const count = currentSuggestions.length;
+    if (count === 0) return;
+    if (event.key === "ArrowDown") {
+      activeSuggestion = activeSuggestion < 0 ? 0 : (activeSuggestion + 1) % count;
+    } else {
+      activeSuggestion =
+        activeSuggestion < 0 ? count - 1 : (activeSuggestion - 1 + count) % count;
+    }
+    renderSuggestions(suggestionsRoot, currentSuggestions, activeSuggestion);
+    input.setAttribute("aria-activedescendant", `suggestion-${activeSuggestion}`);
+    return;
+  }
+
+  if (suggestionsRoot.hidden) return;
+
+  if (event.key === "Enter" && activeSuggestion >= 0) {
+    event.preventDefault();
+    chooseSuggestion(activeSuggestion);
+    return;
+  }
+
+  if (event.key === "Escape") {
+    event.preventDefault();
+    event.stopPropagation();
+    closeSuggestions();
+    return;
+  }
+
+  if (event.key === "Tab") {
+    closeSuggestions();
+  }
+});
+
+suggestionsRoot.addEventListener("mousedown", (event) => event.preventDefault());
+suggestionsRoot.addEventListener("click", (event) => {
+  const button = (event.target as Element | null)?.closest<HTMLButtonElement>(".suggestion");
+  if (!button) return;
+  chooseSuggestion(Number(button.dataset.index));
 });
 
 let pickerTimer = 0;
@@ -659,11 +813,13 @@ colorPicker.addEventListener("input", () => {
   pickerTimer = window.setTimeout(() => {
     const hex = colorPicker.value.toUpperCase();
     input.value = hex;
+    closeSuggestions();
     handleSubmit(hex, null, true);
   }, 120);
 });
 
 clearButton.addEventListener("click", () => {
+  closeSuggestions();
   input.value = "";
   clearError();
   commitUrl(null);
@@ -685,6 +841,7 @@ document.addEventListener("click", (event) => {
       pill.setAttribute("aria-pressed", active ? "true" : "false");
     }
     refreshWorkspaceView();
+    updateStatus();
     return;
   }
 
@@ -735,7 +892,7 @@ document.addEventListener("keydown", (event) => {
 
 syncPickerHex("#C8102E");
 setBusy(true);
-if (window.matchMedia("(max-width: 56rem)").matches) {
+if (window.matchMedia("(max-width: 68rem)").matches) {
   inspectorRail.open = false;
 }
 requestAnimationFrame(() => {
