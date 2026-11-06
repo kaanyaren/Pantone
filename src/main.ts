@@ -1,4 +1,5 @@
 import type { ColorRow, Dataset, Lab, Match, Query, SystemId, SystemMeta } from "./types.ts";
+import { initAnalytics, trackEvent } from "./analytics.ts";
 import { cmykToRgb, deltaE2000, hexToRgb, rgbToHex, rgbToLab } from "./color.ts";
 import { parseQuery } from "./query.ts";
 import { searchColors } from "./search.ts";
@@ -704,7 +705,10 @@ function handleSubmit(
     const label = labelForRow(exactRow);
     input.value = label;
     applyColour(exactRow.hex, label, exactRow);
-    if (syncUrl) commitUrl(label);
+    if (syncUrl) {
+      commitUrl(label);
+      trackEvent("search", { kind: "code" });
+    }
     return;
   }
 
@@ -737,7 +741,10 @@ function handleSubmit(
         return;
       }
       applyColour(rgbToHex(rgb), trimmed, null);
-      if (syncUrl) commitUrl(trimmed);
+      if (syncUrl) {
+        commitUrl(trimmed);
+        trackEvent("search", { kind: "hex" });
+      }
       return;
     }
     case "rgb": {
@@ -748,7 +755,10 @@ function handleSubmit(
         return;
       }
       applyColour(rgbToHex(query.rgb), trimmed, null);
-      if (syncUrl) commitUrl(trimmed);
+      if (syncUrl) {
+        commitUrl(trimmed);
+        trackEvent("search", { kind: "rgb" });
+      }
       return;
     }
     case "cmyk": {
@@ -759,7 +769,10 @@ function handleSubmit(
         return;
       }
       applyColour(rgbToHex(cmykToRgb(query.cmyk)), trimmed, null);
-      if (syncUrl) commitUrl(trimmed);
+      if (syncUrl) {
+        commitUrl(trimmed);
+        trackEvent("search", { kind: "cmyk" });
+      }
       return;
     }
     case "code": {
@@ -779,7 +792,10 @@ function handleSubmit(
       }
       if (exact) {
         applyColour(exact.hex, trimmed, exact);
-        if (syncUrl) commitUrl(trimmed);
+        if (syncUrl) {
+          commitUrl(trimmed);
+          trackEvent("search", { kind: "code" });
+        }
         return;
       }
       const elsewhere = entries.filter(
@@ -791,7 +807,10 @@ function handleSubmit(
         const first = elsewhere[0];
         if (first) {
           applyColour(first.row.hex, trimmed, first.row);
-          if (syncUrl) commitUrl(trimmed);
+          if (syncUrl) {
+            commitUrl(trimmed);
+            trackEvent("search", { kind: "code" });
+          }
           return;
         }
       }
@@ -827,7 +846,10 @@ function handleSubmit(
         results.length,
         shown.length,
       );
-      if (syncUrl) commitUrl(trimmed);
+      if (syncUrl) {
+        commitUrl(trimmed);
+        trackEvent("search", { kind: "text" });
+      }
       input.focus();
       closeSuggestions();
       return;
@@ -923,6 +945,7 @@ async function copyText(
 async function handleRowCodeCopy(codeElement: HTMLElement): Promise<void> {
   const code = codeElement.dataset.copyCode ?? codeElement.textContent?.trim() ?? "";
   if (!code || code === "—") return;
+  trackEvent("copy", { type: "code" });
   let ok = false;
   try {
     await navigator.clipboard.writeText(code);
@@ -1043,6 +1066,7 @@ clearButton.addEventListener("click", () => {
 langToggle.addEventListener("click", () => {
   const nextLang: Lang = currentLang === "tr" ? "en" : "tr";
   setStoredLang(nextLang);
+  trackEvent("language_change", { lang: nextLang });
   applyLanguage(nextLang);
 });
 
@@ -1061,6 +1085,7 @@ document.addEventListener("click", (event) => {
   if (filterPill) {
     const nextFilter = (filterPill.dataset.filter ?? "all") as LibraryFilter;
     activeFilter = nextFilter;
+    trackEvent("filter_change", { filter: nextFilter });
     for (const pill of document.querySelectorAll<HTMLButtonElement>(".filter-pill")) {
       const active = pill.dataset.filter === nextFilter;
       pill.classList.toggle("is-active", active);
@@ -1075,6 +1100,7 @@ document.addEventListener("click", (event) => {
   if (copyButton) {
     const value = copyButton.dataset.copy;
     if (value) {
+      trackEvent("copy", { type: "value" });
       void copyText(
         value,
         copyButton,
@@ -1121,6 +1147,7 @@ document.addEventListener("keydown", (event) => {
 
 copyAllButton.addEventListener("click", () => {
   if (!currentView) return;
+  trackEvent("copy", { type: "tsv" });
   void copyText(
     resultsToTsv(currentView, currentLang),
     copyAllButton,
@@ -1129,6 +1156,7 @@ copyAllButton.addEventListener("click", () => {
 });
 
 copyLinkButton.addEventListener("click", () => {
+  trackEvent("copy", { type: "link" });
   void copyText(
     window.location.href,
     copyLinkButton,
@@ -1138,6 +1166,7 @@ copyLinkButton.addEventListener("click", () => {
 
 /* ---------- boot ---------- */
 
+initAnalytics();
 applyLanguage(currentLang);
 syncPickerHex("#C8102E");
 setBusy(true);
