@@ -92,7 +92,7 @@ test("resultsToTsv emits a localized header and one line per system", () => {
   const tr = resultsToTsv(v, "tr").split("\n");
   assert.equal(line(tr, 0), "Sistem\tKod\tAd\tHex\tRGB\tCMYK\tDeltaE00\tAralık");
   assert.match(line(tr, 1), /^Pantone C\t186\tHigh Risk Red\t#C8102E\t/);
-  assert.match(line(tr, 1), /\t0\.00\taynı değer$/);
+  assert.match(line(tr, 1), /\t0\.00\tAynı$/);
   const en = resultsToTsv(v, "en").split("\n");
   assert.equal(line(en, 0), "System\tCode\tName\tHex\tRGB\tCMYK\tDeltaE00\tBand");
   assert.match(line(en, 1), /\t0\.00\tidentical$/);
@@ -103,7 +103,7 @@ test("resultsToTsv formats non-zero deltas with converted coordinates", () => {
     system("C", [{ row, deltaE: 1.5, mappedHex: "#C8102E", clipped: false }]),
   ]);
   const tr = resultsToTsv(v, "tr").split("\n");
-  assert.match(line(tr, 1), /#C8102E\t200 16 46\t\d+ \d+ \d+ \d+\t1\.50\tyakın$/);
+  assert.match(line(tr, 1), /#C8102E\t200 16 46\t\d+ \d+ \d+ \d+\t1\.50\thafif fark$/);
   const en = resultsToTsv(v, "en").split("\n");
   assert.match(line(en, 1), /\t1\.50\tclose$/);
 });

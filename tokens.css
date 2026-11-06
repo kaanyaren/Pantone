@@ -29,13 +29,17 @@
   --color-deck-focus: #ffffff;
   --color-selection: #f3dbe6;
 
-  /* Semantic ΔE00 tolerance & state tokens (all >= 4.5:1 against paper) */
+  /* Semantic ΔE00 tolerance ramp: green → red with difference, purple note */
   --color-exact: oklch(40% 0.11 160);
   --color-exact-bg: oklch(93% 0.03 160);
-  --color-close: oklch(41% 0.10 235);
-  --color-close-bg: oklch(93% 0.025 235);
-  --color-warn: oklch(43% 0.12 65);
-  --color-warn-bg: oklch(93% 0.035 75);
+  --color-close: oklch(46% 0.13 95);
+  --color-close-bg: oklch(93% 0.035 95);
+  --color-noticeable: oklch(50% 0.15 60);
+  --color-noticeable-bg: oklch(93% 0.035 60);
+  --color-loose: oklch(48% 0.17 35);
+  --color-loose-bg: oklch(93% 0.035 35);
+  --color-note: oklch(50% 0.17 300);
+  --color-note-bg: oklch(93% 0.03 300);
   --color-error: oklch(47% 0.19 28);
   --color-error-bg: oklch(93% 0.03 28);
   --color-error-ink: oklch(98.5% 0.005 80);

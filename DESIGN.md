@@ -20,8 +20,9 @@ colors:
   rubric-vermilion-hover: "#515151"
   rubric-vermilion-ink: "#ffffff"
   tolerance-exact: "oklch(40% 0.11 160)"
-  tolerance-close: "oklch(41% 0.10 235)"
-  tolerance-warn: "oklch(43% 0.12 65)"
+  tolerance-close: "oklch(46% 0.13 95)"
+  tolerance-noticeable: "oklch(50% 0.15 60)"
+  tolerance-loose: "oklch(48% 0.17 35)"
   tolerance-none: "oklch(47% 0.19 28)"
 typography:
   display:

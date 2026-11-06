@@ -62,18 +62,24 @@ test("formatRowLabel builds paste-ready spec labels", () => {
 });
 
 test("deltaBand supports TR and EN localized band labels", () => {
-  assert.equal(deltaBand(0, "tr").text, "aynı değer");
+  assert.equal(deltaBand(0, "tr").text, "Aynı");
   assert.equal(deltaBand(0, "en").text, "identical");
+  assert.equal(deltaBand(0, "tr").tone, "exact");
   assert.equal(deltaBand(0.8, "tr").text, "neredeyse aynı");
   assert.equal(deltaBand(0.8, "en").text, "near identical");
-  assert.equal(deltaBand(1.5, "tr").text, "yakın");
+  assert.equal(deltaBand(0.8, "tr").tone, "exact");
+  assert.equal(deltaBand(1.5, "tr").text, "hafif fark");
   assert.equal(deltaBand(1.5, "en").text, "close");
-  assert.equal(deltaBand(2.5, "tr").text, "fark edilir");
+  assert.equal(deltaBand(1.5, "tr").tone, "close");
+  assert.equal(deltaBand(2.5, "tr").text, "orta fark");
   assert.equal(deltaBand(2.5, "en").text, "noticeable");
-  assert.equal(deltaBand(4.0, "tr").text, "zayıf");
+  assert.equal(deltaBand(2.5, "tr").tone, "noticeable");
+  assert.equal(deltaBand(4.0, "tr").text, "yüksek fark");
   assert.equal(deltaBand(4.0, "en").text, "loose");
+  assert.equal(deltaBand(4.0, "tr").tone, "loose");
   assert.equal(deltaBand(6.0, "tr").text, "yakın eşleşme yok");
   assert.equal(deltaBand(6.0, "en").text, "no close match");
+  assert.equal(deltaBand(6.0, "tr").tone, "none");
 });
 
 test("dictionary has matching keys across languages", () => {

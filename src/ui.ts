@@ -37,7 +37,7 @@ export interface Suggestion {
   hex: string;
 }
 
-export type Tone = "exact" | "close" | "warn" | "none";
+export type Tone = "exact" | "close" | "noticeable" | "loose" | "none";
 
 function el<K extends keyof HTMLElementTagNameMap>(
   tag: K,
@@ -97,8 +97,8 @@ export function deltaBand(deltaE: number, lang: Lang = "tr"): { text: string; to
   if (deltaE === 0) return { text: t.exact, tone: "exact" };
   if (deltaE <= 1) return { text: t.near, tone: "exact" };
   if (deltaE <= 2) return { text: t.close, tone: "close" };
-  if (deltaE <= 3.5) return { text: t.noticeable, tone: "warn" };
-  if (deltaE <= 5) return { text: t.loose, tone: "warn" };
+  if (deltaE <= 3.5) return { text: t.noticeable, tone: "noticeable" };
+  if (deltaE <= 5) return { text: t.loose, tone: "loose" };
   return { text: t.noClose, tone: "none" };
 }
 
