@@ -27,8 +27,8 @@ const toSrgb = converter("rgb") as (colour: CuloriLab) => CuloriRgb;
 const mapToSrgb = toGamut("rgb", "oklch") as (colour: CuloriRgb) => CuloriRgb;
 const srgbInGamut = inGamut("rgb") as (colour: CuloriRgb) => boolean;
 
-const INK = "#0A0E12";
-const PAPER = "#FAFCFE";
+const INK = "#0a0a0a";
+const PAPER = "#ffffff";
 
 function clamp(value: number, min: number, max: number): number {
   if (!Number.isFinite(value)) return min;
