@@ -25,19 +25,19 @@ colors:
   tolerance-none: "oklch(47% 0.19 28)"
 typography:
   display:
-    fontFamily: "Work Sans, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "IBM Plex Sans, ui-sans-serif, system-ui, sans-serif"
     fontSize: "1.5rem"
     fontWeight: 600
     lineHeight: 1.15
     letterSpacing: "0"
   headline:
-    fontFamily: "Work Sans, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "IBM Plex Sans, ui-sans-serif, system-ui, sans-serif"
     fontSize: "1.125rem"
     fontWeight: 600
     lineHeight: 1.2
     letterSpacing: "0"
   body:
-    fontFamily: "Work Sans, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "IBM Plex Sans, ui-sans-serif, system-ui, sans-serif"
     fontSize: "0.875rem"
     fontWeight: 400
     lineHeight: 1.5

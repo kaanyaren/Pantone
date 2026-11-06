@@ -1,4 +1,5 @@
 import { readFile, writeFile } from "node:fs/promises";
+import { gzipSync } from "node:zlib";
 import { createHash } from "node:crypto";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { dirname, join, resolve } from "node:path";
@@ -150,6 +151,7 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const RAW_DIR = join(ROOT, "data", "raw");
 const MANIFEST_PATH = join(RAW_DIR, "manifest.json");
 const OUTPUT_PATH = join(ROOT, "public", "data", "colors.json");
+const OUTPUT_GZ_PATH = `${OUTPUT_PATH}.gz`;
 
 const HEX_RE = /^#[0-9A-F]{6}$/;
 
@@ -468,6 +470,9 @@ async function main(): Promise<void> {
 
   const output = `${JSON.stringify(dataset, null, 2)}\n`;
   const rowsHash = sha256(JSON.stringify(rows));
+  // Precompressed payload: Pages serves no content-encoding, so the client
+  // gunzips this itself (~6x smaller on the wire than colors.json).
+  const gzipped = gzipSync(output, { level: 9 });
 
   console.log("system  count  source             sha256");
   for (const { source, count, sha } of summary) {
@@ -485,12 +490,21 @@ async function main(): Promise<void> {
       fail("public/data/colors.json is missing; run npm run data");
     }
     if (existing !== output) fail("public/data/colors.json is stale; run npm run data");
+    let existingGz: Buffer | null = null;
+    try {
+      existingGz = await readFile(OUTPUT_GZ_PATH);
+    } catch {
+      fail("public/data/colors.json.gz is missing; run npm run data");
+    }
+    if (!existingGz.equals(gzipped)) fail("public/data/colors.json.gz is stale; run npm run data");
     console.log("check ok: public/data/colors.json is up to date");
     return;
   }
 
   await writeFile(OUTPUT_PATH, output);
   console.log(`wrote public/data/colors.json (${Buffer.byteLength(output)} bytes)`);
+  await writeFile(OUTPUT_GZ_PATH, gzipped);
+  console.log(`wrote public/data/colors.json.gz (${gzipped.length} bytes)`);
 }
 
 await main();

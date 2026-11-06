@@ -257,6 +257,44 @@ function acceptDataset(raw: unknown): Dataset {
   return data;
 }
 
+function datasetUrl(file: string): string {
+  // Pinned to the build hash so repeat loads revalidate cheaply (304) and a
+  // redeploy can never serve a stale dataset from HTTP cache.
+  return `./data/${file}?v=${__BUILD_HASH__}`;
+}
+
+async function gunzipText(buffer: ArrayBuffer): Promise<string> {
+  const stream = new Response(buffer).body?.pipeThrough(new DecompressionStream("gzip"));
+  if (!stream) throw new Error("Empty response body");
+  return new Response(stream).text();
+}
+
+async function loadDataset(signal: AbortSignal): Promise<unknown> {
+  // Precompressed first: Pages ships no content-encoding, so colors.json.gz
+  // (~110 KB) beats colors.json (~670 KB) ~6x on slow networks.
+  if (typeof DecompressionStream !== "undefined") {
+    try {
+      const gz = await fetch(datasetUrl("colors.json.gz"), { signal });
+      if (!gz.ok) throw new Error(`HTTP ${gz.status}`);
+      const raw = await gz.arrayBuffer();
+      const head = new Uint8Array(raw, 0, 2);
+      // Some static hosts auto-decode .gz (Content-Encoding: gzip); only
+      // gunzip when the magic bytes are still present.
+      const text =
+        head[0] === 0x1f && head[1] === 0x8b
+          ? await gunzipText(raw)
+          : new TextDecoder().decode(raw);
+      return JSON.parse(text);
+    } catch (error) {
+      if (signal.aborted) throw error;
+      // Fall through to the uncompressed dataset.
+    }
+  }
+  const response = await fetch(datasetUrl("colors.json"), { signal });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  return response.json();
+}
+
 async function loadData(): Promise<void> {
   loadState = "loading";
   setBusy(true);
@@ -269,17 +307,12 @@ async function loadData(): Promise<void> {
   try {
     const controller = new AbortController();
     const timer = window.setTimeout(() => controller.abort(), 15_000);
-    let response: Response;
+    let data: Dataset;
     try {
-      response = await fetch("./data/colors.json", {
-        cache: "no-cache",
-        signal: controller.signal,
-      });
+      data = acceptDataset(await loadDataset(controller.signal));
     } finally {
       window.clearTimeout(timer);
     }
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const data = acceptDataset(await response.json());
 
     const rows: ColorRow[] = [];
     const indexed: Entry[] = [];

@@ -1,6 +1,6 @@
 {
   // unslop.style.json — PantonAK's settled shape, type, motion and copy rules.
-  // Ak Nakış corporate: square corners (border-radius-0), flat, Work Sans.
+  // Ak Nakış corporate: square corners (border-radius-0), flat, IBM Plex Sans.
   "radius": { "policy": "scale", "scale": [0], "tolerance": 0 },
 
   "shadow": { "policy": "neutral" },
@@ -9,8 +9,8 @@
   "gradients": { "allow": false },
 
   "fonts": {
-    "display": ["Work Sans"],
-    "body": ["Work Sans"],
+    "display": ["IBM Plex Sans"],
+    "body": ["IBM Plex Sans"],
     "mono": ["JetBrains Mono"],
     "allowSystemStack": true
   },

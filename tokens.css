@@ -1,6 +1,6 @@
 /* PantonAK design tokens — the only file allowed to declare raw colour and font values.
  * Brand: Ak Nakış (aknakis.com.tr) — white neutrals, near-black ink,
- * plum #ae4a84 CTA with #515151 hover, square corners, Work Sans. */
+ * plum #ae4a84 CTA with #515151 hover, square corners, IBM Plex Sans. */
 
 :root {
   /* Ak Nakış neutrals: white canvas, light-grey panels (zero warm tint) */
@@ -46,9 +46,9 @@
   --color-swatch-fallback: #f2f2f2;
   --color-shadow: transparent;
 
-  /* Typography — Work Sans UI + JetBrains Mono for codes/coordinates (2 families total) */
-  --font-display: "Work Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-body: "Work Sans", ui-sans-serif, system-ui, sans-serif;
+  /* Typography — IBM Plex Sans UI + JetBrains Mono for codes/coordinates (2 families total) */
+  --font-display: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   --display-weight: 600;
   --tracking-display: 0;
