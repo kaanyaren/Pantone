@@ -1,10 +1,10 @@
 @import "../tokens.css";
 
 /* Hallmark · genre: modern-minimal · macrostructure: Split Studio
- * theme: custom (vibe: "D50 lab-dip approval workbench" · paper oklch(97.6% 0.008 80) · accent oklch(48% 0.19 30) vermilion · Archivo + JetBrains Mono)
- * axes: light / grotesk-sans / warm-vermilion
+ * theme: Ak Nakış corporate (vibe: "embroidery solution partner" · white oklch(100% 0 0) · plum #ae4a84 · Work Sans + JetBrains Mono)
+ * axes: light / humanist-sans / plum
  * nav: N13 · footer: Ft2 · enrichment: none
- * tone: utilitarian · anchor hue: 30
+ * tone: utilitarian · anchor hue: 335
  * pre-emit critique: P5 H5 E5 S5 R5 V5
  * contrast: pass (40–41) · slop: pass (42–45) · honest: pass (46) · chrome: pass (47) · tokens: pass (48) · responsive: pass (49) · mobile: pass (34, 49, 50–57)
  */
@@ -1017,9 +1017,9 @@ h2 {
 }
 
 .filter-pill.is-active {
-  border-color: var(--color-ink);
-  background: var(--color-ink);
-  color: var(--color-paper);
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
 }
 
 .results-foot {
@@ -1985,6 +1985,24 @@ h2 {
 @media (max-width: 42rem) {
   .shell {
     padding-inline: var(--space-4);
+  }
+
+  /* ponytail: single scroll row beats a 4+1 orphan wrap on 360px screens */
+  .filter-bar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    max-width: 100%;
+    padding-bottom: var(--space-1);
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .filter-bar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .filter-pill {
+    flex: none;
   }
 
   .deck-top {

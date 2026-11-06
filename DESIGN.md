@@ -2,42 +2,42 @@
 name: PantonAK
 description: Colour and embroidery thread conversion workbench across Pantone C/U/TCX/TPX, Madeira 40, and Durak.
 colors:
-  paper-d50: "oklch(97.6% 0.008 80)"
-  paper-d50-panel: "oklch(94.8% 0.010 80)"
-  paper-d50-recessed: "oklch(91.5% 0.012 80)"
-  ink-carbon: "oklch(17% 0.012 260)"
-  ink-secondary: "oklch(29% 0.012 260)"
-  ink-muted: "oklch(43% 0.010 260)"
-  rule-hairline: "oklch(86% 0.008 80)"
-  rule-control: "oklch(60% 0.010 260)"
-  deck-carbon: "oklch(19% 0.015 260)"
-  deck-surface: "oklch(24% 0.015 260)"
-  deck-elevated: "oklch(29% 0.015 260)"
-  deck-ink: "oklch(96% 0.006 80)"
-  deck-muted: "oklch(76% 0.008 80)"
-  deck-rule: "oklch(52% 0.012 260)"
-  rubric-vermilion: "oklch(48% 0.19 30)"
-  rubric-vermilion-hover: "oklch(43% 0.19 30)"
-  rubric-vermilion-ink: "oklch(98.5% 0.005 80)"
+  paper-d50: "#ffffff"
+  paper-d50-panel: "#f9f9f9"
+  paper-d50-recessed: "#f2f2f2"
+  ink-carbon: "#0a0a0a"
+  ink-secondary: "#1d1d1d"
+  ink-muted: "#444444"
+  rule-hairline: "#e3e3e3"
+  rule-control: "#767676"
+  deck-carbon: "#0a0a0a"
+  deck-surface: "#1d1d1d"
+  deck-elevated: "#2a2a2a"
+  deck-ink: "#ffffff"
+  deck-muted: "#e8e8e8"
+  deck-rule: "#515151"
+  rubric-vermilion: "#ae4a84"
+  rubric-vermilion-hover: "#515151"
+  rubric-vermilion-ink: "#ffffff"
   tolerance-exact: "oklch(40% 0.11 160)"
   tolerance-close: "oklch(41% 0.10 235)"
   tolerance-warn: "oklch(43% 0.12 65)"
   tolerance-none: "oklch(47% 0.19 28)"
 typography:
   display:
-    fontFamily: "Archivo, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "Work Sans, ui-sans-serif, system-ui, sans-serif"
     fontSize: "1.5rem"
-    fontWeight: 700
+    fontWeight: 600
     lineHeight: 1.15
-    letterSpacing: "-0.02em"
+    letterSpacing: "0"
   headline:
-    fontFamily: "Archivo, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "Work Sans, ui-sans-serif, system-ui, sans-serif"
     fontSize: "1.125rem"
-    fontWeight: 700
+    fontWeight: 600
     lineHeight: 1.2
-    letterSpacing: "-0.02em"
+    letterSpacing: "0"
   body:
-    fontFamily: "Archivo, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "Work Sans, ui-sans-serif, system-ui, sans-serif"
     fontSize: "0.875rem"
     fontWeight: 400
     lineHeight: 1.5
@@ -47,9 +47,9 @@ typography:
     fontWeight: 600
     lineHeight: 1.2
 rounded:
-  sm: "4px"
-  control: "6px"
-  panel: "8px"
+  sm: "0"
+  control: "0"
+  panel: "0"
 spacing:
   space-1: "0.25rem"
   space-2: "0.5rem"

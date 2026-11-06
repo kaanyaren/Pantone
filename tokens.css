@@ -1,31 +1,33 @@
-/* PantonAK design tokens — the only file allowed to declare raw colour and font values. */
+/* PantonAK design tokens — the only file allowed to declare raw colour and font values.
+ * Brand: Ak Nakış (aknakis.com.tr) — white neutrals, near-black ink,
+ * plum #ae4a84 CTA with #515151 hover, square corners, Work Sans. */
 
 :root {
-  /* Warm D50 daylight viewing-booth paper & slate-carbon ink (zero pure #fff or #000) */
-  --color-paper: oklch(97.6% 0.008 80);
-  --color-paper-2: oklch(94.8% 0.010 80);
-  --color-paper-3: oklch(91.5% 0.012 80);
-  --color-ink: oklch(17% 0.012 260);
-  --color-ink-2: oklch(29% 0.012 260);
-  --color-muted: oklch(43% 0.010 260);
-  --color-rule: oklch(86% 0.008 80);
-  --color-rule-2: oklch(60% 0.010 260);
+  /* Ak Nakış neutrals: white canvas, light-grey panels (zero warm tint) */
+  --color-paper: #ffffff;
+  --color-paper-2: #f9f9f9;
+  --color-paper-3: #f2f2f2;
+  --color-ink: #0a0a0a;
+  --color-ink-2: #1d1d1d;
+  --color-muted: #444444;
+  --color-rule: #e3e3e3;
+  --color-rule-2: #767676;
 
-  /* Committed dark slate-carbon command deck */
-  --color-deck: oklch(19% 0.015 260);
-  --color-deck-2: oklch(24% 0.015 260);
-  --color-deck-3: oklch(29% 0.015 260);
-  --color-deck-ink: oklch(96% 0.006 80);
-  --color-deck-muted: oklch(76% 0.008 80);
-  --color-deck-rule: oklch(52% 0.012 260);
+  /* Dark hero deck (aknakis video-hero overlay black) */
+  --color-deck: #0a0a0a;
+  --color-deck-2: #1d1d1d;
+  --color-deck-3: #2a2a2a;
+  --color-deck-ink: #ffffff;
+  --color-deck-muted: #e8e8e8;
+  --color-deck-rule: #515151;
 
-  /* Rubric vermilion signal accent (strictly <= 5% viewport area) */
-  --color-accent: oklch(48% 0.19 30);
-  --color-accent-hover: oklch(43% 0.19 30);
-  --color-accent-ink: oklch(98.5% 0.005 80);
-  --color-focus: oklch(52% 0.19 30);
-  --color-deck-focus: oklch(74% 0.16 55);
-  --color-selection: oklch(88% 0.06 45);
+  /* Plum signal accent (aknakis #ae4a84 CTA, hover #515151) */
+  --color-accent: #ae4a84;
+  --color-accent-hover: #515151;
+  --color-accent-ink: #ffffff;
+  --color-focus: #ae4a84;
+  --color-deck-focus: #ffffff;
+  --color-selection: #f3dbe6;
 
   /* Semantic ΔE00 tolerance & state tokens (all >= 4.5:1 against paper) */
   --color-exact: oklch(40% 0.11 160);
@@ -41,15 +43,15 @@
   --color-success: oklch(40% 0.11 160);
 
   /* Neutral fallback for dynamic swatch surfaces */
-  --color-swatch-fallback: oklch(91.5% 0.012 80);
-  --color-shadow: oklch(17% 0.012 260 / 0.08);
+  --color-swatch-fallback: #f2f2f2;
+  --color-shadow: transparent;
 
-  /* Typography — Archivo UI + JetBrains Mono for codes/coordinates (2 families total) */
-  --font-display: "Archivo", ui-sans-serif, system-ui, sans-serif;
-  --font-body: "Archivo", ui-sans-serif, system-ui, sans-serif;
+  /* Typography — Work Sans UI + JetBrains Mono for codes/coordinates (2 families total) */
+  --font-display: "Work Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Work Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-  --display-weight: 700;
-  --tracking-display: -0.02em;
+  --display-weight: 600;
+  --tracking-display: 0;
 
   /* 4 pt spacing scale (multiples of 4 px) */
   --space-1: 0.25rem;
@@ -72,10 +74,10 @@
   --text-xl: 1.3125rem;
   --text-display: 1.5rem;
 
-  /* Structure & motion */
-  --radius-sm: 4px;
-  --radius-control: 6px;
-  --radius-panel: 8px;
+  /* Structure & motion — Ak Nakış square corners (border-radius-0) */
+  --radius-sm: 0;
+  --radius-control: 0;
+  --radius-panel: 0;
   --rule: 1px;
   --shell: 84rem;
   --gutter: var(--space-5);

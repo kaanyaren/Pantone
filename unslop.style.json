@@ -1,6 +1,7 @@
 {
   // unslop.style.json — PantonAK's settled shape, type, motion and copy rules.
-  "radius": { "policy": "scale", "scale": [4, 6, 8], "tolerance": 0 },
+  // Ak Nakış corporate: square corners (border-radius-0), flat, Work Sans.
+  "radius": { "policy": "scale", "scale": [0], "tolerance": 0 },
 
   "shadow": { "policy": "neutral" },
 
@@ -8,8 +9,8 @@
   "gradients": { "allow": false },
 
   "fonts": {
-    "display": ["Archivo"],
-    "body": ["Archivo"],
+    "display": ["Work Sans"],
+    "body": ["Work Sans"],
     "mono": ["JetBrains Mono"],
     "allowSystemStack": true
   },
